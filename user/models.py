@@ -45,16 +45,24 @@ class CompanyGroup(models.Model):
             return False  # Group or CompanyGroup not found
 
 
-# Example usage:
-# Assume 'my_company' is an existing Company instance
-## CompanyGroup.create_company_group('my_group', my_company)
-# Remove the CompanyGroup with the specified group name and company
-## removed = CompanyGroup.remove_company_group('my_group', my_company)
-# if removed:
-#     print("CompanyGroup removed successfully.")
-# else:
-#     print("Group or CompanyGroup not found.")
+    def add_permission(self, permission):
+        # Add a permission to the CompanyGroup
+        self.permissions.add(permission)
     
+    def remove_permission(self, permission):
+        # Remove a permission from the CompanyGroup
+        self.permissions.remove(permission)
+
+    def has_permission(self, required_permission):
+        # Check if the CompanyGroup has the specified required_permission
+        return self.permissions.filter(codename=required_permission).exists()
+
+    # `*`` symbol is used to indicate that the function can accept a variable number of positional arguments.
+    def has_permissions(self, *required_permissions):
+        # Check if the CompanyGroup has all the required_permissions
+        group_permissions = set(self.permissions.all())
+        required_permissions_set = set(required_permissions)
+        return required_permissions_set.issubset(group_permissions)
 
 class CompanyGroupPermission(models.Model):
     company_group = models.ForeignKey(CompanyGroup, on_delete=models.CASCADE)
@@ -65,6 +73,31 @@ class CompanyGroupPermission(models.Model):
 
     class Meta:
         unique_together = ('company_group', 'permission')
+
+
+# Example usage: create_company_group | remove_company_group
+# Assume 'my_company' is an existing Company instance
+## CompanyGroup.create_company_group('my_group', my_company)
+# Remove the CompanyGroup with the specified group name and company
+## removed = CompanyGroup.remove_company_group('my_group', my_company)
+# if removed:
+#     print("CompanyGroup removed successfully.")
+# else:
+#     print("Group or CompanyGroup not found.")
+
+# Example usage: has_permission
+# Assume 'my_company_group' is an existing CompanyGroup instance
+## if my_company_group.has_permission('view_permission'):
+##    print("CompanyGroup has the required permission.")
+## else:
+##    print("CompanyGroup does not have the required permission.")
+
+# Example usage: has_permissions
+# Assume 'my_company_group' is an existing CompanyGroup instance
+## if my_company_group.has_permissions('view_permission', 'edit_permission'):
+##    print("CompanyGroup has all the required permissions.")
+## else:
+##     print("CompanyGroup does not have all the required permissions.")
 
 
 class UserManager(BaseUserManager):
