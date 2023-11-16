@@ -16,6 +16,9 @@ class CompanyGroup(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     permissions = models.ManyToManyField(Permission, through='CompanyGroupPermission')
+    # cg.permissions.all()
+    # cg.permissions.add(p1) - this will reflect in CompanyGroupPermission
+    # cg.permissions.remove(p1) 
 
     def __str__(self):
         return f"{self.group.name} - {self.company.name}"
