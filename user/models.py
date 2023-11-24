@@ -5,7 +5,7 @@ from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.hashers import make_password
 
 class Company(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="companies")
@@ -29,8 +29,9 @@ class CompanyGroup(models.Model):
     @classmethod
     def create_company_group(cls, group_name, company):
         # Create a new CompanyGroup instance with the specified group name and company
-        group, created = Group.objects.get_or_create(name=group_name)
-        company_group, created = cls.objects.get_or_create(group=group, company=company)
+        group_name = group_name.strip().replace(' ', '_') #Remove leading and trailing whitespaces & replace white space with _
+        group, created = Group.objects.get_or_create(name=f"{company.id}_{group_name}")
+        company_group, created = cls.objects.get_or_create(group=group,company=company)
         return company_group
 
     @classmethod
@@ -172,8 +173,22 @@ class User(AbstractUser):
     def name(self):
         return self.get_full_name()
 
+class CompanyDirector(models.Model):
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
+    name = models.CharField(max_length=255)
+    email = models.EmailField(max_length=255)
+    contact = models.CharField(max_length=255)
+    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="directors")
+    created_at = models.DateTimeField(auto_now_add=True)
+
 
 class CompanyBranch(models.Model):
+    BRANCH_TYPES = (('RETAIL', 'RETAIL'),('WHOLESALE', 'WHOLESALE'),)
+    
+    branch_type = models.CharField(max_length=10, choices=BRANCH_TYPES, default="WHOLESALE")
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=255)
     region = models.CharField(max_length=255)    
@@ -186,28 +201,18 @@ class CompanyBranch(models.Model):
 
 
 class Pos(models.Model):
-    name = models.CharField(max_length=255)
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
-    company_branch = models.ForeignKey(CompanyBranch, on_delete=models.SET_NULL, null=True)
+    #Owner
+    company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
+    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    # Data
+    unique_no = models.CharField(max_length=255,unique=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
-
-
-class CompanyDirectors(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
-    name = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255)
-    contact = models.CharField(max_length=255)
-    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="directors")
-    created_at = models.DateTimeField(auto_now_add=True)
+        return self.unique_no
 
 
 class CompanyStaff(models.Model):
@@ -216,7 +221,7 @@ class CompanyStaff(models.Model):
     company_branch = models.ForeignKey(CompanyBranch, on_delete=models.SET_NULL, null=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="staffs")
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="staffs_createdby")
     created_at = models.DateTimeField(auto_now_add=True)
 
 
@@ -225,9 +230,50 @@ class PosUser(models.Model):
     pos = models.ForeignKey(Pos, on_delete=models.SET_NULL, null=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="posusers")
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="posusers_createdby")
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.user.first_name
 
+
+class SupplierEntity(models.Model):
+    name = models.CharField(max_length=255)
+    contact_person = models.CharField(max_length=255, blank=True, null=True)
+    contact_number = models.CharField(max_length=15, blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="suppliers_createdby")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+    
+class Provider(models.Model):
+    PROVIDER_TYPES = (('SUPPLIER', 'Supplier'),('BRANCH', 'Branch'),)
+    
+    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
+    provider_type = models.CharField(max_length=10,choices=PROVIDER_TYPES,default="Supplier")
+    supplier_entity = models.ForeignKey(SupplierEntity,on_delete=models.SET_NULL,null=True)
+    supplier_branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="providers_createdby")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+
+
+class Customer(models.Model):
+    name = models.CharField(max_length=255)
+    phone = models.CharField(max_length=255,blank=True, null=True)
+    email = models.EmailField(blank=True, null=True)
+    address = models.TextField(blank=True, null=True)
+    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="posusers")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
