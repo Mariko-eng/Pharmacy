@@ -1,0 +1,180 @@
+{% extends 'base/main/index.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+
+<form class="row g-3 needs-validation" method="post" novalidate >
+    {% csrf_token %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Received Stock Form</h5>
+            
+            <div class="row mb-3">
+                <label for="provider" class="col-sm-2 col-form-label">Provider</label>
+                <div class="col-sm-10">
+                    {% if form.errors.provider %}
+                    {% render_field form.provider|add_class:"form-control is-invalid" id="provider" %}
+                    <div class="invalid-feedback">
+                        {{ form.errors.provider.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.provider|add_class:"form-control" id="provider" %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="delivered_by_name" class="col-sm-12 col-form-label">Delivered By Name</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.delivered_by_name %}
+                        {% render_field form.delivered_by_name|add_class:"form-control is-invalid" id="delivered_by_name" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.delivered_by_name.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.delivered_by_name|add_class:"form-control" id="delivered_by_name" %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="delivered_by_phone" class="col-sm-12 col-form-label">Delivered By Name</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.delivered_by_phone %}
+                        {% render_field form.delivered_by_phone|add_class:"form-control is-invalid" id="delivered_by_phone" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.delivered_by_phone.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.delivered_by_phone|add_class:"form-control" id="delivered_by_phone" %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <label for="received_date" class="col-sm-2 col-form-label">Received Date</label>
+                <div class="col-sm-10">
+                    {% if form.errors.received_date %}
+                    {% render_field form.received_date|add_class:"form-control is-invalid" type="date" id="received_date" %}
+                    <div class="invalid-feedback">
+                        {{ form.errors.received_date.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.received_date|add_class:"form-control" type="date" id="received_date" %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <label for="delivery_notes" class="col-sm-2 col-form-label">Delivery Notes</label>
+                <div class="col-sm-10">
+                    {% if form.errors.delivery_notes %}
+                    {% render_field form.delivery_notes|add_class:"form-control is-invalid" rows="3" id="delivery_notes" %}
+                    <div class="invalid-feedback">
+                        {{ form.errors.delivery_notes.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.delivery_notes|add_class:"form-control" rows="3" id="delivery_notes" %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <hr/ class="mt-4">
+            <h5 class="card-title">Enter Received Items</h5>                    
+            <div class="row">
+                <div class="col-md-2">
+                    <p class="text-center text-small">Product</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="text-center text-small">Batch No</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="text-center text-small">Qty Received</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="text-center text-small">Unit Cost</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="text-center text-small">Mfg Date</p>
+                </div>
+                <div class="col-md-2">
+                    <p class="text-center text-small">Exp Date</p>
+                </div>
+            </div>
+            {% for form in formset.forms %}
+            <div class="row my-1">
+                <div class="col-md-2">
+                    {% if form.errors.product %}
+                    {% render_field form.product|add_class:"form-control is-invalid" id="product"%}
+                    <div class="invalid-feedback">
+                        {{ form.errors.name.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.product|add_class:"form-control" id="product"%}
+                    {% endif %}
+                </div>
+                <div class="col-md-2">
+                    {% if form.errors.batch_no %}
+                    {% render_field form.batch_no|add_class:"form-control is-invalid" id="product"%}
+                    <div class="invalid-feedback">
+                        {{ form.errors.name.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.batch_no|add_class:"form-control" id="product"%}
+                    {% endif %}
+                </div>
+                <div class="col-md-2">
+                    {% if form.errors.qty_received %}
+                    {% render_field form.qty_received|add_class:"form-control is-invalid" id="product"%}
+                    <div class="invalid-feedback">
+                        {{ form.errors.name.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.qty_received|add_class:"form-control" id="product"%}
+                    {% endif %}
+                </div>
+                <div class="col-md-2">
+                    {% if form.errors.unit_cost %}
+                    {% render_field form.unit_cost|add_class:"form-control is-invalid" id="product"%}
+                    <div class="invalid-feedback">
+                        {{ form.errors.name.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.unit_cost|add_class:"form-control" id="product"%}
+                    {% endif %}
+                </div>
+                <div class="col-md-2">
+                    {% if form.errors.manufactured_date %}
+                    {% render_field form.manufactured_date|add_class:"form-control is-invalid" id="product"%}
+                    <div class="invalid-feedback">
+                        {{ form.errors.name.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.manufactured_date|add_class:"form-control" id="product"%}
+                    {% endif %}
+                </div>
+                <div class="col-md-2">
+                    {% if form.errors.expiry_date %}
+                    {% render_field form.expiry_date|add_class:"form-control is-invalid" id="product"%}
+                    <div class="invalid-feedback">
+                        {{ form.errors.name.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.expiry_date|add_class:"form-control" id="product"%}
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            
+            <div class="col-12 d-flex justify-content-center mt-5">
+                <button class="btn btn-primary" type="submit" style="width: 300px;">Submit</button>
+            </div>
+        </div>
+    </div>
+    
+</form>
+
+
+
+{% endblock %}

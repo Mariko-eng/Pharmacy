@@ -65,7 +65,7 @@ class ReceivedStockItem(models.Model):
     branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
     # Data
     received_stock = models.ForeignKey(ReceivedStock,on_delete=models.SET_NULL,null=True)
-    product = models.ForeignKey(Product,on_delete=models.SET_NULL,null=True)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE)
     batch_no = models.CharField(max_length=255,unique=True)
     qty_received = models.DecimalField(max_digits=12, decimal_places=3)
     unit_cost = models.DecimalField(max_digits=12, decimal_places=3)
@@ -122,8 +122,8 @@ class OutgoingConsumable(models.Model):
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
     # Data
-    product = models.ForeignKey(Product,on_delete=models.SET_NULL,null=True)
-    quantity = models.DecimalField(max_digits=12, decimal_places=3)
+    product = models.ForeignKey(Product,on_delete=models.CASCADE)
+    quantity = models.DecimalField(max_digits=12,decimal_places=3)
     remarks = models.TextField(null=True,blank=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
