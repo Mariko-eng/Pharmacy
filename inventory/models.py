@@ -7,17 +7,26 @@ class ProductType(models.Model): # Drug, Medical Equipment
     # Data    
     name = models.CharField(max_length=255,unique=True)
 
+    def __str__(self):
+        return self.name
+
 class ProductCategory(models.Model):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
     name = models.CharField(max_length=255,unique=True)
 
+    def __str__(self):
+        return self.name
+
 class ProductUnits(models.Model): # Units Of Measure
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
     name = models.CharField(max_length=255,unique=True)
+
+    def __str__(self):
+        return self.name
 
 class Product(models.Model):
     #Owner

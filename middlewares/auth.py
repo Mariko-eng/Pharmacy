@@ -6,13 +6,30 @@ class AuthenticationBackend(ModelBackend):
     def authenticate(self, request, company=None, username=None, password=None, **kwargs):
         UserModel = get_user_model()
 
-        if username is None or password is None:
+        if (username is None and kwargs.get(UserModel.EMAIL_FIELD) is None) or password is None:
             return None
         
-        try:
-            user = UserModel.objects.get(username=username)
-        except UserModel.DoesNotExist:
-            return None
+        # Try to get the user by email
+        if username is None:
+            username_or_email = kwargs.get(UserModel.EMAIL_FIELD)
+            try:
+                user = UserModel._default_manager.get(email=username_or_email)
+            except UserModel.DoesNotExist:
+                return None
+        else:
+            # Try to get the user by username
+            try:
+                user = UserModel._default_manager.get(username=username)
+            except UserModel.DoesNotExist:
+                return None
+
+        # if username is None or password is None:
+        #     return None
+        
+        # try:
+        #     user = UserModel.objects.get(username=username)
+        # except UserModel.DoesNotExist:
+        #     return None
         
         # Check if the user is a superuser
         if user.is_superuser:

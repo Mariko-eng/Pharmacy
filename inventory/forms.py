@@ -26,14 +26,31 @@ class ProductUnitsForm(forms.ModelForm):
 
 
 class ProductForm(forms.ModelForm):
+    type = forms.ModelChoiceField(
+        queryset= ProductType.objects.all(),  # Provide the queryset
+        required= True,  # Set to True if you want it to be required
+    )
+    category = forms.ModelChoiceField(
+        queryset= ProductCategory.objects.all(),  # Provide the queryset
+        required= True,  # Set to True if you want it to be required
+    )
+    name = forms.CharField(max_length=30)
+    description = forms.CharField(widget=forms.Textarea) # For type TextField
+    units = forms.ModelChoiceField(
+        queryset= ProductUnits.objects.all(),  # Provide the queryset
+        required= True,  # Set to True if you want it to be required
+    )
+    item_photo = forms.ImageField(required=False)
+    reorder_min_qty = forms.DecimalField(initial=0)
 
     class Meta:
         model = Product
         fields = [
-            'name','description','item_photo',
-            'type','category','units','unit_price',
-            'reorder_min_qty','is_consummable',
-            'is_for_sale'
+            'type','category',
+            'name','description',
+            'units','unit_price',
+            'item_photo','reorder_min_qty',
+            'is_for_sale','is_consummable',
         ]
         exclude = ['company','unique_no','updated_by_id','updated_at','created_by','created_at']
 

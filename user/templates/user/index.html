@@ -10,7 +10,7 @@
             {% csrf_token %}
             
             {% comment %} {{ form.errors }} {% endcomment %}
-            {{ form.data }}
+            {% comment %} {{ form.data }} {% endcomment %}
             
             <div class="row mb-3">
                 <label for="name" class="col-sm-2 col-form-label">Name</label>

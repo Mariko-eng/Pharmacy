@@ -1,0 +1,308 @@
+{% extends 'base/main/index.html' %}
+{% load widget_tweaks %}
+
+
+{% block pagetitle%}
+<div class="pagetitle">
+    <h1>Hello, {{ request.session.company_name|default:"Guest" }}!</h1>
+    {{ request.session.current_settings_form }}
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">
+                Inventory
+            </a></li>
+        </ol>
+    </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Inventory  Settings</h5>
+        
+        <!-- Default Tabs -->
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="types-tab" data-bs-toggle="tab" data-bs-target="#types" type="button" role="tab" aria-controls="types" aria-selected="true">Product Types</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="categories-tab" data-bs-toggle="tab" data-bs-target="#categories" type="button" role="tab" aria-controls="categories" aria-selected="false">Product Categories</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="units-tab" data-bs-toggle="tab" data-bs-target="#units" type="button" role="tab" aria-controls="units" aria-selected="false">Product Units</button>
+            </li>
+        </ul>
+        <div class="tab-content pt-2" id="myTabContent">
+            <div class="tab-pane fade show active" id="types" role="tabpanel" aria-labelledby="types-tab">
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-row justify-content-end">
+                        <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createProductTypeModal"><i class="bi bi-plus"></i><span>Add</span></button>
+                    </div>
+                    <div>
+                        {% if productTypes %}
+                        {% for item in productTypes %}
+                        <div>{{item.name}}</div>
+                        {% endfor %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="categories" role="tabpanel" aria-labelledby="categories-tab">
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-row justify-content-end">
+                        <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createProductCategoryModal"><i class="bi bi-plus"></i><span>Add</span></button>
+                    </div>
+                    <div>
+                        {% if productCategories %}
+                        {% for item in productCategories %}
+                        <div>{{item.name}}</div>
+                        {% endfor %}
+                        {% endif %}   
+                    </div>
+                </div>
+            </div>
+            <div class="tab-pane fade" id="units" role="tabpanel" aria-labelledby="units-tab">
+                <div class="d-flex flex-column">
+                    <div class="d-flex flex-row justify-content-end">
+                        <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createProductUnitsModal"><i class="bi bi-plus"></i><span>Add</span></button>
+                    </div>
+                    <div>
+                        {% if productUnits %}
+                        {% for item in productUnits %}
+                        <div>{{item.name}}</div>
+                        {% endfor %}
+                        {% endif %}  
+                    </div>
+                </div>
+            </div>
+        </div><!-- End Default Tabs -->
+    </div>
+</div>
+
+<div class="modal fade" id="createProductTypeModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <form id = "productTypeForm" class="row g-3 needs-validation" method="post" novalidate >
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-center">Add Product Type</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <br/>
+                    {% csrf_token %}
+                    <input type="hidden" name="form_prefix" value="{{ productTypeForm.prefix }}">
+                    <div class="row mb-3">
+                        <label for="name" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            {% render_field productTypeForm.name|add_class:"form-control"|attr:"id:productTypeName" %}
+                            <div id = "productTypeError" class="invalid-feedback">
+                                Provide a valid name
+                            </div>
+                        </div>
+                    </div>
+                    {% comment %} <button type="submit">Create Company</button> {% endcomment %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- End Modal Dialog Scrollable-->
+
+<div class="modal fade" id="createProductCategoryModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <form id = "productCategoryForm" class="row g-3 needs-validation" method="post" novalidate >
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-center">Add Product Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <br/>
+                    {% csrf_token %}
+                    <input type="hidden" name="form_prefix" value="{{ productCategoryForm.prefix }}">
+                    <div class="row mb-3">
+                        <label for="name" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            {% render_field productCategoryForm.name|add_class:"form-control"|attr:"id:productCategoryName" %}
+                            <div id = "productCategoryError" class="invalid-feedback">
+                                Provide a valid name
+                            </div>
+                        </div>
+                    </div>
+                    {% comment %} <button type="submit">Create Company</button> {% endcomment %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- End Modal Dialog Scrollable-->
+
+<div class="modal fade" id="createProductUnitsModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <form id = "productUnitsForm" class="row g-3 needs-validation" method="post" novalidate >
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-center">Add Product Unit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <br/>
+                    {% csrf_token %}
+                    <input type="hidden" name="form_prefix" value="{{ productUnitsForm.prefix }}">
+                    <div class="row mb-3">
+                        <label for="name" class="col-sm-2 col-form-label">Name</label>
+                        <div class="col-sm-10">
+                            {% render_field productUnitsForm.name|add_class:"form-control"|attr:"id:productUnitsName" %}
+                            <div id = "productUnitsError" class="invalid-feedback">
+                                Provide a valid name
+                            </div>
+                        </div>
+                    </div>
+                    {% comment %} <button type="submit">Create Company</button> {% endcomment %}
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- End Modal Dialog Scrollable-->
+
+
+<script type='text/javascript'>
+        document.addEventListener('DOMContentLoaded', function () {
+        // Get the active tab from localStorage or default to the first tab
+        const activeTab = localStorage.getItem('activeTab') || 'types-tab';
+
+        // Set the active tab based on the stored value
+        const activeTabButton = document.getElementById(activeTab);
+        if (activeTabButton) {
+            activeTabButton.click();
+        }
+
+        // Add an event listener to store the active tab when a tab is clicked
+        const tabButtons = document.querySelectorAll('.nav-tabs button');
+        tabButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                const tabId = this.id;
+                localStorage.setItem('activeTab', tabId);
+            });
+        });
+    });
+
+    $(document).ready(function() {
+
+        $("#productTypeForm").submit(function (e) {
+            e.preventDefault();
+            
+            const data = $('#productTypeForm').serialize() // Contains Form Data And CSRF Token As Well
+            // console.log(data)
+            
+            $.ajax({
+                type: 'POST',
+                url: '{% url "inventory:settings" %}',
+                data: data,
+                success: function (data) {
+                    console.log(data)
+                    if (data.success) {
+                        // Close the modal on success
+                        $('#productTypeName').removeClass('is-invalid');
+                        $('#productTypeName').addClass('is-valid');
+                        $('#createProductTypeModal').modal('hide');
+                        window.location.reload()
+                        // Optionally, you can redirect or perform other actions after a successful submission
+                    } else {
+                        if(data.errors.name){
+                            $('#productTypeName').removeClass('is-valid');
+                            $('#productTypeName').addClass('is-invalid');
+                            $('#productTypeError').text(data.errors.name[0])
+                        }else{
+                            alert('Error: ' + JSON.stringify(data.errors));
+                        }
+                    }
+                }
+            })
+        })
+
+        $("#productCategoryForm").submit(function (e) {
+            e.preventDefault();
+            
+            const data = $('#productCategoryForm').serialize() // Contains Form Data And CSRF Token As Well
+            //console.log(data)
+            
+            $.ajax({
+                type: 'POST',
+                url: '{% url "inventory:settings" %}',
+                data: data,
+                success: function (data) {
+                    //console.log(data)
+                    if (data.success) {
+                        // Close the modal on success
+                        // $('#productCategoryName').removeClass('is-invalid');
+                        // $('#productCategoryName').addClass('is-valid');
+                        // $('#createProductCategoryModal').modal('hide');
+                        window.location.reload()
+                        // Optionally, you can redirect or perform other actions after a successful submission
+                    } else {
+                        console.log(data.errors)
+                        if(data.errors.name){
+                            // $('#productCategoryName').removeClass('is-valid');
+                            // $('#productCategoryName').addClass('is-invalid');
+                            // $('#productCategoryError').text(data.errors.name[0])
+                        }else{
+                            alert('Error: ' + JSON.stringify(data.errors));
+                        }
+                    }
+                }
+            })
+        })
+
+        $("#productUnitsForm").submit(function (e) {
+            e.preventDefault();
+            
+            const data = $('#productUnitsForm').serialize() // Contains Form Data And CSRF Token As Well
+            //console.log(data)
+            
+            $.ajax({
+                type: 'POST',
+                url: '{% url "inventory:settings" %}',
+                data: data,
+                success: function (data) {
+                    //console.log(data)
+                    if (data.success) {
+                        // Close the modal on success
+                        $('#productUnitsName').removeClass('is-invalid');
+                        $('#productUnitsName').addClass('is-valid');
+                        $('#createProductUnitsModal').modal('hide');
+                        window.location.reload()
+                        // Optionally, you can redirect or perform other actions after a successful submission
+                    } else {
+                        if(data.errors.name){
+                            $('#productUnitsName').removeClass('is-valid');
+                            $('#productUnitsName').addClass('is-invalid');
+                            $('#productUnitsError').text(data.errors.name[0])
+                        }else{
+                            alert('Error: ' + JSON.stringify(data.errors));
+                        }
+                    }
+                }
+            })
+        })
+    })
+</script>
+
+{% endblock %}
+

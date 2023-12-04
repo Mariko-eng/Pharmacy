@@ -1,4 +1,11 @@
 from django import forms
+from .models import Company
+
+class CompanyForm(forms.ModelForm):
+    
+    class Meta:
+        model = Company
+        fields = ['name']
 
 class NameForm(forms.Form):
     name = forms.CharField(label="Your name", max_length=100,)

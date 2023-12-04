@@ -282,7 +282,7 @@
   /**
    * Initiate Bootstrap validation check
    */
-  var needsValidation = document.querySelectorAll('.needs-validation')
+  var needsValidation = document.querySelectorAll('.needs-validation1')
 
   Array.prototype.slice.call(needsValidation)
     .forEach(function(form) {

@@ -638,7 +638,7 @@ h6 {
 }
 
 @media (max-width: 1199px) {
-  .toggle-sidebar .sidebar {
+  .toggle-sidebar .sidebar { 
     left: 0;
   }
 }
