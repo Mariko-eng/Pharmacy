@@ -4,6 +4,13 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
+from django.utils.translation import gettext as _
+
+class Role(models.TextChoices):
+    COMPANY_ADMIN = 'Company Admin', _('Company Admin')
+    BRANCH_MANAGER = 'Branch Manager', _('Branch Manager')
+    POS_ATTENDANT = 'Pos Attendant', _('Pos Attendant')
+    STAFF_MEMBER = 'Staff Member', _('Staff Member')
 
 class Company(models.Model):
     name = models.CharField(max_length=255, unique=True)
@@ -12,6 +19,8 @@ class Company(models.Model):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="companies")
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
 
 class CompanyGroup(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -169,23 +178,30 @@ class User(AbstractUser):
     def name(self):
         return self.get_full_name()
 
-class CompanyDirector(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
-    name = models.CharField(max_length=255)
-    email = models.EmailField(max_length=255)
-    contact = models.CharField(max_length=255)
+    @property
+    def role(self):
+        if self.is_superuser:
+            return "Super User"
+        elif self.companyadmin: # True if is not empty
+            return Role.COMPANY_ADMIN
+        elif self.companymanager: # True if is not empty
+            return Role.BRANCH_MANAGER
+        else:
+            return Role.STAFF_MEMBER
+
+class CompanyAdmin(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="directors")
     created_at = models.DateTimeField(auto_now_add=True)
 
-
 class CompanyBranch(models.Model):
     BRANCH_TYPES = (('RETAIL', 'RETAIL'),('WHOLESALE', 'WHOLESALE'),)
     
     branch_type = models.CharField(max_length=10, choices=BRANCH_TYPES, default="WHOLESALE")
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     region = models.CharField(max_length=255)    
     district = models.CharField(max_length=255)
@@ -195,11 +211,24 @@ class CompanyBranch(models.Model):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    def __str__(self):
+        return self.name
+
+
+class CompanyManager(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company_branch = models.ForeignKey(CompanyBranch, on_delete=models.CASCADE)
+    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="managers_createdby")
+    created_at = models.DateTimeField(auto_now_add=True)
+
 
 class Pos(models.Model):
     #Owner
-    company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    company = models.ForeignKey(Company,on_delete=models.CASCADE)
+    branch = models.ForeignKey(CompanyBranch,on_delete=models.CASCADE)
     # Data
     unique_no = models.CharField(max_length=255,unique=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
@@ -212,14 +241,13 @@ class Pos(models.Model):
 
 
 class CompanyStaff(models.Model):
-    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True)
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
-    company_branch = models.ForeignKey(CompanyBranch, on_delete=models.SET_NULL, null=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    company_branch = models.ForeignKey(CompanyBranch, on_delete=models.CASCADE)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="staffs_createdby")
     created_at = models.DateTimeField(auto_now_add=True)
-
 
 class PosUser(models.Model):
     user = models.ForeignKey(CompanyStaff, on_delete=models.SET_NULL, null=True)
@@ -258,8 +286,6 @@ class Provider(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="providers_createdby")
     created_at = models.DateTimeField(auto_now_add=True)
-
-
 
 class Customer(models.Model):
     name = models.CharField(max_length=255)

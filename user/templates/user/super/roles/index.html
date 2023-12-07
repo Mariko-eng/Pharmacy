@@ -1,0 +1,242 @@
+{% extends 'base/super/index.html' %}
+{% load widget_tweaks %}
+
+
+{% block pagetitle%}
+<div class="pagetitle">
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="index.html">Users & Access</a></li>
+        </ol>
+    </nav>
+</div><!-- End Page Title --> 
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Users & Roles</h5>
+            <h5 class="card-title">{{ group.name }}</h5>
+            
+            <form action="" method="post">
+                {% csrf_token %}
+                <div class="table-responsive small">
+                    <table id="bootstrapdatatable" class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">App</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in all_permissions %}
+                            <tr>
+                                <td>{{item.content_type.name|upper}}</td>
+                                <td>{{item.name}}</td>
+                                <td>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" name="permissions" value="{{ item.id }}"
+                                        {% if item in group_permissions %} checked {% endif %}>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            
+                <button class="btn btn-outline-primary" type="submit">Submit</button>
+            </form/>
+        </div>
+    </div>
+    
+    
+    <script type='text/javascript'>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Get the active tab from localStorage or default to the first tab
+            const activeTab = localStorage.getItem('activeTab') || 'users-tab';
+            
+            // Set the active tab based on the stored value
+            const activeTabButton = document.getElementById(activeTab);
+            if (activeTabButton) {
+                activeTabButton.click();
+            }
+            
+            // Add an event listener to store the active tab when a tab is clicked
+            const tabButtons = document.querySelectorAll('.nav-tabs button');
+            tabButtons.forEach(function (button) {
+                button.addEventListener('click', function () {
+                    const tabId = this.id;
+                    localStorage.setItem('activeTab', tabId);
+                });
+            });
+        });
+        
+        $(document).ready(function() {
+            $("#selectUserTypeForm").submit(function(e){
+                e.preventDefault();
+                
+                const selectedUserType = document.querySelector('input[name="user_type"]:checked');
+                
+                if (selectedUserType) {
+                    $('#user_type_error').removeClass('d-block');
+                    $('#user_type_error').addClass('d-none');
+                    const value = selectedUserType.value;
+                    // console.log(value);
+                    $('#selectUserTypeModal').modal('hide');
+                    if(value === "superUser"){
+                        $('#createSuperUserModal').modal('show');
+                    }else{
+                        $('#createAdminUserModal').modal('show');
+                    }
+                } else {
+                    $('#user_type_error').removeClass('d-none');
+                    $('#user_type_error').addClass('d-block');
+                }
+                
+            })
+            
+            $("#superUserForm").submit(function (e) {
+                e.preventDefault();
+                
+                const data = $('#superUserForm').serialize() // Contains Form Data And CSRF Token As Well
+                // console.log(data)
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "user:super-all-users" %}',
+                    data: data,
+                    success: function (data) {
+                        //console.log(data)
+                        if (data.success) {
+                            // Close the modal on success
+                            $('#first_name').removeClass('is-invalid');
+                            $('#first_name').addClass('is-valid');
+                            $('#createCompanyModal').modal('hide');
+                            window.location.reload()
+                            // Optionally, you can redirect or perform other actions after a successful submission
+                        } else {
+                            console.log(data.errors)
+                            
+                            if(data.errors.first_name){
+                                $('#first_name').removeClass('is-valid');
+                                $('#first_name').addClass('is-invalid');
+                                $('#firstNameError').text(data.errors.first_name[0])
+                            }else{
+                                $('#first_name').removeClass('is-invalid');
+                                $('#first_name').addClass('is-valid');
+                            }
+                            
+                            if(data.errors.last_name){
+                                $('#last_name').removeClass('is-valid');
+                                $('#last_name').addClass('is-invalid');
+                                $('#lastNameError').text(data.errors.last_name[0])
+                            }else{
+                                $('#last_name').removeClass('is-invalid');
+                                $('#last_name').addClass('is-valid');
+                            }
+                            
+                            if(data.errors.email){
+                                $('#email').removeClass('is-valid');
+                                $('#email').addClass('is-invalid');
+                                $('#emailError').text(data.errors.email[0])
+                            }else{
+                                $('#email').removeClass('is-invalid');
+                                $('#email').addClass('is-valid');
+                            }
+                            
+                            if(data.errors.phone_number){
+                                $('#phone_number').removeClass('is-valid');
+                                $('#phone_number').addClass('is-invalid');
+                                $('#phoneNumberError').text(data.errors.email[0])
+                            }else{
+                                $('#phone_number').removeClass('is-invalid');
+                                $('#phone_number').addClass('is-valid');
+                            }
+                            
+                        }
+                    }
+                })
+            })
+            
+            $("#adminUserForm").submit(function (e) {
+                e.preventDefault();
+                
+                const data = $('#adminUserForm').serialize() // Contains Form Data And CSRF Token As Well
+                // console.log(data)
+                
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "user:super-all-users" %}',
+                    data: data,
+                    success: function (data) {
+                        //console.log(data)
+                        if (data.success) {
+                            // Close the modal on success
+                            $('#id_name').removeClass('is-invalid');
+                            $('#id_name').addClass('is-valid');
+                            $('#createCompanyModal').modal('hide');
+                            window.location.reload()
+                            // Optionally, you can redirect or perform other actions after a successful submission
+                        } else {
+                            console.log(data.errors)
+                            
+                            if(data.errors.company){
+                                $('#admin_company').removeClass('is-valid');
+                                $('#admin_company').addClass('is-invalid');
+                                $('#adminCompanyError').text(data.errors.company[0])
+                            }else{
+                                $('#admin_company').removeClass('is-invalid');
+                                $('#admin_company').addClass('is-valid');
+                            }
+                            
+                            if(data.errors.first_name){
+                                $('#admin_first_name').removeClass('is-valid');
+                                $('#admin_first_name').addClass('is-invalid');
+                                $('#adminFirstNameError').text(data.errors.first_name[0])
+                            }else{
+                                $('#admin_first_name').removeClass('is-invalid');
+                                $('#admin_first_name').addClass('is-valid');
+                            }
+                            
+                            if(data.errors.last_name){
+                                $('#admin_last_name').removeClass('is-valid');
+                                $('#admin_last_name').addClass('is-invalid');
+                                $('#adminLastNameError').text(data.errors.last_name[0])
+                            }else{
+                                $('#admin_last_name').removeClass('is-invalid');
+                                $('#admin_last_name').addClass('is-valid');
+                            }
+                            
+                            if(data.errors.email){
+                                $('#admin_email').removeClass('is-valid');
+                                $('#admin_email').addClass('is-invalid');
+                                console.log(data.errors.email[0])
+                                $('#adminEmailError').text(data.errors.email[0])
+                            }else{
+                                $('#admin_email').removeClass('is-invalid');
+                                $('#admin_email').addClass('is-valid');
+                            }
+                            
+                            if(data.errors.phone_number){
+                                $('#admin_phone_number').removeClass('is-valid');
+                                $('#admin_phone_number').addClass('is-invalid');
+                                $('#adminPhoneNumberError').text(data.errors.email[0])
+                            }else{
+                                $('#admin_phone_number').removeClass('is-invalid');
+                                $('#admin_phone_number').addClass('is-valid');
+                            }
+                            
+                        }
+                    }
+                })
+            })
+            
+        })
+    </script>
+    
+    {% endblock %}

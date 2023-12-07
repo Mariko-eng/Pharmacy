@@ -10,6 +10,9 @@ urlpatterns = [
 
     path('home/',views.home_view,name="home"),
     path('home/super/',views.home_super_view,name="home-super"),
-    path('company/list/', views.company_view, name='company-list'),
+    path('super/all-users/', views.super_all_users_view, name='super-all-users'),
+    path('super/all-users/', views.super_all_users_view, name='super-all-users'),
+    path('super/roles-edit/<int:id>/', views.super_roles_permissions_edit_view, name='super-roles-permissions-edit'),
+    
     path('company/home/<int:id>/', views.company_home_view, name='company-home')
 ]

@@ -35,7 +35,41 @@
           <div class="d-flex flex-row justify-content-end">
             <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createProductModal"><i class="bi bi-plus"></i><span>Add</span></button>
           </div>
-          <div></div>
+          <div>
+        <div class="table-responsive small">
+        <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Type</th>
+              <th scope="col">Category</th>
+              <th scope="col">QTY</th>
+              <th scope="col">Min Order Qty</th>
+              <th scope="col">Unit Price</th>
+              <th scope="col">Device Addr</th>
+              <th scope="col">Created At</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for result in results %}
+             <tr>
+              <td>{{result.unique_no}}</td>
+              <td>{{result.name}}</td>
+              <td>{{result.type.name}}</td>
+              <td>{{result.category.name}}</td>
+              <td>{{result.available_qty}}</td>
+              <td>{{result.reorder_min_qty}}</td>
+              <td>{{result.units.name}}</td>
+              <td>{{result.unit_price}}</td>
+              <td>{{result.company.name}}</td>
+              <td>{{result.created_at}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+          </div>
         </div>
       </div>
     </div><!-- End Default Tabs -->
@@ -165,22 +199,77 @@
         url: '{% url "inventory:stock" %}',
         data: data,
         success: function (data) {
-          console.log(data)
+          // console.log(data)
           if (data.success) {
             // Close the modal on success
-            $('#productTypeName').removeClass('is-invalid');
-            $('#productTypeName').addClass('is-valid');
+            $('#type').removeClass('is-invalid');
+            $('#type').addClass('is-valid');
+            $('#category').removeClass('is-invalid');
+            $('#category').addClass('is-valid');
+            $('#name').removeClass('is-invalid');
+            $('#name').addClass('is-valid');
+            $('#description').removeClass('is-invalid');
+            $('#description').addClass('is-valid');
+            $('#units').removeClass('is-invalid');
+            $('#units').addClass('is-valid');
+            $('#unit_price').removeClass('is-invalid');
+            $('#unit_price').addClass('is-valid');
+
             $('#createProductTypeModal').modal('hide');
             window.location.reload()            
             // Optionally, you can redirect or perform other actions after a successful submission
           } else {
-            if(data.errors.name){
-              $('#productTypeName').removeClass('is-valid');
-              $('#productTypeName').addClass('is-invalid');
-              $('#productTypeError').text(data.errors.name[0])
+            if(data.errors.type){
+              $('#type').removeClass('is-valid');
+              $('#type').addClass('is-invalid');
+              $('#typeError').text(data.errors.type[0])
             }else{
-              alert('Error: ' + JSON.stringify(data.errors));
+              $('#type').removeClass('is-invalid');
+              $('#type').addClass('is-valid');
             }
+            if(data.errors.category){
+              $('#category').removeClass('is-valid');
+              $('#category').addClass('is-invalid');
+              $('#categoryError').text(data.errors.category[0])
+            }else{
+              $('#category').removeClass('is-invalid');
+              $('#category').addClass('is-valid');
+            }
+            if(data.errors.name){
+              $('#name').removeClass('is-valid');
+              $('#name').addClass('is-invalid');
+              $('#nameError').text(data.errors.name[0])
+            }else{
+              $('#name').removeClass('is-invalid');
+              $('#name').addClass('is-valid');
+            }
+            if(data.errors.category){
+              $('#description').removeClass('is-valid');
+              $('#description').addClass('is-invalid');
+              $('#descriptionError').text(data.errors.description[0])
+            }else{
+              $('#description').removeClass('is-invalid');
+              $('#description').addClass('is-valid');
+            }
+            if(data.errors.units){
+              $('#units').removeClass('is-valid');
+              $('#units').addClass('is-invalid');
+              $('#unitsError').text(data.errors.units[0])
+            }else{
+              $('#units').removeClass('is-invalid');
+              $('#units').addClass('is-valid');
+            }
+            if(data.errors.unit_price){
+              $('#unit_price').removeClass('is-valid');
+              $('#unit_price').addClass('is-invalid');
+              $('#unitPriceError').text(data.errors.unit_price[0])
+            }else{
+              $('#unit_price').removeClass('is-invalid');
+              $('#unit_price').addClass('is-valid');
+            }
+            // else{
+            //  alert('Error: ' + JSON.stringify(data.errors));
+            //}
           }
         }
       })

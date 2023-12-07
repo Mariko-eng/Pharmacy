@@ -74,7 +74,7 @@
             
             $.ajax({
                 type: 'POST',
-                url: '{% url "user:company-list" %}',
+                url: '{% url "user:super-all-companies" %}',
                 data: data,
                 success: function (data) {
                     //console.log(data)

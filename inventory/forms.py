@@ -24,7 +24,7 @@ class ProductUnitsForm(forms.ModelForm):
             'name'
         ]
 
-
+ 
 class ProductForm(forms.ModelForm):
     type = forms.ModelChoiceField(
         queryset= ProductType.objects.all(),  # Provide the queryset
