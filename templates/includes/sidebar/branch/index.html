@@ -1,0 +1,312 @@
+  <!-- ======= Sidebar ======= -->
+  <aside id="sidebar" class="sidebar">
+
+    <ul class="sidebar-nav" id="sidebar-nav">
+
+    <li class="nav-heading">Home</li>
+
+     <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#dashboard-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Dashboard</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="dashboard-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>Analytics</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>Reports</span>
+            </a>
+          </li>
+        </ul>
+      </li><!-- End Dashboard Nav -->
+
+      <li class="nav-heading">Company Branch</li>
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#company-pos-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Point Of Sales</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="company-pos-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{% url 'user:company-branch-pos-list' company_id=company.id branch_id=branch.id %}">
+              <i class="bi bi-circle"></i><span>List POS</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>New POS</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <!-- End Company Nav -->
+
+    <li class="nav-heading">Inventory</li>
+     <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#stock-items-nav" data-bs-toggle="collapse" 
+        href="{% url 'inventory:stock' %}">
+          <i class="bi bi-menu-button-wide"></i><span>Stock Items</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="stock-items-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{% url 'inventory:stock' %}">
+              <i class="bi bi-circle"></i><span>List Items</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>New Items</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#incoming-stock-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Incoming Stock</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="incoming-stock-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Stock</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>New Stock</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#Stock-requests-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Stock Requests</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="Stock-requests-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Requests</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>New Request</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#consumables-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Consumables</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="consumables-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Items</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>Issue Out</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link " href="{% url 'inventory:settings' %}">
+          <i class="bi bi-grid"></i>
+          <span>Settings</span>
+        </a>
+      </li><!-- End Profile Nav -->
+      <!-- End Inventory Nav -->
+
+      <li class="nav-heading">Purchase Orders</li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#purchase-order-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Purchase Requests</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="purchase-order-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Requests</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>New Requests</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <!-- End Purchase Orders Nav -->
+      <li class="nav-heading">Sales</li>
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#sales-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Sales</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="sales-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Sales</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>New Sale</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#payment-methods-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Payment Methods</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="payment-methods-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Methods</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>New Method</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <!-- End sales Nav -->
+
+      <li class="nav-heading">Finance</li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#invoices-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Invoices</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="invoices-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Invoices</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>New Invoice</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#receipts-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Receipts</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="receipts-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Receipts</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-accordion.html">
+              <i class="bi bi-circle"></i><span>New Receipt</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <!-- End Finance Nav -->
+
+      <li class="nav-heading">Users & Access</li>
+       <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#users-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Users</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="users-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="{% url 'user:company-admins-list' %}">
+              <i class="bi bi-circle"></i><span>Administrators</span>
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'user:company-managers-list' %}">
+              <i class="bi bi-circle"></i><span>Branch Managers</span>
+            </a>
+          </li>
+          <li>
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>POS Attendants</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>ALL Staff</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>All Users</span>
+            </a>
+          </li>
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>Access Control</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#roles-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Roles</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="roles-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Roles</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#permissions-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Permissions</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="permissions-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a href="components-alerts.html">
+              <i class="bi bi-circle"></i><span>List Permissions</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <!-- End Users & Access Nav -->
+
+      <li class="nav-heading">Profile</li>
+
+      <li class="nav-item">
+        <a class="nav-link " href="index.html">
+          <i class="bi bi-grid"></i>
+          <span>My Profile</span>
+        </a>
+      </li><!-- End Profile Nav -->
+
+      <li class="nav-heading">FAQ</li>
+
+      <li class="nav-item">
+        <a class="nav-link " href="index.html">
+          <i class="bi bi-grid"></i>
+          <span>F.A.Q</span>
+        </a>
+      </li><!-- End Profile Nav -->
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" href="pages-blank.html">
+          <i class="bi bi-file-earmark"></i>
+          <span>Blank</span>
+        </a>
+      </li><!-- End Blank Page Nav -->
+
+    </ul>
+
+  </aside>
+  <!-- End Sidebar-->

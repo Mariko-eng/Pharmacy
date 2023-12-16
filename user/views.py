@@ -1,16 +1,23 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from django.http import JsonResponse
-from .forms import CompanyForm,SuperUserForm,CompanyAdminUserForm
+from django.http import JsonResponse,HttpResponseServerError
 from django.contrib.auth.models import Group, Permission
-from .models import Role, User, Company ,CompanyAdmin
-from django.contrib.auth.hashers import make_password
-
-# custom 404 view
-def custom_404(request, exception):
-    return render(request, '404.html', status=404)
+from .forms import AppUserForm
+from .forms import AdminUserForm
+from .forms import ManagerUserForm
+from .forms import PosUserForm
+from .forms import OtherStaffUserForm
+from .forms import CompanyForm
+from .forms import CompanyBranchForm
+from .forms import CompanyPosForm
+from .models import AppRoles, CompanyRoles, BranchRoles
+from .models import User, UserRoleTrail
+from .models import CompanyStaff, PosAttendant
+from .models import Company, CompanyBranch, CompanyPos
 
 # @unauthenticated_user
 def index(request):
@@ -19,32 +26,36 @@ def index(request):
     context = {}
     if request.user.is_authenticated:
         if request.user.is_superuser:
-            return redirect('user:home-super')
+            return redirect('user:home')
         
         return redirect('user:home')
     
     if request.method == "POST":
         email = request.POST.get("email")
         password = request.POST.get("password")
-        # print(email)
-        # print(password)
         
         user = authenticate(request,email=email,password=password)
 
         if user is not None:
             login(request,user)
 
+            if request.user.is_superuser == False and request.user.is_staff == False:
+                request.session['company_id'] = request.user.company.id
+                request.session['company_name'] = request.user.company.name
+
+            if request.user.groups.filter(name = BranchRoles.BRANCH_MANAGER):
+                companyStaffDetails = CompanyStaff.objects.filter(user=request.user).firxt()
+                request.session['branch_id'] = companyStaffDetails.branch.id
+                request.session['branch_name'] = companyStaffDetails.branch.name
+
             if next_url:
                 return redirect(next_url)  # Redirect to the URL specified in 'next' parameter
-            
-            if request.user.is_superuser:
-                return redirect('user:home-super')
+        
             return redirect('user:home')
         else:
-            messages.info(request, "Please Provide A Valid Username And Paassword")
+            messages.info(request, "Please Provide A Valid Email And Paassword")
 
     return render(request,'auth/login/index.html',context)
-    # return render(request,'accounts/login.html',context)
 
 def logoutView(request):
     # Clear the session data
@@ -53,73 +64,243 @@ def logoutView(request):
     logout(request)
     return redirect('user:login')
 
+
 @login_required(login_url='/login')
 def home_view(request):
-    return render(request, "home/main/index.html", context={})
+    if request.user.is_superuser or request.user.is_staff:
+        return render(request, "dashboard/super/index.html", context={})
+    
+    if request.user.groups.filter(name = CompanyRoles.COMPANY_OWNER):
+        return render(request, "dashboard/company/index.html", context={})
+    
+    if request.user.groups.filter(name = CompanyRoles.COMPANY_ADMIN):
+        return render(request, "dashboard/company/index.html", context={})
+
+    return render(request, "dashboard/branch/index.html", context={})
+
+
 
 @login_required(login_url='/login')
-def home_super_view(request):
-    return render(request, "home/super/index.html", context={})
+def company_admins_list_view(request):
+    company_id = request.session.get('company_id', None)
+    company = None
+    if company_id is not None:
+        company = Company.objects.get(pk=company_id)
+    elif request.user.company:
+        company = request.user.company
+
+    owner_group = Group.objects.get(name=CompanyRoles.COMPANY_OWNER)
+
+    admin_group = Group.objects.get(name=CompanyRoles.COMPANY_ADMIN)
+
+    owner_users = owner_group.user_set.all()
+
+    owner_users = owner_users.filter(company=company)
+
+    admin_users = admin_group.user_set.all()
+
+    admin_users = admin_users.filter(company=company)
+
+    users = []
+    for owner_user in owner_users:
+        users.append(owner_user)
+
+    for admin_user in admin_users:
+        users.append(admin_user)
+
+    form = AdminUserForm()
+    
+    if request.method == 'POST':
+        form_data = AdminUserForm(request.POST or None)
+        if form_data.is_valid():            
+            user = form_data.save(commit=False)
+            group, created = Group.objects.get_or_create(name = CompanyRoles.COMPANY_ADMIN)
+            user.company = company
+            user.set_password(str(user.email))
+            user.created_by = request.user
+            user.save()
+
+            # Add user to group
+            user.groups.add(group)
+
+            UserRoleTrail.objects.create(company=company,user=user, group=group)
+
+            return JsonResponse({'success': True, 'email': form_data.cleaned_data['email']})
+        else:
+            return JsonResponse({'success': False, 'errors': form_data.errors})
+
+    return render(request, "user/accounts/admin/index.html", context={'users': users, 'form': form})
+
 
 @login_required(login_url='/login')
-def super_all_users_view(request):
-    global_roles = Role.choices
+def company_managers_list_view(request):
+    company_id = request.session.get('company_id', None)
+    branch_id = request.session.get('branch_id', None)
+    company = None
+    if company_id is not None:
+        company = Company.objects.get(pk=company_id)
+    elif request.user.company:
+        company = request.user.company
+
+    branch = None
+    if branch_id is not None:
+        branch = CompanyBranch.objects.get(pk=branch_id)
+
+    companyStaffs = CompanyStaff.objects.filter(company = company)
+    users = []
+
+    for companyStaff in companyStaffs:
+        users.append(companyStaff.user)
+
+    if request.method == 'POST':
+        form_data = ManagerUserForm(request.POST,company = company)
+        if form_data.is_valid():
+            branch = form_data.cleaned_data.pop("branch")
+
+            # Create the user
+            user = form_data.save(commit=False)
+            user.company = company 
+            user.set_password(str(user.email))
+            user.created_by = request.user
+            user.save()
+
+            companyStaff = CompanyStaff.objects.create(user=user,company=company,branch=branch)
+
+            group, created = Group.objects.get_or_create(name = BranchRoles.BRANCH_MANAGER)
+            user.groups.add(group)
+
+            UserRoleTrail.objects.create(company=company,user=user, group=group)
+
+            return JsonResponse({'success': True, 'manager_id': companyStaff.id})
+        else:
+            return JsonResponse({'success': False, 'errors': form_data.errors})
+
+    form = ManagerUserForm(company = company)
+
+    return render(request, "user/accounts/manager/index.html", context={'form': form,'users': users})
+
+
+@login_required(login_url='/login')
+def company_pos_attendants_list_view(request, bId):
+    company_id = request.session.get('company_id', None)
+    branch_id = request.session.get('branch_id', None)
+    company = None
+    if company_id is not None:
+        company = Company.objects.get(pk=company_id)
+    elif request.user.company:
+        company = request.user.company
+
+    branch = None
+    if branch_id is not None:
+        branch = CompanyBranch.objects.get(pk=branch_id)
+    else:
+        branch = CompanyBranch.objects.get(pk=bId)
+
+    pos_attendants = PosAttendant.objects.filter(company = company, branch = branch)
+    users = []
+
+    for pos_attendant in pos_attendants:
+        users.append(pos_attendant.user)
+
+    # if request.method == 'POST':
+    #     form = CompanyPosAttendantForm(request.POST,branch=branch)
+    #     if form.is_valid():
+    #         pos = form.cleaned_data.pop("pos")
+
+    #         # Create the user
+    #         user = form.save(commit=False)
+    #         user.company = company 
+    #         user.set_password(str(user.email))
+    #         user.created_by = request.user
+    #         user.save()
+
+    #         staff = BranchStaff.objects.create(user=user,company=company,branch=branch)
+    #         attendant = PosAttendant.objects.create(staff=staff,pos=pos)
+
+    #         group, created = Group.objects.get_or_create(name = BranchRoles.POS_ATTENDANT)
+    #         user.groups.add(group)
+
+    #         return JsonResponse({'success': True, 'attendant_id': attendant.id})
+    #     else:
+    #         return JsonResponse({'success': False, 'errors': form.errors})
+
+    form = PosUserForm(branch=branch)
+
+    return render(request, "user/accounts/manager/index.html", context={'form': form,'users': users})
+
+
+##3####################- ALL -############################
+
+def users_and_roles_list(request):
     groups_static = []
-    for role in global_roles:
-        group, created = Group.objects.get_or_create(name = role[0])
+    app_roles = AppRoles.choices
+    for app_role in app_roles:
+        group, created = Group.objects.get_or_create(name = app_role[0])
+        groups_static.append(group)
+    company_roles = CompanyRoles.choices
+    for company_role in company_roles:
+        group, created = Group.objects.get_or_create(name = company_role[0])
+        groups_static.append(group)
+    branch_roles = BranchRoles.choices
+    for branch_role in branch_roles:
+        group, created = Group.objects.get_or_create(name = branch_role[0])
         groups_static.append(group)
 
     groups_dynamic = Group.objects.exclude(name__in=[group.name for group in groups_static])
     users = User.objects.all()
-    superUserForm = SuperUserForm(prefix="superUserForm")
-    adminUserForm = CompanyAdminUserForm(prefix="adminUserForm")
+    superUserForm = AppUserForm(prefix="superUserForm")
 
     context = {
         "users" : users,
         "groups_static" : groups_static,
         "groups_dynamic" : groups_dynamic,
         "superUserForm" : superUserForm,
-        "adminUserForm" : adminUserForm,
         }
+    
     if request.method == 'POST':
         form_prefix = request.POST.get('form_prefix')
-        # print(form_prefix)
 
         if form_prefix == 'superUserForm':
-            superUserForm_data = SuperUserForm(request.POST or None,prefix="superUserForm")
-            if superUserForm_data.is_valid():
-                super_user = superUserForm_data.save(commit=False)
-                super_user.is_superuser = True
-                super_user.is_staff = True
-                super_user.password = make_password(str(super_user.email))
-                super_user.created_by = request.user
-                super_user.save()
+            form_data = AppUserForm(request.POST or None,prefix="superUserForm")
+            if form_data.is_valid():
+                if form_data.cleaned_data['role'] == CompanyRoles.COMPANY_OWNER:
+                    if form_data.cleaned_data['company'] is None:
+                        form_data.errors['company'] = ['This field is required!']
+                        return JsonResponse({'success': False, 'errors': form_data.errors})
+                
+                user = form_data.save(commit=False)
+                if form_data.cleaned_data['role'] == AppRoles.APP_ADMIN:
+                    group, created = Group.objects.get_or_create(name = AppRoles.APP_ADMIN)
+                    user.is_superuser = True
+                    user.is_staff = True
+                    user.company = None
+                if form_data.cleaned_data['role'] == AppRoles.APP_MANAGER:
+                    group, created = Group.objects.get_or_create(name = AppRoles.APP_MANAGER)
+                    user.is_superuser = False
+                    user.is_staff = True
+                    user.company = None
+                if form_data.cleaned_data['role'] == CompanyRoles.COMPANY_OWNER:
+                    group, created = Group.objects.get_or_create(name = CompanyRoles.COMPANY_OWNER)
+                    user.is_superuser = False
+                    user.is_staff = False
+                    user.company = form_data.cleaned_data['company']
+            
+                user.set_password(str(user.email))
+                user.created_by = request.user
+                user.save()
 
-                return JsonResponse({'success': True, 'email': super_user.name})
+                # Add user to group
+                user.groups.add(group)
+
+                return JsonResponse({'success': True, 'email': form_data.cleaned_data['email']})
             else:
-                return JsonResponse({'success': False, 'errors': superUserForm_data.errors})
-
-        if form_prefix == 'adminUserForm':
-            adminUserForm_data = CompanyAdminUserForm(request.POST or None,prefix="adminUserForm")
-            if adminUserForm_data.is_valid():
-                admin_user = adminUserForm_data.save(commit=False)
-                admin_user.password = make_password(str(admin_user.email))
-                admin_user.created_by = request.user
-                admin_user.save()
-
-                CompanyAdmin.objects.create(user = admin_user, company = admin_user.company, created_by = admin_user.created_by)
-
-                group, created = Group.objects.get_or_create(name = Role.COMPANY_ADMIN)
-                admin_user.groups.add(group)
-
-                return JsonResponse({'success': True, 'email': admin_user.email})
-            else:
-                return JsonResponse({'success': False, 'errors': adminUserForm_data.errors})
+                return JsonResponse({'success': False, 'errors': form_data.errors})
 
     return render(request, "user/super/index.html", context=context)
 
+
 @login_required(login_url='/login')
-def super_roles_permissions_edit_view(request, id):
+def role_permissions_list(request, id):
     group = Group.objects.get(pk=id)
     group_permissions = group.permissions.all()
     # Specify the app labels you want to include
@@ -158,18 +339,38 @@ def super_roles_permissions_edit_view(request, id):
                 existing_perm = Permission.objects.get(pk=perm_id)
                 group.permissions.remove(existing_perm)
         
-        # return redirect('user:super-roles-permissions-edit', id=id)
-
     return render(request, "user/super/roles/index.html", context= context)
 
 
 @login_required(login_url='/login')
-def super_all_companies_view(request):
-    companies = Company.objects.all()
+def company_list(request):
+    # companies = Company.objects.all()
+    companies = Company.objects1.get_queryset(request.user).all()
     if request.method == 'POST':
         form = CompanyForm(request.POST)
         if form.is_valid():
-            company = form.save()
+            first_name = form.cleaned_data.pop("first_name")
+            last_name = form.cleaned_data.pop("last_name")
+            email = form.cleaned_data.pop("email")
+            phone_number = form.cleaned_data.pop("phone_number")
+            if User.objects.filter(email = email).exists():
+                form.errors['email'] = ['Email Already Exists!']
+                return JsonResponse({'success': False, 'errors': form.errors})
+            
+            company = form.save() 
+            # Create Comapny Owner
+            user = User(first_name = first_name,last_name = last_name,email = email,phone_number = phone_number)
+            user.is_superuser = False
+            user.is_staff = False
+            user.company = company
+            user.set_password(str(user.email))
+            user.created_by = request.user
+            user.save()
+
+            # Assign User To Group
+            group, created = Group.objects.get_or_create(name = CompanyRoles.COMPANY_OWNER)
+            user.groups.add(group)
+
             return JsonResponse({'success': True, 'company_id': company.id})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
@@ -177,10 +378,36 @@ def super_all_companies_view(request):
         form = CompanyForm()
     return render(request, "company/list/index.html", context={'form': form, 'companies': companies})
 
-#  By the Super User
+
 @login_required(login_url='/login')
-def company_home_view(request, id):
-    company = Company.objects.get(pk=id)
+@csrf_exempt  # Use this decorator if you don't need CSRF protection for this view
+def company_deactivate(request,company_id):
+    if request.method == 'POST':
+        try:
+            company = get_object_or_404(Company, id=company_id)
+            company.delete()
+            return JsonResponse({'message': 'Company deactivated successfully'})
+        except Exception as e:
+            return HttpResponseServerError({'message': f'Failed to delete company. Error: {str(e)}'})
+
+
+@login_required(login_url='/login')
+@csrf_exempt  # Use this decorator if you don't need CSRF protection for this view
+def company_delete(request,company_id):
+    if request.method == 'POST':
+        try:
+            company = get_object_or_404(Company, id=company_id)
+            print(company)
+            company.hard_delete()
+            return JsonResponse({'message': 'Company deleted successfully'})
+        except Exception as e:
+            print(e)
+            return HttpResponseServerError({'message': f'Failed to delete company. Error: {str(e)}'})
+
+
+##3####################- Company -############################
+def company_detail(request, company_id):
+    company = Company.objects.get(pk=company_id)
     request.session['company_id'] = company.id
     request.session['company_name'] = company.name
     if request.method == 'POST':
@@ -192,35 +419,143 @@ def company_home_view(request, id):
             return JsonResponse({'success': False, 'errors': form.errors}) 
     else:
         form = CompanyForm(instance=company)
-    return render(request, "company/home/index.html", context={'form': form, 'company': company})
+    context = {
+        'form': form,
+        'company': company
+    }
+    return render(request, "dashboard/company/index.html", context=context)
+
+def company_branches_list(request, company_id):
+    company = None
+    if company_id is not None:
+        company = Company.objects.get(pk=company_id)
+    elif request.user.company:
+        company = request.user.company
+
+    if request.user.is_superuser:
+        branches = CompanyBranch.objects.all()
+    else:
+        branches = CompanyBranch.objects.filter(company=company)
+
+    if request.method == 'POST':
+        form = CompanyBranchForm(request.POST)
+        if form.is_valid():
+            branch = form.save(commit=False)
+            branch.created_by = request.user
+            branch.company = company
+            branch.save()
+            return JsonResponse({'success': True, 'branch_id': branch.id})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = CompanyBranchForm()
+    
+    context = {
+        'form': form,
+        'company': company,
+        'branches': branches
+    }
+    return render(request, "branch/list/index.html", context = context)
+
+def company_pos_list(request, company_id):
+    company = None
+    if company_id is not None:
+        company = Company.objects.get(pk=company_id)
+    elif request.user.company:
+        company = request.user.company
+
+    context = { "company": company }
+    return render(request, "pos/index.html", context = context)
+
+def company_users_list(request, company_id):
+    company = None
+    if company_id is not None:
+        company = Company.objects.get(pk=company_id)
+    elif request.user.company:
+        company = request.user.company
+
+    context = {"company": company }
+    return render(request, "user/company/list/index.html", context=context)
 
 
-# def index(request): 
-#     form = NameForm()
-#     context = {
-#         'form': form
-#     }
-#     # if this is a POST request we need to process the form data
-#     if request.method == "POST":
-#         # create a form instance and populate it with data from the request:
-#         form = NameForm(request.POST)
+##3####################- Branch -############################
+@login_required(login_url='/login')
+def company_branch_detail(request, company_id, branch_id):
+    company = Company.objects.get(id=company_id)
+    branch = CompanyBranch.objects.get(id=branch_id)
+    context = {
+        "company": company,
+        "branch": branch,
+    }
+    return render(request, "dashboard/branch/index.html", context=context)
 
-#         # Check if the name is "Mark" and add a custom error if true
-#         if form.data.get('name', '').lower() == 'mark':
-#             form.add_error('name', forms.ValidationError("Bad name: 'Mark' is not allowed."))
+def company_branch_pos_list(request, company_id, branch_id):
+    company = None
+    if company_id is not None:
+        company = Company.objects.get(pk=company_id)
+    elif request.user.company:
+        company = request.user.company
 
-#         # check whether it's valid:
-#         if form.is_valid():
-#             # process the data in form.cleaned_data as required
-#             # ...
-#             # redirect to a new URL:
-#             print("Valid")
-#             context['form'] = form
-#         else:
-#             print("Invalid")
-#             # for field, errors in form.errors.items():
-#             #     form[field].field.widget.attrs['class'] += ' is-invalid'
-#             #     print(form[field])
-#             context['form'] = form
+    branch = None
+    if branch_id is not None:
+        branch = CompanyBranch.objects.get(pk=branch_id)
 
-#     return render(request, "user/index.html", context=context)
+    pos_list = CompanyPos.objects1.get_queryset(request.user,branch=branch).all()
+
+    if request.method == 'POST':
+        form = CompanyPosForm(request.POST)
+        if form.is_valid():
+            print(form.cleaned_data)
+            # pos = form.save(commit=False)
+            # pos.created_by = request.user
+            # pos.company = company
+            # pos.branch = branch
+            # pos.save()  
+            return JsonResponse({'success': True, 'pos_id': "pos.id"})
+        else:
+            return JsonResponse({'success': False, 'errors': form.errors})
+    
+    form = CompanyPosForm()
+    context = {
+        "company": company, "branch": branch,
+        "pos_list": pos_list, "form": form}
+    
+    print("Here")
+    return render(request, "pos/list/index.html", context=context)
+
+
+def company_branch_users_list(request, company_id, branch_id):
+    company = Company.objects.get(id=company_id)
+    branch = CompanyBranch.objects.get(id=branch_id)
+    context = {
+        "company": company,
+        "branch": branch,
+    }
+    return render(request, "user/branch/list/index.html", context=context)
+
+
+##3####################- Branch -############################
+@login_required(login_url='/login')
+def company_branch_pos_detail(request, company_id, branch_id, pos_id):
+    company = Company.objects.get(id=company_id)
+    branch = CompanyBranch.objects.get(id=branch_id)
+    pos = CompanyPos.objects.get(id=pos_id)
+    context = {
+        "company": company,
+        "branch": branch,
+        "pos":pos
+    }
+    return render(request, "pos/detail/index.html", context=context)
+
+def company_branch_pos_users_list(request, company_id, branch_id,pos_id):
+    company = Company.objects.get(id=company_id)
+    branch = CompanyBranch.objects.get(id=branch_id)
+    pos = CompanyPos.objects.get(id=pos_id)
+    context = {
+        "company": company,
+        "branch": branch,
+        "pos":pos
+    }
+    return render(request, "user/accounts/manager/index.html", context=context)
+
+

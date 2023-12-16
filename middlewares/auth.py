@@ -8,7 +8,7 @@ class AuthenticationBackend(ModelBackend):
 
         if (username is None and kwargs.get(UserModel.EMAIL_FIELD) is None) or password is None:
             return None
-        
+                        
         # Try to get the user by email
         if username is None:
             username_or_email = kwargs.get(UserModel.EMAIL_FIELD)
@@ -22,26 +22,12 @@ class AuthenticationBackend(ModelBackend):
                 user = UserModel._default_manager.get(username=username)
             except UserModel.DoesNotExist:
                 return None
-
-        # if username is None or password is None:
-        #     return None
-        
-        # try:
-        #     user = UserModel.objects.get(username=username)
-        # except UserModel.DoesNotExist:
-        #     return None
-        
-        # Check if the user is a superuser
+                    
         if user.is_superuser:
             if user.check_password(password):
                 return user
         else:
-            if company is None:
-                return None
-
-            try:
-                user = UserModel.objects.get(school=company,username=username)
-            except UserModel.DoesNotExist:
+            if company is None and user.company is None:
                 return None
 
             if user.check_password(password):

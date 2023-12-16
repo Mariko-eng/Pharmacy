@@ -5,22 +5,110 @@ from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from simple_history.models import HistoricalRecords
+from .mixins import CommonFieldsMixin
 
-class Role(models.TextChoices):
+class AppRoles(models.TextChoices):
+    SUPER_USER = 'Super User', _('Super User')
+    APP_ADMIN = 'App Admin', _('App Admin')
+    APP_MANAGER = 'App Manager', _('App Manager')
+    COMPANY_OWNER = 'Company Owner', _('Company Owner')
+
+class CompanyRoles(models.TextChoices):
+    COMPANY_OWNER = 'Company Owner', _('Company Owner')
     COMPANY_ADMIN = 'Company Admin', _('Company Admin')
+
+class BranchRoles(models.TextChoices):
     BRANCH_MANAGER = 'Branch Manager', _('Branch Manager')
     POS_ATTENDANT = 'Pos Attendant', _('Pos Attendant')
-    STAFF_MEMBER = 'Staff Member', _('Staff Member')
+    FINANCE = 'Finance', _('Finance')
+    SALES = 'Sales', _('Sales')
+    INVENTORY = 'Inventory', _('Inventory')
 
-class Company(models.Model):
+class AccountTypes(models.TextChoices):
+    APP_ADMIN = 'App Admin',_('App Admin')
+    COMPANY_ADMIN = 'Company Admin',_('Company Admin')
+    BRANCH_ADMIN = 'Branch Admin',_('Branch Admin')
+    POS_ADMIN = 'POS Admin',_('POS Admin')
+
+class AppAdminRoles(models.TextChoices):
+    APP_ADMIN = 'App Admin',_('App Admin')
+    APP_MANAGER = 'App Manager',_('App Manager')
+
+class CompanyAdminRoles(models.TextChoices):
+    ACCOUNT_HOLDER = 'App Admin',_('App Admin')
+    COMPANY_ADMIN = 'App Manager',_('App Manager')
+
+class BranchAdminRoles(models.TextChoices):
+    BRANCH_MANAGER = 'Branch Manager',_('Branch Manager')
+    INVENTORY_MANAGER = 'Inventory Manager',_('Inventory Manager')
+    PROCUREMENT_OFFICER = 'Procurement Officer',_('Procurement Officer')
+    SALES_MANAGER = 'Sales Manager',_('Sales Manager')
+    FINANCE_MANAGER = 'Finance Manager',_('Finance Manager')
+
+class POSAdminRoles(models.TextChoices):
+    POS_ATTENDANT = 'POS Attendant',_('POS Attendant')
+    CASHIER = 'Cashier',_('Cashier')
+
+
+# class Role(models.TextChoices):
+#     APP_MANAGER = 'App Manager', _('App Manager')
+#     COMPANY_ADMIN = 'Company Admin', _('Company Admin')
+#     BRANCH_MANAGER = 'Branch Manager', _('Branch Manager')
+#     STAFF_MEMBER = 'Staff Member', _('Staff Member')
+#     POS_ATTENDANT = 'Pos Attendant', _('Pos Attendant')
+
+class Company(CommonFieldsMixin):
     name = models.CharField(max_length=255, unique=True)
+    tin_no = models.CharField(max_length=225,null=True,blank=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="companies")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
+ 
+    class Meta:
+        ordering = ('-created_at',)
+        permissions = [
+            ("list_companies", "Can list companies"),
+        ]
+
+class CompanyBranch(CommonFieldsMixin):
+    BRANCH_TYPES = [('RETAIL', 'RETAIL'),('WHOLESALE', 'WHOLESALE'),]
+    REGION_CHOICES = [('CENTRAL', 'CENTRAL'),('EASTERN', 'EASTERN'),
+                      ('WESTERN', 'WESTERN'),('NORTHERN', 'NORTHERN'),
+                      ('SOUTHERN', 'SOUTHERN')]
+    
+    company = models.ForeignKey(Company, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+    district = models.CharField(max_length=255)
+    village = models.CharField(max_length=255)
+    region = models.CharField(max_length=255,choices=REGION_CHOICES)
+    branch_type = models.CharField(max_length=255,choices=BRANCH_TYPES)
+    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
+    # updated_at = models.DateTimeField(auto_now=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.name
+
+class CompanyPos(CommonFieldsMixin):
+    #Owner
+    company = models.ForeignKey(Company,on_delete=models.CASCADE)
+    branch = models.ForeignKey(CompanyBranch,on_delete=models.CASCADE)
+    # Data
+    unique_no = models.CharField(max_length=255,unique=True)
+    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
+
+
+    def __str__(self):
+        return self.unique_no
 
 class CompanyGroup(models.Model):
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -139,22 +227,22 @@ class UserManager(BaseUserManager):
     extra_fields.setdefault('is_active', True)  # Set is_active to False by default
     extra_fields.setdefault('is_staff', True)
     extra_fields.setdefault('is_superuser', True)
-    user=self._create_user(email,password,**extra_fields)
+    user = self._create_user(email, password, **extra_fields)
+    group, created = Group.objects.get_or_create(name = AppRoles.APP_ADMIN)
+    user.groups.add(group)
     return user
 
 
 class User(AbstractUser):
     GENDER_CHOICES = [("M", "Male"), ("F", "Female")]
 
-    email = models.EmailField(max_length=254, unique=True)
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
+    email = models.EmailField(max_length=225, unique=True)
     national_id = models.CharField(max_length=225,null=True,blank=True)
-    profile_pic = models.ImageField(upload_to="profile_pic",null=True)
-    two_factor_enabled = models.BooleanField(default=False)
     otp_code = models.CharField(max_length=100,null=True)
     phone_number = models.CharField(max_length=225,null=True,blank=True)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES,null=True)
-    bio = models.TextField(null = True, blank = True)
+    profile_pic = models.ImageField(upload_to="profile_pic",null=True)
     last_otp_verified = models.DateTimeField(null=True)
     is_otp_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
@@ -163,8 +251,16 @@ class User(AbstractUser):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
     created_at = models.DateTimeField(auto_now_add=True)
 
+    history = HistoricalRecords(inherit=True)
+
     class Meta:
         ordering = ('-created_at',)
+        permissions = [
+            ("list_users", "Can list users"),
+            ("add_super_user", "Can change super user"),
+            ("add_company_admin", "Can add company admin"),
+            ("add_company_manager", "Can add company manager"),
+        ]
     
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -177,105 +273,66 @@ class User(AbstractUser):
     @property
     def name(self):
         return self.get_full_name()
-
-    @property
-    def role(self):
-        if self.is_superuser:
-            return "Super User"
-        elif self.companyadmin: # True if is not empty
-            return Role.COMPANY_ADMIN
-        elif self.companymanager: # True if is not empty
-            return Role.BRANCH_MANAGER
-        else:
-            return Role.STAFF_MEMBER
-
-class CompanyAdmin(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="directors")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-class CompanyBranch(models.Model):
-    BRANCH_TYPES = (('RETAIL', 'RETAIL'),('WHOLESALE', 'WHOLESALE'),)
     
-    branch_type = models.CharField(max_length=10, choices=BRANCH_TYPES, default="WHOLESALE")
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
-    region = models.CharField(max_length=255)    
-    district = models.CharField(max_length=255)
-    village = models.CharField(max_length=255)
-    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
-    created_at = models.DateTimeField(auto_now_add=True)
+    def role(self):
+        return "Groups"
+    
+class CompanyRole(CommonFieldsMixin):   
+    group = models.ForeignKey(Group,on_delete=models.CASCADE) 
+    name = models.CharField(max_length=100, unique= True)
 
-    def __str__(self):
-        return self.name
+class BranchRole(CommonFieldsMixin):
+    name = models.CharField(max_length=100, unique= True)
+    group = models.ForeignKey(Group,on_delete=models.CASCADE)
 
-
-class CompanyManager(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    company_branch = models.ForeignKey(CompanyBranch, on_delete=models.CASCADE)
-    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="managers_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-
-class Pos(models.Model):
-    #Owner
+class UserRoleTrail(CommonFieldsMixin):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    group = models.ForeignKey(Group,on_delete=models.PROTECT)
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.CASCADE)
-    # Data
-    unique_no = models.CharField(max_length=255,unique=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="role_trails")
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return self.unique_no
-
-
-class CompanyStaff(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+class CompanyStaff(CommonFieldsMixin):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
-    company_branch = models.ForeignKey(CompanyBranch, on_delete=models.CASCADE)
+    branch = models.ForeignKey(CompanyBranch, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    is_head = models.BooleanField(default=False)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="staffs_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
-
-class PosUser(models.Model):
-    user = models.ForeignKey(CompanyStaff, on_delete=models.SET_NULL, null=True)
-    pos = models.ForeignKey(Pos, on_delete=models.SET_NULL, null=True)
-    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="posusers_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="users_createdby")
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.user.first_name
 
+class PosAttendant(CommonFieldsMixin):
+    company_staff = models.ForeignKey(CompanyStaff, on_delete=models.CASCADE)
+    company_pos = models.ForeignKey(CompanyPos, on_delete=models.CASCADE)
+    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="posusers_createdby")
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
-class SupplierEntity(models.Model):
+    def __str__(self):
+        return self.company_staff.user.first_name
+
+class SupplierEntity(CommonFieldsMixin):
     name = models.CharField(max_length=255)
     contact_person = models.CharField(max_length=255, blank=True, null=True)
     contact_number = models.CharField(max_length=15, blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="suppliers_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
     
-class Provider(models.Model):
+class Provider(CommonFieldsMixin):
     PROVIDER_TYPES = (('SUPPLIER', 'Supplier'),('BRANCH', 'Branch'),)
     
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
@@ -283,19 +340,19 @@ class Provider(models.Model):
     supplier_entity = models.ForeignKey(SupplierEntity,on_delete=models.SET_NULL,null=True)
     supplier_branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="providers_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
-class Customer(models.Model):
+class Customer(CommonFieldsMixin):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=255,blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="posusers")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name

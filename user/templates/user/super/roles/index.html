@@ -108,7 +108,7 @@
                 
                 $.ajax({
                     type: 'POST',
-                    url: '{% url "user:super-all-users" %}',
+                    url: '{% url "user:users-and-roles-list" %}',
                     data: data,
                     success: function (data) {
                         //console.log(data)
@@ -156,79 +156,6 @@
                             }else{
                                 $('#phone_number').removeClass('is-invalid');
                                 $('#phone_number').addClass('is-valid');
-                            }
-                            
-                        }
-                    }
-                })
-            })
-            
-            $("#adminUserForm").submit(function (e) {
-                e.preventDefault();
-                
-                const data = $('#adminUserForm').serialize() // Contains Form Data And CSRF Token As Well
-                // console.log(data)
-                
-                $.ajax({
-                    type: 'POST',
-                    url: '{% url "user:super-all-users" %}',
-                    data: data,
-                    success: function (data) {
-                        //console.log(data)
-                        if (data.success) {
-                            // Close the modal on success
-                            $('#id_name').removeClass('is-invalid');
-                            $('#id_name').addClass('is-valid');
-                            $('#createCompanyModal').modal('hide');
-                            window.location.reload()
-                            // Optionally, you can redirect or perform other actions after a successful submission
-                        } else {
-                            console.log(data.errors)
-                            
-                            if(data.errors.company){
-                                $('#admin_company').removeClass('is-valid');
-                                $('#admin_company').addClass('is-invalid');
-                                $('#adminCompanyError').text(data.errors.company[0])
-                            }else{
-                                $('#admin_company').removeClass('is-invalid');
-                                $('#admin_company').addClass('is-valid');
-                            }
-                            
-                            if(data.errors.first_name){
-                                $('#admin_first_name').removeClass('is-valid');
-                                $('#admin_first_name').addClass('is-invalid');
-                                $('#adminFirstNameError').text(data.errors.first_name[0])
-                            }else{
-                                $('#admin_first_name').removeClass('is-invalid');
-                                $('#admin_first_name').addClass('is-valid');
-                            }
-                            
-                            if(data.errors.last_name){
-                                $('#admin_last_name').removeClass('is-valid');
-                                $('#admin_last_name').addClass('is-invalid');
-                                $('#adminLastNameError').text(data.errors.last_name[0])
-                            }else{
-                                $('#admin_last_name').removeClass('is-invalid');
-                                $('#admin_last_name').addClass('is-valid');
-                            }
-                            
-                            if(data.errors.email){
-                                $('#admin_email').removeClass('is-valid');
-                                $('#admin_email').addClass('is-invalid');
-                                console.log(data.errors.email[0])
-                                $('#adminEmailError').text(data.errors.email[0])
-                            }else{
-                                $('#admin_email').removeClass('is-invalid');
-                                $('#admin_email').addClass('is-valid');
-                            }
-                            
-                            if(data.errors.phone_number){
-                                $('#admin_phone_number').removeClass('is-valid');
-                                $('#admin_phone_number').addClass('is-invalid');
-                                $('#adminPhoneNumberError').text(data.errors.email[0])
-                            }else{
-                                $('#admin_phone_number').removeClass('is-invalid');
-                                $('#admin_phone_number').addClass('is-valid');
                             }
                             
                         }

@@ -28,6 +28,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'simple_history',
+    'django_celery_results',
     'widget_tweaks',
     
     'inventory',
@@ -139,3 +141,14 @@ AUTH_USER_MODEL = "user.User"
 
 AUTHENTICATION_BACKENDS = ['middlewares.auth.AuthenticationBackend']
 
+
+# CELERY SETTINGS
+# Celery configuration
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Africa/Nairobi'
+
+# CELERY_RESULT_BACKEND = 'django-db'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'

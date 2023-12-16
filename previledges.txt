@@ -1,0 +1,93 @@
+Company Previleges
+    Manange Company Users & Access
+    Mannage Comapny branches
+    Company Reports
+
+Branch Previleges
+    Manage Branch POS
+    Mannage Branch Users & Access
+    Manage inventory
+    Manage Purchase Orders
+    Manage Finance Orders
+    Branch Reports
+
+POS Previleges
+    Manage Sales
+    POS Sales Reports
+
+
+General Previleges
+    Manage users and roles
+    Manage Company access
+    Manage agreements, tax, and banking
+    View payments and financial reports
+    Reports
+
+
+Restrict Accees to Pages
+    Restricted Pages
+        - SuperUser Dashboard (is_superuser, is_staff)
+        - Company Dashoard 
+            - (company_superuser, company_admin)
+        - Branch Dashboard 
+            - (branch_manager, inventory_officer, procurement_officer)
+        - Pos Dashboard 
+            - (pos_attendant)
+        - User Profile Dashboard
+            - (login_user)
+
+permissions = [
+    ("can_access_superuser_dashboard", "Can access superuser dashboard"),
+    ("can_access_company_dashboard", "Can access company dashboard"),
+    ("can_access_branch_dashboard", "Can access branch dashboard"),
+    ("can_access_pos_dashboard", "Can access pos dashboard"),
+    ("can_access_user_profile_dashboard", "Can access user profile dashboard"),
+
+    ("can_access_app_reports_page", "Can access app reports page"),
+    ("can_access_company_reports_page", "can access company reports page"),
+    ("can_access_branch_reports_page", "can access branch reports page"),
+    ("can_access_pos_reports_page", "can access pos reports page"),
+]
+
+Default Roles
+    - Super User - A
+    - App Admin - A
+    - Company Owner - C
+    - Company Admin - C
+    - Finance Manager - C
+    - Inventory Manager - C
+    - Branch Manager -B
+    - Store Keeper -B
+    - Accountant - B
+    - Procurement -B
+    - Pos Attendant -B 
+
+
+
+User Module, Role And Permissions
+    - Super User - is_superuser = True - is_staff = True
+        - ("can_add_app_superuser", "Can add app superuser"),
+        - ("can_add_app_staff", "Can add app staff),
+    
+    - App Admin  - is_superuser = False - is_staff = True
+        - ("can_add_app_staff", "Can add app staff),
+        - ("can_add_company_owner", "Can add company owner),
+
+    - Company Owner
+        - ("can_add_company_owner", "Can add company owner),
+        - ("can_add_company_admin", "Can add company admin),
+
+    - Company Admin
+        - ("can_add_company_admin", "Can add company admin),
+        - ("can_add_branch_staff", "Can add branch staff),
+        - ("can_assign_default_roles_to_branch_staff", "Can assign default roles to branch staff),
+
+#        - ("can_add_branch_manager", "Can add branch manager),
+#        - ("can_delete_branch_manager", "Can delete branch manager),
+
+NB: When a Super user is created, he is assigned to Super User & App Admin roles
+
+NB: When registering a company, also regusetr the initail company owner information
+NB: When a company owner is created, he is assigned to Company Owner & Company Admin roles
+
+NB: When creating Branch Users, They must be attached to a branch

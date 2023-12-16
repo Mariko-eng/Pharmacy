@@ -105,12 +105,13 @@ def settings_index(request):
     if request.method == "POST":
         form_prefix = request.POST.get('form_prefix')
         # print(form_prefix)
-
+ 
         if form_prefix == 'productTypeForm':
             productTypeForm_data = ProductTypeForm(request.POST or None,prefix="productTypeForm")
             if productTypeForm_data.is_valid():
                 product_type = productTypeForm_data.save(commit=False)
                 product_type.name = product_type.name.capitalize()
+                product_type.company = company
                 product_type.save()
                 return JsonResponse({'success': True, 'name': product_type.name})
             else:
@@ -121,6 +122,7 @@ def settings_index(request):
             if productCategoryForm_data.is_valid():
                 product_category = productCategoryForm_data.save(commit=False)
                 product_category.name = product_category.name.capitalize()
+                product_category.company = company
                 product_category.save()
                 return JsonResponse({'success': True, 'name': product_category.name})
             else:
@@ -131,6 +133,7 @@ def settings_index(request):
             if productUnitsForm_data.is_valid():
                 product_unit = productUnitsForm_data.save(commit=False)
                 product_unit.name = product_unit.name.lower()
+                product_unit.company = company
                 product_unit.save()
                 return JsonResponse({'success': True, 'name': product_unit.name})
             else:

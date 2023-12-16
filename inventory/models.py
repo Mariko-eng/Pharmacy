@@ -1,7 +1,10 @@
 from django.db import models
-from user.models import Company,CompanyBranch, Provider
+from user.models import Company
+from user.models import CompanyBranch
+from user.models import Provider
+from user.mixins import CommonFieldsMixin
 
-class ProductType(models.Model): # Drug, Medical Equipment
+class ProductType(CommonFieldsMixin): # Drug, Medical Equipment
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
@@ -10,7 +13,7 @@ class ProductType(models.Model): # Drug, Medical Equipment
     def __str__(self):
         return self.name
 
-class ProductCategory(models.Model):
+class ProductCategory(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
@@ -19,7 +22,7 @@ class ProductCategory(models.Model):
     def __str__(self):
         return self.name
 
-class ProductUnits(models.Model): # Units Of Measure
+class ProductUnits(CommonFieldsMixin): # Units Of Measure
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
@@ -28,7 +31,7 @@ class ProductUnits(models.Model): # Units Of Measure
     def __str__(self):
         return self.name
 
-class Product(models.Model):
+class Product(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
@@ -45,14 +48,14 @@ class Product(models.Model):
     is_consummable = models.BooleanField(default=False)
     is_for_sale = models.BooleanField(default=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="products_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
 
-class ReceivedStock(models.Model):
+class ReceivedStock(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
@@ -63,12 +66,11 @@ class ReceivedStock(models.Model):
     received_date = models.DateField(null=True)
     delivery_notes = models.TextField(null=True,blank=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="received_stocks_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
-
-class ReceivedStockItem(models.Model):
+class ReceivedStockItem(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
@@ -81,12 +83,11 @@ class ReceivedStockItem(models.Model):
     manufactured_date = models.DateField(null=True)
     expiry_date = models.DateField(null=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="received_stock_items_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
-
-class StockRequest(models.Model):
+class StockRequest(CommonFieldsMixin):
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),
         ('APPROVED', 'Approved'),
@@ -101,15 +102,14 @@ class StockRequest(models.Model):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     request_notes = models.TextField(null=True,blank=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="stock_requests_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
-
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.request_date} - {self.status}"
 
-class StockRequestItem(models.Model):
+class StockRequestItem(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
@@ -118,15 +118,14 @@ class StockRequestItem(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="stock_request_items_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.product.name} - {self.quantity}"
 
-
-class OutgoingConsumable(models.Model):
+class OutgoingConsumable(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
@@ -135,9 +134,12 @@ class OutgoingConsumable(models.Model):
     quantity = models.DecimalField(max_digits=12,decimal_places=3)
     remarks = models.TextField(null=True,blank=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
-    updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="outgoing_consumables_createdby")
-    created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)
+    # updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.product.name} - {self.quantity}"
 
 
 

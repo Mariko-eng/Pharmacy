@@ -1,0 +1,210 @@
+{% extends 'base/company/index.html' %}
+{% load widget_tweaks %}
+
+
+{% block pagetitle%}
+<div class="pagetitle">
+  <h1>Hello, {{ request.session.company_name|default:"Guest" }}!</h1>
+  
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">
+        Company Branches
+      </a></li>
+    </ol>
+  </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Manage Branches</h5>
+    
+    <!-- Default Tabs -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">List Branches</button>
+      </li>
+    </ul>
+    <div class="tab-content pt-2" id="myTabContent">
+      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <div class="d-flex flex-column">
+          <div class="d-flex flex-row justify-content-end">
+            <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createBranchModal"><i class="bi bi-plus"></i><span>Add</span></button>
+          </div>
+          <div>
+            <div class="row">
+              {% if branches %}
+              {% for branch in branches %}
+              <div class="col-xs-12 col-sm-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
+                <a href="{% url 'user:company-branch-detail' company_id=company.id branch_id=branch.id %}">
+                  <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
+                    <i class="bi bi-house text-white" style="font-size: 2em;"></i>
+                  </div>
+                  <p>{{branch.name}}</p>
+                </a>
+              </div>
+              {% endfor %}
+              {%  endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- End Default Tabs -->
+  </div>
+</div>
+
+<div class="modal fade" id="createBranchModal" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title text-center">Add Company Branch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body row g-3 needs-validation">
+        <form id = "branchForm" method="post" novalidate >
+          <input type="hidden" id="companyId" name="companyId" value="{{company.id}}">
+          {% csrf_token %}
+          <div class="row mt-1 mb-3">
+            <label for="branch_type" class="col-sm-3 col-form-label">Branch Type</label>
+            <div class="col-sm-9">
+              {% render_field form.branch_type|add_class:"form-select"|attr:"id:branch_type" %}
+              <div id = "branchTypeError" class="invalid-feedback">
+                Provide Select Branch Type
+              </div>
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="name" class="col-sm-3 col-form-label">Name</label>
+            <div class="col-sm-9">
+              {% render_field form.name|add_class:"form-control"|attr:"id:name" %}
+              <div id = "nameError" class="invalid-feedback">
+                Provide a valid name
+              </div>
+            </div>
+          </div>
+          <div>
+            <h5>Branch Location Details</b>
+            </div>
+            <div class="row mb-3">
+              <label for="region" class="col-sm-3 col-form-label">Region</label>
+              <div class="col-sm-9">
+                {% render_field form.region|add_class:"form-select"|attr:"id:region" %}
+                <div id = "regionError" class="invalid-feedback">
+                  Select Region
+                </div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="district" class="col-sm-3 col-form-label">District</label>
+              <div class="col-sm-9">
+                {% render_field form.district|add_class:"form-control"|attr:"id:district" %}
+                <div id = "districtError" class="invalid-feedback">
+                  Provide a valid district
+                </div>
+              </div>
+            </div>
+            <div class="row mb-3">
+              <label for="village" class="col-sm-3 col-form-label">Village</label>
+              <div class="col-sm-9">
+                {% render_field form.village|add_class:"form-control"|attr:"id:village" %}
+                <div id = "villageError" class="invalid-feedback">
+                  Provide a valid village
+                </div>
+              </div>
+            </div>
+            
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="button" id ="formSubmitButton" class="btn btn-primary">Save</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- End Modal Dialog Scrollable-->
+  
+  <script type='text/javascript'>
+    
+    $(document).ready(function() {  
+      $("#formSubmitButton").click(function () {
+        
+        const data = $('#branchForm').serialize() // Contains Form Data And CSRF Token As Well
+        // console.log(data)
+        
+        const id = $('#companyId').val();
+        
+        $.ajax({
+          type: 'POST',
+          url: '{% url "user:company-branch-list" 0 %}'.replace('0', id), 
+          data: data,
+          success: function (data) {
+            // console.log(data)
+            if (data.success) {
+              // Close the modal on success
+              $('#branch_type').removeClass('is-invalid');
+              $('#branch_type').addClass('is-valid');
+              $('#name').removeClass('is-invalid');
+              $('#name').addClass('is-valid');
+              $('#region').removeClass('is-invalid');
+              $('#region').addClass('is-valid');
+              $('#district').removeClass('is-invalid');
+              $('#district').addClass('is-valid');
+              $('#village').removeClass('is-invalid');
+              $('#village').addClass('is-valid');
+              
+              $('#createBranchModal').modal('hide');
+              window.location.reload()            
+              // Optionally, you can redirect or perform other actions after a successful submission
+            } else {
+              if(data.errors.branch_type){
+                $('#branch_type').removeClass('is-valid');
+                $('#branch_type').addClass('is-invalid');
+                $('#branchTypeError').text(data.errors.branch_type[0])
+              }else{
+                $('#branch_type').removeClass('is-invalid');
+                $('#branch_type').addClass('is-valid');
+              }
+              if(data.errors.name){
+                $('#name').removeClass('is-valid');
+                $('#name').addClass('is-invalid');
+                $('#nameError').text(data.errors.name[0])
+              }else{
+                $('#name').removeClass('is-invalid');
+                $('#name').addClass('is-valid');
+              }
+              if(data.errors.region){
+                $('#region').removeClass('is-valid');
+                $('#region').addClass('is-invalid');
+                $('#regionError').text(data.errors.region[0])
+              }else{
+                $('#region').removeClass('is-invalid');
+                $('#region').addClass('is-valid');
+              }
+              if(data.errors.district){
+                $('#district').removeClass('is-valid');
+                $('#district').addClass('is-invalid');
+                $('#districtError').text(data.errors.district[0])
+              }else{
+                $('#district').removeClass('is-invalid');
+                $('#district').addClass('is-valid');
+              }
+              if(data.errors.village){
+                $('#village').removeClass('is-valid');
+                $('#village').addClass('is-invalid');
+                $('#villageError').text(data.errors.village[0])
+              }else{
+                $('#village').removeClass('is-invalid');
+                $('#village').addClass('is-valid');
+              }
+            }
+          }
+        })
+      })
+    })
+  </script>
+  {% endblock %}
