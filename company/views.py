@@ -50,22 +50,14 @@ def company_account_activate_view(request):
 
             if CompanyApplication.objects.filter(email = email, activation_code = activation_code).exists():
                 companyApplication = CompanyApplication.objects.filter(email = email, activation_code = activation_code).first()
-                
-                name = companyApplication.name
-                phone = companyApplication.phone
-                email = companyApplication.email
-                location = companyApplication.location
-                logo = companyApplication.location
-                activation_code = companyApplication.activation_code
 
-                company = Company.objects.get_or_create(
-                    name = name,
-                    phone = phone,
+                company, created = Company.objects.get_or_create(
+                    name = companyApplication.name,
+                    phone = companyApplication.phone,
                     email = email,
-                    location = location,
-                    logo = logo,
-                    activation_code = activation_code
-                )
+                    location = companyApplication.location,
+                    logo = companyApplication.logo,
+                    activation_code = activation_code)
 
                 if companyApplication.status != "APPROVED":
                     companyApplication.status = "APPROVED"
@@ -87,7 +79,10 @@ def company_admin_user_register_view(request, company_id):
     company = Company.objects.get(pk = company_id)
 
     form = CompanyAdminRegisterForm()
-    context = { "form": form }
+    context = { 
+        "company": company,
+        "form": form 
+        }
 
     if request.method == "POST":
         form = CompanyAdminRegisterForm(request.POST)
@@ -120,7 +115,7 @@ def company_admin_user_register_view(request, company_id):
         else:
             messages.error(request,"Failed to create company admin account!")
             
-    return render(request, 'company/application/new/index.html', context=context)
+    return render(request, 'company/admin_account/new.html', context=context)
     
 
 def company_application_list_view(request):

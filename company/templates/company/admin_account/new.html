@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+    <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-2">
         <div class="container">
             <div class="row justify-content-end">
                 <div class="col-lg-6 col-md-8 d-flex flex-column align-items-center justify-content-center"> 
@@ -16,12 +16,13 @@
                     </div>
                     <!-- End Logo -->
                     
-                    <div class="card mb-3">
+                    <div class="card mb-2">
                         
                         <div class="card-body">
                             
-                            <div class="pt-4 pb-2">
-                                <h5 class="card-title text-center pb-0 fs-4">Company Account Verification & Activation</h5>
+                            <div class="py-1">
+                                <h4 class="card-title text-center pt-2 fs-4 text-primary">{{ company.name }}</h4>
+                                <p class="card-title text-center p-0 fs-6">Admin Account Form</p>
                             </div>
                             
                             {% if messages %}
@@ -41,9 +42,33 @@
                             
                             <form id="userForm" class="row g-3" method="post" novalidate>
                                 {% csrf_token %}
+
+                                <div class="col-6">
+                                    <label for="first_name" class="form-label">First Name</label>
+                                    {% if form.errors.first_name %}
+                                    {% render_field form.first_name|add_class:"form-control is-invalid"|attr:"id:first_name" %}
+                                    {% else %}
+                                    {% render_field form.first_name|add_class:"form-control is-valid"|attr:"id:first_name" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.first_name.0  }}
+                                    </div>
+                                </div>
+
+                                <div class="col-6">
+                                    <label for="last_name" class="form-label">Last Name</label>
+                                    {% if form.errors.last_name %}
+                                    {% render_field form.last_name|add_class:"form-control is-invalid"|attr:"id:last_name" %}
+                                    {% else %}
+                                    {% render_field form.last_name|add_class:"form-control is-valid"|attr:"id:last_name" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.last_name.0  }}
+                                    </div>
+                                </div>
                                 
                                 <div class="col-12">
-                                    <label for="email" class="form-label">Company Email address</label>
+                                    <label for="email" class="form-label">Email address</label>
                                     {% if form.errors.email %}
                                     {% render_field form.email|add_class:"form-control is-invalid"|attr:"id:email" %}
                                     {% else %}
@@ -55,23 +80,35 @@
                                 </div>
                                 
                                 <div class="col-12">
-                                    <label for="activation_code" class="form-label">Activation & Verification Code</label>
-                                    {% if form.errors.activation_code %}
-                                    {% render_field form.activation_code|add_class:"form-control is-invalid"|attr:"id:activation_code" %}
+                                    <label for="password1" class="form-label">Enter Password</label>
+                                    {% if form.errors.password1 %}
+                                    {% render_field form.password1|add_class:"form-control is-invalid"|attr:"id:password1" type="password" %}
                                     {% else %}
-                                    {% render_field form.activation_code|add_class:"form-control is-valid"|attr:"id:activation_code" %}
+                                    {% render_field form.password1|add_class:"form-control is-valid"|attr:"id:password1" type="password"%}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
-                                        {{  form.errors.activation_code.0  }}
+                                        {{  form.errors.password1.0  }}
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="password2" class="form-label">Confirm Password</label>
+                                    {% if form.errors.password2 %}
+                                    {% render_field form.password2|add_class:"form-control is-invalid"|attr:"id:password2" type="password" %}
+                                    {% else %}
+                                    {% render_field form.password2|add_class:"form-control is-valid"|attr:"id:password2" type="password"%}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.password2.0  }}
                                     </div>
                                 </div>
                                 
                                 <div class="col-12">
                                     <button class="btn btn-primary w-100" type="submit">Submit</button>
                                 </div>
-                                
+
                                 <div class="col-12">
-                                    <p class="small mb-0">{{" < "}}<a href="{% url 'company:company-application-add' %}">Go Back</a></p>
+                                    <p class="small mb-0">{{" < "}}<a href="{% url 'user:index' %}">Go Home</a></p>
                                 </div>
                             </form>
                             
