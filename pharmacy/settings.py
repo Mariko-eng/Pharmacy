@@ -1,6 +1,8 @@
-
 import os
 from pathlib import Path
+
+# Set PYTHONDONTWRITEBYTECODE to prevent .pyc file generation
+os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -35,6 +37,7 @@ INSTALLED_APPS = [
     'inventory',
     'purchases',
     'sales',
+    'company',
     'user',
 ]
 

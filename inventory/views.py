@@ -7,7 +7,7 @@ from .forms import ProductForm, ReceivedStockForm,ReceivedStockItemForm
 from .models import ProductType, ProductCategory, ProductUnits, Product
 from .models import ReceivedStock, ReceivedStockItem
 from .mixins import CompanyMixin, CompanyFormMixin
-from user.models import Company
+from company.models import Company
 from django.forms import formset_factory
 
 

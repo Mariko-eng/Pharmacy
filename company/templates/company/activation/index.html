@@ -1,0 +1,105 @@
+{% extends 'base/auth/index.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+        <div class="container">
+            <div class="row justify-content-end">
+                <div class="col-lg-6 col-md-8 d-flex flex-column align-items-center justify-content-center"> 
+                    <div class="d-flex justify-content-center py-4">
+                        <a href="index.html" class="logo d-flex align-items-center w-auto">
+                            <img src="{% static 'img/logo.png'%}" alt="">
+                            <span class="d-none d-lg-block">MyPharmacy</span>
+                        </a>
+                    </div>
+                    <!-- End Logo -->
+                    
+                    <div class="card mb-3">
+                        
+                        <div class="card-body">
+                            
+                            <div class="pt-4 pb-2">
+                                <h5 class="card-title text-center pb-0 fs-4">Company Account Verification & Activation</h5>
+                            </div>
+                            
+                            {% if messages %}
+                            {% for message in messages %}
+                            
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            
+                            {% endfor %}
+                            {% endif %}
+                            
+                            {% comment %} <div class="alert alert-success" role="alert">
+                                {{ message }}
+                            </div> {% endcomment %}
+                            
+                            <form id="userForm" class="row g-3" method="post" novalidate>
+                                {% csrf_token %}
+                                
+                                <div class="col-12">
+                                    <label for="email" class="form-label">Company Email address</label>
+                                    {% if form.errors.email %}
+                                    {% render_field form.email|add_class:"form-control is-invalid"|attr:"id:email" %}
+                                    {% else %}
+                                    {% render_field form.email|add_class:"form-control is-valid"|attr:"id:email" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.email.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label for="activation_code" class="form-label">Activation & Verification Code</label>
+                                    {% if form.errors.activation_code %}
+                                    {% render_field form.activation_code|add_class:"form-control is-invalid"|attr:"id:activation_code" %}
+                                    {% else %}
+                                    {% render_field form.activation_code|add_class:"form-control is-valid"|attr:"id:activation_code" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.activation_code.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <button class="btn btn-primary w-100" type="submit">Submit Application</button>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <p class="small mb-0">Want to be a member? <a href="{% url 'user:index' %}">Apply Here</a></p>
+                                </div>
+                            </form>
+                            
+                        </div>
+                    </div>
+                    
+                    <div class="credits">
+                        <!-- All the links in the footer should remain intact. -->
+                        <!-- You can delete the links only if you purchased the pro version. -->
+                        <!-- Licensing information: https://bootstrapmade.com/license/ -->
+                        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
+                        {% comment %} Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> {% endcomment %}
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </section>
+    
+</div>
+
+<script>    
+    
+    $(document).ready(function(){
+        $("#userForm").submit(function(e){
+
+        })
+    })
+</script>
+{% endblock %}

@@ -1,8 +1,9 @@
 from django.db import models
-from user.models import Company
-from user.models import CompanyBranch
-from user.models import Provider
-from user.mixins import CommonFieldsMixin
+from company.models import Company
+from company.models import Store
+from company.models import PosCenter
+from company.models import Provider
+from company.mixins import CommonFieldsMixin
 
 class ProductType(CommonFieldsMixin): # Drug, Medical Equipment
     #Owner
@@ -34,6 +35,7 @@ class ProductUnits(CommonFieldsMixin): # Units Of Measure
 class Product(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data    
     unique_no = models.CharField(max_length=255,unique=True)
     name = models.CharField(max_length=255,unique=True)
@@ -58,7 +60,7 @@ class Product(CommonFieldsMixin):
 class ReceivedStock(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     provider = models.ForeignKey(Provider,on_delete=models.SET_NULL,null=True)
     delivered_by_name = models.CharField(max_length=255,unique=True)
@@ -73,7 +75,7 @@ class ReceivedStock(CommonFieldsMixin):
 class ReceivedStockItem(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     received_stock = models.ForeignKey(ReceivedStock,on_delete=models.SET_NULL,null=True)
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
@@ -96,7 +98,7 @@ class StockRequest(CommonFieldsMixin):
 
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     request_date = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
@@ -112,7 +114,7 @@ class StockRequest(CommonFieldsMixin):
 class StockRequestItem(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     stock_request = models.ForeignKey(StockRequest, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
@@ -128,7 +130,7 @@ class StockRequestItem(CommonFieldsMixin):
 class OutgoingConsumable(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     product = models.ForeignKey(Product,on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=12,decimal_places=3)

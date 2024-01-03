@@ -1,0 +1,67 @@
+{% extends 'base/main/index.html' %}
+
+{% block content %}
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">General Form Elements</h5>
+        <form class="row g-3 needs-validation" method="post" novalidate >
+            {% csrf_token %}
+            
+            {{ form.errors }}
+            
+            <div class="row mb-3">
+                <label for="name" class="col-sm-2 col-form-label">Name</label>
+                <div class="col-sm-10">
+                    <input type="text" id="name" name="{{ form.name.name }}" value="{% if form.data.name %}{{ form.data.name }}{% endif %}" class="form-control{% if form.name.errors %} is-invalid {% endif %}">
+                    {% if form.errors.name %}
+                    <div class="invalid-feedback">
+                        Please choose a name.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label for="name" class="col-sm-2 col-form-label">State</label>
+                <div class="col-sm-10">
+                    <select id="state" name="state" class="form-select{% if form.state.errors %} is-invalid {% endif %}">
+                        <option selected disabled value="">Choose...</option>
+                        <option value="One">One</option>
+                        <option value="Two">Two</option>
+                        <option value="Three">Three</option>
+                    </select>
+                  {% if form.errors.state %}
+                    <div class="invalid-feedback">
+                        Please choose a state.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-sm-2"></div>
+                <div class="col-sm-10">
+                    <div class="form-check">
+                        <input type="checkbox" value="yes" id="terms" name="terms" class="form-check-input{% if form.terms.errors %} is-invalid {% endif %}">
+                        <label class="form-check-label" for="invalidCheck2">
+                            Agree to terms and conditions
+                        </label>
+                  {% if form.errors.terms %}
+                    <div class="invalid-feedback">
+                        Please agree to terms.
+                    </div>
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="row mb-3">
+            </div>
+            <div class="col-12">
+                <button class="btn btn-primary" type="submit">Submit form</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+
+{% endblock %}

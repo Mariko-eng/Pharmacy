@@ -1,6 +1,5 @@
 from django.shortcuts import get_object_or_404
-from user.models import Company
-
+from company.models import Company
 class CompanyMixin:
     
     def get_user(self):

@@ -1,9 +1,9 @@
 from django.db import models
-from user.models import Company
-from user.models import CompanyBranch
-from user.models import Provider
+from company.models import Company
+from company.models import Store
+from company.models import Provider
+from company.mixins import CommonFieldsMixin
 from inventory.models import Product
-from user.mixins import CommonFieldsMixin
 
 class PurchaseOrderRequest(CommonFieldsMixin):
     STATUS_CHOICES = (
@@ -14,7 +14,7 @@ class PurchaseOrderRequest(CommonFieldsMixin):
 
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     provider = models.ForeignKey(Provider,on_delete=models.SET_NULL,null=True)
     order_date = models.DateField(null=True)
@@ -31,7 +31,7 @@ class PurchaseOrderRequest(CommonFieldsMixin):
 class PurchaseOrderRequestItem(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     stock_request = models.ForeignKey(PurchaseOrderRequest, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

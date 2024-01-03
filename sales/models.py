@@ -1,7 +1,7 @@
 from django.db import models
 from inventory.models import Product
-from user.models import Company,CompanyBranch,CompanyPos,Customer
-from user.mixins import CommonFieldsMixin
+from company.models import Company,Store,PosCenter,Customer
+from company.mixins import CommonFieldsMixin
 
 class PaymentMethod(CommonFieldsMixin):
     #Owner
@@ -19,7 +19,7 @@ class Sale(CommonFieldsMixin):
 
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     customer = models.ForeignKey(Customer,on_delete=models.SET_NULL,null=True)
     payment_method = models.ForeignKey(PaymentMethod,on_delete=models.SET_NULL,null=True)
@@ -36,9 +36,9 @@ class Sale(CommonFieldsMixin):
 class SaleItem(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    branch = models.ForeignKey(CompanyBranch,on_delete=models.SET_NULL,null=True)
+    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
-    pos = models.ForeignKey(CompanyPos, on_delete=models.CASCADE)
+    pos_center = models.ForeignKey(PosCenter, on_delete=models.CASCADE)
     product = models.ForeignKey(Product, on_delete=models.CASCADE)
     quantity_sold = models.PositiveIntegerField()
     price_sold = models.DecimalField(max_digits=10, decimal_places=2)

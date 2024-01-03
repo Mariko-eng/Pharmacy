@@ -5,10 +5,12 @@ from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('user.urls')),
     path('', include('inventory.urls')),
+    path('', include('company.urls')),
 
     path('reset_password/', 
           auth_views.PasswordResetView.as_view(template_name="accounts/password_reset.html"), name="reset_password"),
@@ -26,6 +28,7 @@ urlpatterns = [
              template_name ="accounts/password_reset_done.html"),name="password_reset_complete"),
              
     path('404/', TemplateView.as_view(template_name='404.html'), name='404'),
+
 ]
 
 if settings.DEBUG:

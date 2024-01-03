@@ -1,0 +1,215 @@
+{% extends 'base/auth/index.html' %}
+{% load widget_tweaks %}
+{% load static %}
+
+{% block content %}
+<div class="container">
+    <section class="section register min-vh-100 d-flex flex-column align-items-center justify-content-center py-4">
+        <div class="container">
+            <div class="row justify-content-end">
+                <div class="col-lg-6 col-md-8 d-flex flex-column align-items-center justify-content-center"> 
+                    <div class="d-flex justify-content-center py-4">
+                        <a href="index.html" class="logo d-flex align-items-center w-auto">
+                            <img src="{% static 'img/logo.png'%}" alt="">
+                            <span class="d-none d-lg-block">MyPharmacy</span>
+                        </a>
+                    </div>
+                    <!-- End Logo -->
+                    
+                    <div class="card mb-3">
+                        
+                        <div class="card-body">
+                            
+                            <div class="pt-4 pb-2">
+                                <h5 class="card-title text-center pb-0 fs-4">Company Setup</h5>
+                                <p class="small text-center my-2">Already Applied? <a href="{% url 'company:company-account-activate' %}">Verify & Activate Company Account</a></p>
+                            </div>
+                            
+                            {% if messages %}
+                            {% for message in messages %}
+                            
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                            
+                            {% endfor %}
+                            {% endif %}
+                            
+                            {% comment %} <div class="alert alert-success" role="alert">
+                                {{ message }}
+                            </div> {% endcomment %}
+                            
+                            <form id="userForm" class="row g-3" method="post" enctype="multipart/form-data" novalidate>
+                                {% csrf_token %}
+                                <div class="col-12">
+                                    <label for="name" class="form-label">Company Name</label>
+                                    {% if form.errors.name %}
+                                    {% render_field form.name|add_class:"form-control is-invalid"|attr:"id:name" %}
+                                    {% else %}
+                                    {% render_field form.name|add_class:"form-control is-valid"|attr:"id:name" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.name.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label for="phone" class="form-label">Phone</label>
+                                    {% if form.errors.phone %}
+                                    {% render_field form.phone|add_class:"form-control is-invalid"|attr:"id:phone" %}
+                                    {% else %}
+                                    {% render_field form.phone|add_class:"form-control is-valid"|attr:"id:phone" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.phone.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label for="email" class="form-label">Email address</label>
+                                    {% if form.errors.email %}
+                                    {% render_field form.email|add_class:"form-control is-invalid"|attr:"id:email" %}
+                                    {% else %}
+                                    {% render_field form.email|add_class:"form-control is-valid"|attr:"id:email" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.email.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label for="logo" class="form-label">Company Logo</label>
+                                    {% if form.errors.logo %}
+                                    {% render_field form.logo|add_class:"form-control is-invalid"|attr:"id:logo" %}
+                                    {% else %}
+                                    {% render_field form.logo|add_class:"form-control is-valid"|attr:"id:logo" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.logo.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <button class="btn btn-primary w-100" type="submit">Submit Application</button>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <p class="small mb-0">Want to be a member? <a href="{% url 'user:index' %}">Apply Here</a></p>
+                                </div>
+                            </form>
+                            
+                        </div>
+                    </div>
+                    
+                    <div class="credits">
+                        <!-- All the links in the footer should remain intact. -->
+                        <!-- You can delete the links only if you purchased the pro version. -->
+                        <!-- Licensing information: https://bootstrapmade.com/license/ -->
+                        <!-- Purchase the pro version with working PHP/AJAX contact form: https://bootstrapmade.com/nice-admin-bootstrap-admin-html-template/ -->
+                        {% comment %} Designed by <a href="https://bootstrapmade.com/">BootstrapMade</a> {% endcomment %}
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+        
+    </section>
+    
+</div>
+
+<script>
+    function validateName() {
+        var nameValue = $('#name').val();
+        
+        if (nameValue.trim().length < 5) {
+            $('#name').removeClass('is-valid').addClass('is-invalid');
+            $('#nameError').text("Please provide a valid name, at-least 5 letters!");
+            return false;
+        } else {
+            $('#name').removeClass('is-invalid').addClass('is-valid');
+            return true;
+        }
+    }
+    
+    function validatePhone() {
+        var phoneValue = $('#phone').val();
+        
+        if (phoneValue.trim().length < 10) {
+            $('#phone').removeClass('is-valid').addClass('is-invalid');
+            $('#phoneError').text("Please provide a valid phone number!");
+            return false;
+        } else {
+            $('#phone').removeClass('is-invalid').addClass('is-valid');
+            return true;
+        }
+    }
+    
+    
+    // Your custom email validation function
+    function isValidEmail(email) {
+        // Use a regular expression to check if the email is valid
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const isValid = emailRegex.test(email);
+        return isValid;
+    }
+    
+    function validateEmail() {
+        var emailValue = $('#email').val();
+        
+        if (!isValidEmail(emailValue)) {
+            $('#email').removeClass('is-valid').addClass('is-invalid');
+            $('#emailError').text("Please provide a valid email address");
+            return false;
+        } else {
+            $('#email').removeClass('is-invalid').addClass('is-valid');
+            return true;
+        }
+    }
+    
+    function validateLogo() {
+        var logoValue = document.getElementById('logo');        
+        // Get the selected file
+        
+        var file = logoValue.files[0];
+
+        if (file) {
+
+            // Check if the file type is an image (either PNG or JPEG)
+            if (file.type === 'image/png' || file.type === 'image/jpeg' || file.type === 'image/jpg') {
+                $('#logo').removeClass('is-invalid').addClass('is-valid');
+                return true;
+            } else {
+                $('#logo').removeClass('is-valid').addClass('is-invalid');
+                $('#logoError').text("Please provide a valid logo!");
+                return false;
+            }
+        } else {
+            // Display an error message for no file selected
+            $('#logo').removeClass('is-valid').addClass('is-invalid');
+            $('#logoError').text("Please provide a valid company logo!");
+            return false;
+        }
+        
+    }
+    
+    $(document).ready(function(){
+        $('.toast').toast('show');
+        
+        $("#userForm").submit(function(e){
+            e.preventDefault()
+            $('#userForm').removeClass('was-validated');
+            
+            // Run the validation functions before submission
+            const nameValid =  validateName();
+            const phoneValid =  validatePhone();
+            const emailValid =  validateEmail();
+            const logoValid = validateLogo(); 
+            
+            if(nameValid && phoneValid && emailValid && logoValid){
+                this.submit()
+            }
+        })
+    })
+</script>
+{% endblock %}
