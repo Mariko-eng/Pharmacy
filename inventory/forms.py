@@ -1,33 +1,26 @@
 from django import forms
-from .models import ProductType, ProductCategory, ProductUnits
+from .models import ProductVariant, ProductCategory, ProductUnits
 from .models import Product, ReceivedStock, ReceivedStockItem
 from django.forms import inlineformset_factory
 
-class ProductTypeForm(forms.ModelForm):
+class ProductVariantForm(forms.ModelForm):
     class Meta:
-        model = ProductType
-        fields = [
-            'name'
-        ]
+        model = ProductVariant
+        fields = ['name']
 
 class ProductCategoryForm(forms.ModelForm):
     class Meta:
         model = ProductCategory
-        fields = [
-            'name'
-        ]
+        fields = ['name']
 
 class ProductUnitsForm(forms.ModelForm):
     class Meta:
         model = ProductUnits
-        fields = [
-            'name'
-        ]
+        fields = ['name']
 
- 
 class ProductForm(forms.ModelForm):
-    type = forms.ModelChoiceField(
-        queryset= ProductType.objects.all(),  # Provide the queryset
+    variant = forms.ModelChoiceField(
+        queryset= ProductVariant.objects.all(),  # Provide the queryset
         required= True,  # Set to True if you want it to be required
     )
     category = forms.ModelChoiceField(
@@ -46,7 +39,7 @@ class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
         fields = [
-            'type','category',
+            'variant','category',
             'name','description',
             'units','unit_price',
             'item_photo','reorder_min_qty',

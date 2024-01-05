@@ -26,7 +26,7 @@
             
             <div class="d-flex flex-column">
                 <div class="d-flex flex-row justify-content-end">
-                    <a href="{% url 'user:company-roles-new' company_id=company.id %}" class="btn btn-outline-primary" style="width: 150px; display: inline-block; text-align: center; text-decoration: none;">
+                    <a href="{% url 'user:users-company-roles-new' company_id=company.id %}" class="btn btn-outline-primary" style="width: 150px; display: inline-block; text-align: center; text-decoration: none;">
                         <i class="bi bi-plus"></i><span>Add Role</span>
                     </a>
                 </div>
@@ -44,7 +44,7 @@
                                 {% for item in groups_static %}
                                 <tr>
                                     <td>{{item.name}}</td>
-                                    <td><a href="{% url 'user:role-permissions-list' item.id %}"><i class="bi bi-pencil"></i>View Role</a></td>
+                                    <td><a href="{% url 'user:users-company-roles-permissions-list' company_id=company.id role_id=item.id %}"><i class="bi bi-pencil"></i>View Role</a></td>
                                 </tr>
                                 {% endfor %}
                             </tbody>

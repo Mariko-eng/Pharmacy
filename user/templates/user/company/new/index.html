@@ -33,7 +33,7 @@
                             {% if form.errors.first_name %}
                             {% render_field form.first_name|add_class:"form-control is-invalid"|attr:"id:first_name" %}
                             {% else %}
-                            {% render_field form.first_name|add_class:"form-control is-valid"|attr:"id:first_name" %}
+                            {% render_field form.first_name|add_class:"form-control"|attr:"id:first_name" %}
                             {% endif %}
                             <div id = "" class="invalid-feedback">
                                 {{  form.errors.first_name.0  }}
@@ -47,7 +47,7 @@
                             {% if form.errors.last_name %}
                             {% render_field form.last_name|add_class:"form-control is-invalid"|attr:"id:last_name" %}
                             {% else %}
-                            {% render_field form.last_name|add_class:"form-control is-valid"|attr:"id:last_name" %}
+                            {% render_field form.last_name|add_class:"form-control"|attr:"id:last_name" %}
                             {% endif %}
                             <div id ="" class="invalid-feedback">
                                 {{  form.errors.last_name.0  }}
@@ -61,7 +61,7 @@
                             {% if form.errors.email %}
                             {% render_field form.email|add_class:"form-control is-invalid"|attr:"id:email" %}
                             {% else %}
-                            {% render_field form.email|add_class:"form-control is-valid"|attr:"id:email" %}
+                            {% render_field form.email|add_class:"form-control"|attr:"id:email" %}
                             {% endif %}
                             <div id = "" class="invalid-feedback">
                                 {{  form.errors.email.0  }}
@@ -75,11 +75,35 @@
                             {% if form.errors.phone_number %}
                             {% render_field form.phone_number|add_class:"form-control is-invalid"|attr:"id:phone_number" %}
                             {% else %}
-                            {% render_field form.phone_number|add_class:"form-control is-valid"|attr:"id:phone_number" %}
+                            {% render_field form.phone_number|add_class:"form-control"|attr:"id:phone_number" %}
                             {% endif %}
                             <div id = "" class="invalid-feedback">
                                 {{  form.errors.email.0  }}
                             </div>
+                        </div>
+                    </div>
+                    
+                    <hr/>
+                    
+                    <div class="row mb-3">
+                        <label for="account_type" class="col-sm-3 col-form-label">Select Account Type*</label>
+                        <div class="col-sm-9">
+                            <div class ="d-flex">
+                                <div class="row">
+                                    {% for radio in form.account_type %}
+                                    <div class="col-sm-6">
+                                        <div class="form-check">
+                                            {{ radio }}
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% if form.errors.account_type %}
+                            <div id = "" class="text-danger">
+                                {{ form.errors.account_type.0 }}
+                            </div>
+                            {% endif %}
                         </div>
                     </div>
                     
@@ -128,12 +152,12 @@
                                     {% endfor %}
                                 </div>
                                 {% else %}
-                                <a href="{% url 'user:company-branch-list' company_id=company.id %}" style="width: 250px; height:70px; display: inline-block; text-align: start; text-decoration: none;">
+                                <a href="{% url 'company:company-store-list' company_id=company.id %}" style="width: 250px; height:70px; display: inline-block; text-align: start; text-decoration: none;">
                                     <i class="bi bi-plus"></i><span>Click here to add a branch</span>
                                 </a>
                                 {% endif %}
                             </div>
-                          {% if form.errors.branches %}
+                            {% if form.errors.branches %} 
                             <div id = "" class="text-danger">
                                 {{ form.errors.branches.0 }}
                             </div>
@@ -158,13 +182,45 @@
     $(document).ready(function() {
         
         // console.log($('input[name="role"]:checked').val())
-        
-        if($('input[name="roles"]:checked').val() == undefined){
+
+        if($('input[name="account_type"]:checked').val() == undefined){
+            $('input[name="roles"]').prop('checked', false);
+            $('input[name="roles"]').prop('disabled', true);
             $('input[name="branches"]').prop('checked', false);
             $('input[name="branches"]').prop('disabled', true);
             $('input[name="access_to_all_branches"]').prop('checked', false);
             $('input[name="access_to_all_branches"]').prop('disabled', true);
         }
+        
+        //if($('input[name="roles"]:checked').val() == undefined){
+        //    $('input[name="branches"]').prop('checked', false);
+        //    $('input[name="branches"]').prop('disabled', true);
+        //    $('input[name="access_to_all_branches"]').prop('checked', false);
+        //    $('input[name="access_to_all_branches"]').prop('disabled', true);
+        //}
+
+        function handleAccountTypeSelection() {
+            var selectedAccountType = $('input[name="account_type"]:checked').val();
+
+            if(selectedAccountType === "Company Admin"){
+                $('input[name="roles"]').prop('checked', true);
+                $('input[name="roles"]').prop('disabled', true);
+            }else if (selectedAccountType === "POS Attendant"){
+                $('input[name="roles"]').prop('checked', false);
+                $('input[name="roles"]').prop('disabled', false);
+                // Enable the selected role checkbox
+                var selectedRole = "Cashier";
+                $('input[name="roles"][value="' + selectedRole + '"]').prop('disabled', true);
+                $('input[name="roles"][value="' + selectedRole + '"]').prop('checked', true);
+            }else{
+                $('input[name="roles"]').prop('checked', false);
+                $('input[name="roles"]').prop('disabled', false);
+            }
+   
+        }
+
+        // Attach the function to the change event of the roles checkboxes
+        $('input[name="account_type"]').change(handleAccountTypeSelection);
         
         
         function handleRolesSelection() {

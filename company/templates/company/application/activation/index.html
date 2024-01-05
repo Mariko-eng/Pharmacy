@@ -47,7 +47,7 @@
                                     {% if form.errors.email %}
                                     {% render_field form.email|add_class:"form-control is-invalid"|attr:"id:email" %}
                                     {% else %}
-                                    {% render_field form.email|add_class:"form-control is-valid"|attr:"id:email" %}
+                                    {% render_field form.email|add_class:"form-control"|attr:"id:email" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.email.0  }}
@@ -59,7 +59,7 @@
                                     {% if form.errors.activation_code %}
                                     {% render_field form.activation_code|add_class:"form-control is-invalid"|attr:"id:activation_code" %}
                                     {% else %}
-                                    {% render_field form.activation_code|add_class:"form-control is-valid"|attr:"id:activation_code" %}
+                                    {% render_field form.activation_code|add_class:"form-control"|attr:"id:activation_code" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.activation_code.0  }}

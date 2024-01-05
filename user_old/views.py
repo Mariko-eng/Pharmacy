@@ -66,7 +66,6 @@ def logoutView(request):
     logout(request)
     return redirect('user:login')
 
-
 @login_required(login_url='/login')
 def home_view(request):
     if request.user.is_superuser or request.user.is_staff:
@@ -89,7 +88,6 @@ def home_view(request):
     #     return render(request, "dashboard/company/index.html", context={})
 
     return render(request, "dashboard/branch/index.html", context={})
-
 
 
 @login_required(login_url='/login')
@@ -148,7 +146,6 @@ def company_admins_list_view(request):
 
     return render(request, "user/accounts/admin/index.html", context = context)
 
-
 @login_required(login_url='/login')
 def company_managers_list_view(request):
     company_id = request.session.get('company_id', None)
@@ -200,7 +197,6 @@ def company_managers_list_view(request):
     }
 
     return render(request, "user/accounts/manager/index.html", context = context)
-
 
 @login_required(login_url='/login')
 def company_pos_attendants_list_view(request, bId):
@@ -254,7 +250,6 @@ def company_pos_attendants_list_view(request, bId):
     }
 
     return render(request, "user/accounts/manager/index.html", context = context)
-
 
 ##3####################- ALL -############################
 
@@ -388,7 +383,6 @@ def role_permissions_list(request, id):
         
     return render(request, "user/super/roles/index.html", context= context)
 
-
 @login_required(login_url='/login')
 def company_list(request):
     # companies = Company.objects.all()
@@ -473,11 +467,12 @@ def company_detail(request, company_id):
     }
     return render(request, "dashboard/company/index.html", context=context)
 
+
 @login_required(login_url='/login')
 def company_branches_list(request, company_id):
     company = None
     if company_id is not None:
-        company = Company.objects.get(pk=company_id)
+        company = Company.objects.get(pk=company_id) 
     elif request.user.company:
         company = request.user.company
 
@@ -490,7 +485,7 @@ def company_branches_list(request, company_id):
         form = CompanyBranchForm(request.POST)
         if form.is_valid():
             branch = form.save(commit=False)
-            branch.created_by = request.user
+            branch.created_by = request.user 
             branch.company = company
             branch.save()
             return JsonResponse({'success': True, 'branch_id': branch.id})
@@ -505,6 +500,7 @@ def company_branches_list(request, company_id):
         'branches': branches
     }
     return render(request, "branch/list/index.html", context = context)
+
 
 @login_required(login_url='/login')
 def company_pos_list(request, company_id):

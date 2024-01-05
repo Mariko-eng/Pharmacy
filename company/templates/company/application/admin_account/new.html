@@ -48,7 +48,7 @@
                                     {% if form.errors.first_name %}
                                     {% render_field form.first_name|add_class:"form-control is-invalid"|attr:"id:first_name" %}
                                     {% else %}
-                                    {% render_field form.first_name|add_class:"form-control is-valid"|attr:"id:first_name" %}
+                                    {% render_field form.first_name|add_class:"form-control"|attr:"id:first_name" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.first_name.0  }}
@@ -60,10 +60,22 @@
                                     {% if form.errors.last_name %}
                                     {% render_field form.last_name|add_class:"form-control is-invalid"|attr:"id:last_name" %}
                                     {% else %}
-                                    {% render_field form.last_name|add_class:"form-control is-valid"|attr:"id:last_name" %}
+                                    {% render_field form.last_name|add_class:"form-control"|attr:"id:last_name" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.last_name.0  }}
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="phone" class="form-label">Phone</label>
+                                    {% if form.errors.phone %}
+                                    {% render_field form.phone|add_class:"form-control is-invalid"|attr:"id:phone" %}
+                                    {% else %}
+                                    {% render_field form.phone|add_class:"form-control"|attr:"id:phone" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.phone.0  }}
                                     </div>
                                 </div>
                                 
@@ -72,7 +84,7 @@
                                     {% if form.errors.email %}
                                     {% render_field form.email|add_class:"form-control is-invalid"|attr:"id:email" %}
                                     {% else %}
-                                    {% render_field form.email|add_class:"form-control is-valid"|attr:"id:email" %}
+                                    {% render_field form.email|add_class:"form-control"|attr:"id:email" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.email.0  }}
@@ -84,7 +96,7 @@
                                     {% if form.errors.password1 %}
                                     {% render_field form.password1|add_class:"form-control is-invalid"|attr:"id:password1" type="password" %}
                                     {% else %}
-                                    {% render_field form.password1|add_class:"form-control is-valid"|attr:"id:password1" type="password"%}
+                                    {% render_field form.password1|add_class:"form-control"|attr:"id:password1" type="password"%}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.password1.0  }}
@@ -96,7 +108,7 @@
                                     {% if form.errors.password2 %}
                                     {% render_field form.password2|add_class:"form-control is-invalid"|attr:"id:password2" type="password" %}
                                     {% else %}
-                                    {% render_field form.password2|add_class:"form-control is-valid"|attr:"id:password2" type="password"%}
+                                    {% render_field form.password2|add_class:"form-control"|attr:"id:password2" type="password"%}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.password2.0  }}

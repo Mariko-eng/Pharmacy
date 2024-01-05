@@ -27,28 +27,23 @@
         <li class="nav-heading">Company Info</li>
         
         <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#company-branches-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-menu-button-wide"></i><span>Branches</span><i class="bi bi-chevron-down ms-auto"></i>
+            <a class="nav-link collapsed" data-bs-target="#company-stores-nav" data-bs-toggle="collapse" href="#">
+                <i class="bi bi-menu-button-wide"></i><span>Stores</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
-            <ul id="company-branches-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+            <ul id="company-stores-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 {% if request.user.is_staff or request.user.is_superuser %}
                 <li>
-                    <a href="{% url 'user:company-branch-list' company_id=company.id %}">
-                        <i class="bi bi-circle"></i><span>List Branches</span>
+                    <a href="{% url 'company:company-store-list' company_id=company.id %}">
+                        <i class="bi bi-circle"></i><span>List Stores</span>
                     </a>
                 </li>
                 {% else %}
                     <li>
-                    <a href="{% url 'user:company-branch-list' company_id=request.user.company.id %}">
-                        <i class="bi bi-circle"></i><span>List Branches</span>
+                    <a href="{% url 'company:company-store-list' company_id=request.user.company.id %}">
+                        <i class="bi bi-circle"></i><span>List Stores</span>
                     </a>
                 </li>
                 {%endif%}
-                <li>
-                    <a href="components-accordion.html">
-                        <i class="bi bi-circle"></i><span>New Branch</span>
-                    </a>
-                </li>
             </ul>
         </li>
         <!-- End Company Nav -->
@@ -86,39 +81,40 @@
             <ul id="company-users-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 {% if request.user.is_staff or request.user.is_superuser %}
                 <li>
-                    <a href="{% url 'user:company-users-list' company_id=company.id %}">
+                    <a href="{% url 'user:cusers-company-list' company_id=company.id %}">
                         <i class="bi bi-circle"></i><span>List Users</span>
                     </a>
                 </li>
                 {% else %}
                     <li>
-                    <a href="{% url 'user:company-users-list' company_id=request.user.company.id %}">
+                    <a href="{% url 'user:users-company-list' company_id=request.user.company.id %}">
                         <i class="bi bi-circle"></i><span>List Users</span>
                     </a>
                 </li>
                 {%endif%}
             </ul>
         </li>
-                <li class="nav-item">
+        
+        <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#company-roles-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-menu-button-wide"></i><span>Roles</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
             <ul id="company-roles-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 {% if request.user.is_staff or request.user.is_superuser %}
                 <li>
-                    <a href="{% url 'user:company-roles-list' company_id=company.id %}">
+                    <a href="{% url 'user:users-company-roles-list' company_id=company.id %}">
                         <i class="bi bi-circle"></i><span>List Roles</span>
                     </a>
                 </li>
                 {% else %}
                     <li>
-                    <a href="{% url 'user:company-roles-list' company_id=request.user.company.id %}">
+                    <a href="{% url 'user:users-company-roles-list' company_id=request.user.company.id %}">
                         <i class="bi bi-circle"></i><span>List Roles</span>
                     </a>
                 </li>
                 {%endif%}
             </ul>
-        </li>
+        </li> 
         <!-- End Users Nav -->
 
         <!-- End Profile Nav -->
@@ -127,15 +123,15 @@
         
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#company-actions-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-menu-button-wide"></i><span>More Actions</span><i class="bi bi-chevron-down ms-auto"></i>
+                <i class="bi bi-menu-button-wide"></i><span>Actions</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
             <ul id="company-actions-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
-                    <a href="components-accordion.html">
+                    <a href="{% url 'company:company-detail' company_id=company.id %}">
                         <i class="bi bi-circle"></i><span>View Profile</span>
                     </a>
                 </li>
-                {% if request.user.is_superuser or request.user.is_staff %}
+                {% comment %} {% if request.user.is_superuser or request.user.is_staff %}
               <li>
                     <a class="text-warning" data-bs-toggle="modal" data-bs-target="#deactivateModal" href="#">
                         <i class="bi bi-trash"></i><span>Deactivate Company</span>
@@ -146,7 +142,7 @@
                         <i class="bi bi-trash"></i><span>Delete Company!!!</span>
                     </a>
                 </li>
-                {% endif %}
+                {% endif %} {% endcomment %}
             </ul>
         </li>
         <!-- End Actions Nav -->
@@ -200,13 +196,13 @@
             const id = $('#companyId').val();
             // Make an AJAX request to delete the company
             $.ajax({
-                url: '{% url "user:company-deactivate" 0 %}'.replace('0', id),
+                url: '{% url "company:company-deactivate" 0 %}'.replace('0', id),
                 method: 'POST',
                 success: function (data) {
                     // If the deletion is successful, handle the response
                     console.log(data.message);
                     $('#deactivateModal').modal('hide');
-                    window.location.href = '{% url "user:company-list" %}';
+                    window.location.href = '{% url "company:company-list" %}';
                     // Optionally display a success message or update the UI
                 },
                 error: function (error) {
@@ -221,13 +217,13 @@
             const id = $('#companyId').val();
             // Make an AJAX request to delete the company
             $.ajax({
-                url: '{% url "user:company-delete" 0 %}'.replace('0', id),
+                url: '{% url "company:company-delete" 0 %}'.replace('0', id),
                 method: 'POST',
                 success: function (data) {
                     // If the deletion is successful, handle the response
                     console.log(data.message);
                     $('#deleteModal').modal('hide');
-                    window.location.href = '{% url "user:company-list" %}';
+                    window.location.href = '{% url "company:company-list" %}';
                     // Optionally display a success message or update the UI
                 },
                 error: function (error) {

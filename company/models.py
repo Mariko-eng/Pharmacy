@@ -2,7 +2,11 @@ from django.db import models
 from .mixins import CommonFieldsMixin
 
 class CompanyApplication(CommonFieldsMixin):
-    STATUS_TYPES = [('PENDING', 'PENDING'), ('APPROVED', 'APPROVED'),('DECLINED', 'DECLINED'),]
+    STATUS_TYPES = [('PENDING', 'PENDING'), 
+                    ('APPROVED', 'APPROVED'),
+                    ('CREATED', 'CREATED'),
+                    ('DECLINED', 'DECLINED'),
+                    ('CANCELLED', 'CANCELLED'),]
 
     name = models.CharField(max_length = 225)
     phone = models.CharField(max_length = 225)
@@ -27,15 +31,18 @@ class Company(CommonFieldsMixin):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
 
-class Store(CommonFieldsMixin):
+class Store(models.Model):
     STORE_TYPES = [('RETAIL', 'RETAIL'),('WHOLESALE', 'WHOLESALE'),]
     STATUS_TYPES = [('OPEN', 'OPEN'),('CLOSED', 'CLOSED'),]
 
+    company = models.ForeignKey(Company,on_delete=models.CASCADE)
     name = models.CharField(max_length = 225)
-    location = models.CharField(max_length = 225)
     phone = models.CharField(max_length = 225)
+    email = models.EmailField(blank=True, null=True)
     store_type = models.CharField(max_length=255,choices=STORE_TYPES)
-    status_type = models.CharField(max_length=255,choices=STATUS_TYPES)
+    status = models.CharField(max_length=255,choices=STATUS_TYPES)
+    location_district = models.CharField(max_length = 225, blank=True, null=True)
+    location_village = models.CharField(max_length = 225, blank=True, null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 

@@ -47,7 +47,7 @@
                                     {% if form.errors.name %}
                                     {% render_field form.name|add_class:"form-control is-invalid"|attr:"id:name" %}
                                     {% else %}
-                                    {% render_field form.name|add_class:"form-control is-valid"|attr:"id:name" %}
+                                    {% render_field form.name|add_class:"form-control"|attr:"id:name" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.name.0  }}
@@ -59,7 +59,7 @@
                                     {% if form.errors.phone %}
                                     {% render_field form.phone|add_class:"form-control is-invalid"|attr:"id:phone" %}
                                     {% else %}
-                                    {% render_field form.phone|add_class:"form-control is-valid"|attr:"id:phone" %}
+                                    {% render_field form.phone|add_class:"form-control"|attr:"id:phone" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.phone.0  }}
@@ -71,10 +71,22 @@
                                     {% if form.errors.email %}
                                     {% render_field form.email|add_class:"form-control is-invalid"|attr:"id:email" %}
                                     {% else %}
-                                    {% render_field form.email|add_class:"form-control is-valid"|attr:"id:email" %}
+                                    {% render_field form.email|add_class:"form-control"|attr:"id:email" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.email.0  }}
+                                    </div>
+                                </div>
+
+                                <div class="col-12">
+                                    <label for="location" class="form-label">Company Location</label>
+                                    {% if form.errors.location %}
+                                    {% render_field form.location|add_class:"form-control is-invalid"|attr:"id:location" %}
+                                    {% else %}
+                                    {% render_field form.location|add_class:"form-control"|attr:"id:location" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.location.0  }}
                                     </div>
                                 </div>
                                 
@@ -83,7 +95,7 @@
                                     {% if form.errors.logo %}
                                     {% render_field form.logo|add_class:"form-control is-invalid"|attr:"id:logo" %}
                                     {% else %}
-                                    {% render_field form.logo|add_class:"form-control is-valid"|attr:"id:logo" %}
+                                    {% render_field form.logo|add_class:"form-control"|attr:"id:logo" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.logo.0  }}

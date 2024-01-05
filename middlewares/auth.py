@@ -27,7 +27,7 @@ class AuthenticationBackend(ModelBackend):
             if user.check_password(password):
                 return user
         else:
-            if company is None and user.company is None:
+            if company is None and user.userprofile.company is None:
                 return None
 
             if user.check_password(password):

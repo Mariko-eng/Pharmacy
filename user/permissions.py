@@ -1,5 +1,39 @@
 from django.db import models
 from django.utils.translation import gettext as _
+from .models import AccessGroups, RoleGroup ,Group
+
+class DefaultRoles(models.TextChoices): 
+    APP_ADMIN = 'App Admin', _('App Admin')
+    ACCOUNT_HOLDER = 'Account Holder', _('Account Holder')
+    COMPANY_ADMIN = 'Company Admin', _('Company Admin')
+    STORE_MANAGER = 'Store Manager', _('Store Manager')
+    INVENTORY_MANAGER = 'Inventory Manager',_('Inventory Manager')
+    PROCUREMENT_OFFICER = 'Procurement Officer',_('Procurement Officer')
+    SALES_MANAGER = 'Sales Manager',_('Sales Manager')
+    FINANCE_MANAGER = 'Finance Manager',_('Finance Manager')
+    CASHIER = 'Cashier', _('Cashier')
+
+
+APP_ADMIN_GROUP_ROLES = [
+    DefaultRoles.APP_ADMIN,
+]
+
+COMPANY_ADMIN_GROUP_ROLES  = [
+    DefaultRoles.ACCOUNT_HOLDER,
+    DefaultRoles.COMPANY_ADMIN,
+]
+
+STORE_ADMIN_GROUP_ROLES  = [
+    DefaultRoles.STORE_MANAGER,
+    DefaultRoles.INVENTORY_MANAGER,
+    DefaultRoles.PROCUREMENT_OFFICER,
+    DefaultRoles.SALES_MANAGER,
+    DefaultRoles.FINANCE_MANAGER,
+]
+
+POS_ATTENDANT_GROUP_ROLES  = [
+    DefaultRoles.CASHIER,
+]
 
 
 USER_PERMS = [
@@ -133,26 +167,7 @@ STOCK_REQUESTS_PERMS = [
     ("delete_stock_request_items","Delete stock request item"),
 ]
 
-
 PURCHASE_PERMS = []
-
-
-
-class DefaultGroups(models.TextChoices):
-    # SUPER_USER = 'Super User', _('Super User') # is_superuser
-    # SUPER_STAFF = 'Super Staff', _('Super Staff') # is_staff
-    ACCOUNT_HOLDER = 'Account Holder', _('Account Holder')
-    COMPANY_ADMIN = 'Company Admin', _('Company Admin')
-    BRANCH_ADMIN = 'Branch Admin',_('Branch Admin')
-    POS_ATTENDANT = 'POS Attendant',_('POS Attendant')
-
-    #Other Roles
-    INVENTORY_MANAGER = 'Inventory Manager',_('Inventory Manager')
-    PROCUREMENT_OFFICER = 'Procurement Officer',_('Procurement Officer')
-    SALES_MANAGER = 'Sales Manager',_('Sales Manager')
-    FINANCE_MANAGER = 'Finance Manager',_('Finance Manager')
-    CASHIER = 'Cashier',_('Cashier')
-    
  
 app_user_perms = [
     ("add_app_superuser","Add app superuser"),
@@ -315,16 +330,7 @@ pos_perms = [
 ]
 
 
-
-# SUPER_USER_PERMS = [choice[0] for choice in app_user_perms]
-
-# APP_ADMIN_PERMS = [choice[0] for choice in app_user_perms if choice[0] not in [
-#     "add_app_superuser", 
-#     "edit_app_superuser", 
-#     "activate_app_superuser",
-#     "deactivate_app_superuser",
-#     "delete_app_superuser",
-#     "remove_app_superuser",]]
+APP_ADMIN_PERMS = []
 
 ACCOUNT_HOLDER_PERMS = [
     choice[0] for choice in account_holder_perms] + [
@@ -337,22 +343,44 @@ COMPANY_ADMIN_PERMS = [
     choice[0] for choice in branch_perms] + [
     choice[0] for choice in pos_perms]
 
-BRANCH_ADMIN_PERMS = [
+STORE_MANAGER_PERMS = [
     choice[0] for choice in branch_perms if choice[0] not in [
         "access_to_all_branches"]] + [
     choice[0] for choice in pos_perms]
 
-POS_ATTENDANT_PERMS = [
+INVENTORY_MANAGER_PERMS = []
+
+PROCUREMENT_OFFICER_PERMS = []
+
+SALES_MANAGER_PERMS = []
+
+FINANCE_MANAGER_PERMS = []
+
+CASHIER_PERMS = [
     choice[0] for choice in pos_perms if choice[0] not in [
         "access_to_all_points_of_sale"]]
 
-
 class DefaultPermissions:
     perms = {
-        # DefaultGroups.SUPER_USER : SUPER_USER_PERMS,
-        # DefaultGroups.APP_ADMIN : APP_ADMIN_PERMS,
-        DefaultGroups.ACCOUNT_HOLDER : ACCOUNT_HOLDER_PERMS,
-        DefaultGroups.COMPANY_ADMIN : COMPANY_ADMIN_PERMS,
-        DefaultGroups.BRANCH_ADMIN : BRANCH_ADMIN_PERMS,
-        DefaultGroups.POS_ATTENDANT : POS_ATTENDANT_PERMS
+        DefaultRoles.APP_ADMIN : APP_ADMIN_PERMS,
+        DefaultRoles.ACCOUNT_HOLDER : ACCOUNT_HOLDER_PERMS,
+        DefaultRoles.COMPANY_ADMIN : COMPANY_ADMIN_PERMS,
+        DefaultRoles.STORE_MANAGER : STORE_MANAGER_PERMS,
+        DefaultRoles.INVENTORY_MANAGER : INVENTORY_MANAGER_PERMS,
+        DefaultRoles.PROCUREMENT_OFFICER : PROCUREMENT_OFFICER_PERMS,
+        DefaultRoles.STORE_MANAGER : SALES_MANAGER_PERMS,
+        DefaultRoles.FINANCE_MANAGER : FINANCE_MANAGER_PERMS,
+        DefaultRoles.CASHIER : CASHIER_PERMS
     }
+
+
+# class DefaultPermissions:
+#     perms = {
+#         # DefaultGroups.SUPER_USER : SUPER_USER_PERMS,
+#         # DefaultGroups.APP_ADMIN : APP_ADMIN_PERMS,
+#         DefaultGroups.ACCOUNT_HOLDER : ACCOUNT_HOLDER_PERMS,
+#         DefaultGroups.COMPANY_ADMIN : COMPANY_ADMIN_PERMS,
+#         DefaultGroups.BRANCH_ADMIN : BRANCH_ADMIN_PERMS,
+#         DefaultGroups.POS_ATTENDANT : POS_ATTENDANT_PERMS
+#     }
+

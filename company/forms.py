@@ -6,8 +6,7 @@ from .models import PosCenter
 from user.models import User
 
 
-class CompanyApplicationRegisterForm(forms.ModelForm):
-    
+class CompanyApplicationRegisterForm(forms.ModelForm):    
     class Meta:
         model = CompanyApplication
         fields = ['name', 'phone', 'email', 'location', 'logo',]
@@ -36,7 +35,6 @@ class CompanyAccountActivationForm(forms.Form):
             raise forms.ValidationError("Company Email does not exists!")
         return email
     
-
 class CompanyAdminRegisterForm(forms.Form):
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
@@ -48,8 +46,8 @@ class CompanyAdminRegisterForm(forms.Form):
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
-        if not User.objects.filter(email = email).exists():
-            raise forms.ValidationError("Email does not exists!")
+        if User.objects.filter(email = email).exists():
+            raise forms.ValidationError("Email already exists!")
         return email
 
     def clean_passord2(self):
@@ -69,15 +67,14 @@ class CompanyAdminRegisterForm(forms.Form):
 
 class StoreForm(forms.ModelForm):
     store_type = forms.ChoiceField(choices=[('', '---------')] + Store.STORE_TYPES)
-    status_type = forms.ChoiceField(choices=[('', '---------')] + Store.STATUS_TYPES)
-
+    status = forms.ChoiceField(choices=[('', '---------')] + Store.STATUS_TYPES)
+    location_district = forms.CharField(max_length=30)
+    location_village = forms.CharField(max_length=30)
     class Meta:
         model = Store
-        fields = ['name','location','phone','store_type','status_type',]
-
+        fields = ['name','email','phone','location_district','location_village','store_type','status',]
 
 class PosCenterForm(forms.ModelForm):
-
     class Meta:
         model = PosCenter
         fields = ['name',]

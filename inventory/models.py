@@ -5,7 +5,7 @@ from company.models import PosCenter
 from company.models import Provider
 from company.mixins import CommonFieldsMixin
 
-class ProductType(CommonFieldsMixin): # Drug, Medical Equipment
+class ProductCategory(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
@@ -13,8 +13,8 @@ class ProductType(CommonFieldsMixin): # Drug, Medical Equipment
 
     def __str__(self):
         return self.name
-
-class ProductCategory(CommonFieldsMixin):
+    
+class ProductVariant(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
@@ -40,13 +40,13 @@ class Product(CommonFieldsMixin):
     unique_no = models.CharField(max_length=255,unique=True)
     name = models.CharField(max_length=255,unique=True)
     description = models.TextField(blank=True, null=True)
-    item_photo = models.ImageField(upload_to="products", null=True)
-    type = models.ForeignKey(ProductType,on_delete=models.SET_NULL, null=True)
     category = models.ForeignKey(ProductCategory,on_delete=models.SET_NULL, null=True)
+    variant = models.ForeignKey(ProductVariant,on_delete=models.SET_NULL, null=True)
     units = models.ForeignKey(ProductUnits,on_delete=models.SET_NULL, null=True)
     unit_price = models.DecimalField(max_digits=12, decimal_places=3)
     available_qty = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     reorder_min_qty = models.DecimalField(max_digits=12, decimal_places=3,default=0)
+    item_photo = models.ImageField(upload_to="products", null=True)
     is_consummable = models.BooleanField(default=False)
     is_for_sale = models.BooleanField(default=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)

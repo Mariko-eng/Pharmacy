@@ -2,9 +2,9 @@ from django.shortcuts import render
 from django.views import View
 from django.views.generic import ListView,CreateView
 from django.http import JsonResponse
-from .forms import ProductTypeForm, ProductCategoryForm, ProductUnitsForm
+from .forms import ProductCategoryForm, ProductVariantForm, ProductUnitsForm
 from .forms import ProductForm, ReceivedStockForm,ReceivedStockItemForm
-from .models import ProductType, ProductCategory, ProductUnits, Product
+from .models import ProductVariant, ProductCategory, ProductUnits, Product
 from .models import ReceivedStock, ReceivedStockItem
 from .mixins import CompanyMixin, CompanyFormMixin
 from company.models import Company
@@ -85,20 +85,20 @@ def settings_index(request):
     elif request.user.company:
         company = request.user.company
 
-    productTypeForm = ProductTypeForm(prefix="productTypeForm")
+    productVariantForm = ProductVariantForm(prefix="ProductVariantForm")
     productCategoryForm = ProductCategoryForm(prefix="productCategoryForm")
     productUnitsForm = ProductUnitsForm(prefix="productUnitsForm")
 
-    productTypes = ProductType.objects.all()
+    productVariants = ProductVariant.objects.all()
     productCategories = ProductCategory.objects.all()
     productUnits = ProductUnits.objects.all()
 
     context = {
         "company" : company,
-        "productTypes" : productTypes,
+        "productVariants" : productVariants,
         "productCategories" : productCategories,
         "productUnits" : productUnits,
-        "productTypeForm": productTypeForm,
+        "productVariantForm": productVariantForm,
         "productCategoryForm": productCategoryForm,
         "productUnitsForm": productUnitsForm}
     
@@ -106,16 +106,16 @@ def settings_index(request):
         form_prefix = request.POST.get('form_prefix')
         # print(form_prefix)
  
-        if form_prefix == 'productTypeForm':
-            productTypeForm_data = ProductTypeForm(request.POST or None,prefix="productTypeForm")
-            if productTypeForm_data.is_valid():
-                product_type = productTypeForm_data.save(commit=False)
-                product_type.name = product_type.name.capitalize()
-                product_type.company = company
-                product_type.save()
-                return JsonResponse({'success': True, 'name': product_type.name})
+        if form_prefix == 'productVariantForm':
+            productVariantForm_data = ProductVariantForm(request.POST or None,prefix="productVariantForm")
+            if productVariantForm_data.is_valid():
+                product_variant = productVariantForm_data.save(commit=False)
+                product_variant.name = product_variant.name.capitalize()
+                product_variant.company = company
+                product_variant.save()
+                return JsonResponse({'success': True, 'name': product_variant.name})
             else:
-                return JsonResponse({'success': False, 'errors': productTypeForm_data.errors})
+                return JsonResponse({'success': False, 'errors': productVariantForm_data.errors})
         
         if form_prefix == 'productCategoryForm':
             productCategoryForm_data = ProductCategoryForm(request.POST or None,prefix="productCategoryForm")
