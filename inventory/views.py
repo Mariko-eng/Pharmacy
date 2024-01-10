@@ -194,7 +194,7 @@ def products_new(request, store_id = None, company_id = None):
         context["company"] = company
 
     if request.method == "POST":
-        form = ProductForm(request.POST)
+        form = ProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
             if Product.objects.filter(name = product.name.capitalize(), company = company).exists():
