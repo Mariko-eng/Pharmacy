@@ -1,39 +1,46 @@
 from django import forms
 from .models import ProductVariant, ProductCategory, ProductUnits
 from .models import Product, ReceivedStock, ReceivedStockItem
+from company.models import SupplierEntity
 from django.forms import inlineformset_factory
-
-class ProductVariantForm(forms.ModelForm):
-    class Meta:
-        model = ProductVariant
-        fields = ['name']
 
 class ProductCategoryForm(forms.ModelForm):
     class Meta:
         model = ProductCategory
         fields = ['name']
 
+class ProductVariantForm(forms.ModelForm):
+    class Meta:
+        model = ProductVariant
+        fields = ['name']
+        
 class ProductUnitsForm(forms.ModelForm):
     class Meta:
         model = ProductUnits
         fields = ['name']
 
+class SupplierEntityForm(forms.ModelForm):
+    class Meta:
+        model = SupplierEntity
+        fields = ['name','phone','email','location']
+
 class ProductForm(forms.ModelForm):
-    variant = forms.ModelChoiceField(
-        queryset= ProductVariant.objects.all(),  # Provide the queryset
-        required= True,  # Set to True if you want it to be required
-    )
+    name = forms.CharField(max_length=30)
+    description = forms.CharField(widget=forms.Textarea) # For type TextField
+    item_photo = forms.ImageField(required=False)
     category = forms.ModelChoiceField(
         queryset= ProductCategory.objects.all(),  # Provide the queryset
         required= True,  # Set to True if you want it to be required
     )
-    name = forms.CharField(max_length=30)
-    description = forms.CharField(widget=forms.Textarea) # For type TextField
+    variant = forms.ModelChoiceField(
+        queryset= ProductVariant.objects.all(),  # Provide the queryset
+        required= True,  # Set to True if you want it to be required
+    )
     units = forms.ModelChoiceField(
         queryset= ProductUnits.objects.all(),  # Provide the queryset
         required= True,  # Set to True if you want it to be required
     )
-    item_photo = forms.ImageField(required=False)
+    unit_price = forms.DecimalField(initial=0)
     reorder_min_qty = forms.DecimalField(initial=0)
 
     class Meta:

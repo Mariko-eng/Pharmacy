@@ -285,8 +285,8 @@ def pos_list_view(request, store_id):
         form = PosCenterForm(request.POST)
         if form.is_valid():
             pos_center = form.save(commit=False)
-            if PosCenter.objects.filter(name = pos_center.name, store = store).exists():
-                form.errors['name'] = "Name ALready Exists!"
+            if PosCenter.objects.filter(name = pos_center.name.capitalize(), store = store).exists():
+                form.errors['name'] = ["Name ALready Exists!"]
                 return JsonResponse({'success': False, 'errors': form.errors})
             
             pos_center.name = form.cleaned_data['name'].capitalize()

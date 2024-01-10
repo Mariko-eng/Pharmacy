@@ -1,0 +1,79 @@
+{% extends 'base/store/index.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">
+    <h1>Store : {{ store.name }}!</h1>
+
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active"><a>Products</a></li>
+        </ol>
+    </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Products</h5>
+    
+    <!-- Default Tabs -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Stock Items/Products</button>
+      </li>
+    </ul>
+    <div class="tab-content pt-2" id="myTabContent">
+      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <div class="d-flex flex-column">
+          <div class="d-flex flex-row justify-content-end">
+              <a href="{% url 'inventory:store-products-new' store_id=store.id %}" class="btn btn-outline-primary" style="width: 150px; display: inline-block; text-align: center; text-decoration: none;">
+                  <i class="bi bi-plus"></i><span>Add</span>
+              </a>
+          </div>
+          <div>
+        <div class="table-responsive small">
+        <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Name</th>
+              <th scope="col">Category</th>
+              <th scope="col">Variant</th>
+              <th scope="col">Units</th>
+              <th scope="col">Unit Price</th>
+              <th scope="col">QTY</th>
+              <th scope="col">Min Order Qty</th>
+              <th scope="col">Created At</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for result in products %}
+             <tr>
+              <td>{{result.unique_no}}</td>
+              <td>{{result.name}}</td>
+              <td>{{result.category.name}}</td>
+              <td>{{result.variant.name}}</td>
+              <td>{{result.units.name}}</td>
+              <td>{{result.unit_price}}</td>
+              <td>{{result.available_qty}}</td>
+              <td>{{result.reorder_min_qty}}</td>
+              <td>{{result.created_at}}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+          </div>
+        </div>
+      </div>
+    </div><!-- End Default Tabs -->
+  </div>
+</div>
+
+{% endblock %}
+

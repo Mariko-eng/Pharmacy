@@ -5,7 +5,6 @@ from .models import Store
 from .models import PosCenter
 from user.models import User
 
-
 class CompanyApplicationRegisterForm(forms.ModelForm):    
     class Meta:
         model = CompanyApplication
