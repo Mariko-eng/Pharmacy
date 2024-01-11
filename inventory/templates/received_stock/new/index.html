@@ -8,7 +8,8 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active"><a>Received Stock</a></li>
+            <li class="breadcrumb-item"><a>Received Stock</a></li>
+            <li class="breadcrumb-item active"><a>New</a></li>
         </ol>
     </nav>
 </div><!-- End Page Title --> 
@@ -19,11 +20,9 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title"> New Received Stock</h5>
+        <h5 class="card-title"> New Received Stock Form</h5>
         
         <form class="row g-3 needs-validation" method="post" novalidate >
-            
-            <h5 class="card-title">Received Stock Form</h5>
             
             <div class="row mb-3">
                 <label for="provider_type" class="col-sm-3 col-form-label">Supplier/Store</label>
@@ -47,7 +46,7 @@
                 </div>
             </div>
             
-
+            
             <div class="row mb-3">
                 <div class="col-md-6">
                     <label for="supplier" class="col-sm-12 col-form-label">Supplier</label>
@@ -145,10 +144,10 @@
                     <p class="text-center text-small">Batch No</p>
                 </div>
                 <div class="col-md-2">
-                    <p class="text-center text-small">Quantity</p>
+                    <p class="text-center text-small">Qty Received</p>
                 </div>
                 <div class="col-md-2">
-                    <p class="text-center text-small">Unit Cost</p>
+                    <p class="text-center text-small">Total Cost(SHS)</p>
                 </div>
                 <div class="col-md-2">
                     <p class="text-center text-small">Mfg Date</p>
@@ -165,7 +164,7 @@
                     {% if form.errors.product %}
                     {% render_field form.product|add_class:"form-control is-invalid"%}
                     <div class="invalid-feedback">
-                        {{ form.errors.name.0 }}
+                        {{ form.errors.product.0 }}
                     </div>
                     {% else %}
                     {% render_field form.product|add_class:"form-control"%}
@@ -175,7 +174,7 @@
                     {% if form.errors.batch_no %}
                     {% render_field form.batch_no|add_class:"form-control is-invalid"%}
                     <div class="invalid-feedback">
-                        {{ form.errors.name.0 }}
+                        {{ form.errors.batch_no.0 }}
                     </div>
                     {% else %}
                     {% render_field form.batch_no|add_class:"form-control"%}
@@ -185,27 +184,27 @@
                     {% if form.errors.qty_received %}
                     {% render_field form.qty_received|add_class:"form-control is-invalid"%}
                     <div class="invalid-feedback">
-                        {{ form.errors.name.0 }}
+                        {{ form.errors.qty_received.0 }}
                     </div>
                     {% else %}
                     {% render_field form.qty_received|add_class:"form-control"%}
                     {% endif %}
                 </div>
                 <div class="col-md-2">
-                    {% if form.errors.unit_cost %}
-                    {% render_field form.unit_cost|add_class:"form-control is-invalid"%}
+                    {% if form.errors.total_cost %}
+                    {% render_field form.total_cost|add_class:"form-control is-invalid"%}
                     <div class="invalid-feedback">
-                        {{ form.errors.name.0 }}
+                        {{ form.errors.total_cost.0 }}
                     </div>
                     {% else %}
-                    {% render_field form.unit_cost|add_class:"form-control"%}
+                    {% render_field form.total_cost|add_class:"form-control"%}
                     {% endif %}
                 </div>
                 <div class="col-md-2">
                     {% if form.errors.manufactured_date %}
                     {% render_field form.manufactured_date|add_class:"form-control is-invalid" type="date"%}
                     <div class="invalid-feedback">
-                        {{ form.errors.name.0 }}
+                        {{ form.errors.manufactured_date.0 }}
                     </div>
                     {% else %}
                     {% render_field form.manufactured_date|add_class:"form-control" type="date"%}
@@ -233,8 +232,6 @@
                 </div>
                 {% endfor %}
             </div>
-            
-            
             
             
             <div class="col-12 d-flex justify-content-center mt-5">

@@ -95,7 +95,7 @@ class ReceivedStockItemForm(forms.ModelForm):
         model = ReceivedStockItem
         fields = [
             'product','batch_no','qty_received',
-            'unit_cost','manufactured_date','expiry_date',
+            'total_cost','manufactured_date','expiry_date',
         ]
         exclude = ['company','branch','received_stock','updated_by_id','updated_at','created_by','created_at']
 
