@@ -8,7 +8,7 @@
   <nav>
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="#">Home</a></li>
-      <li class="breadcrumb-item active"><a>Products</a></li>
+      <li class="breadcrumb-item active"><a>Received Stock</a></li>
     </ol>
   </nav>
 </div><!-- End Page Title --> 
@@ -19,19 +19,21 @@
 
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Products</h5>
+    <h5 class="card-title">Received Stock</h5>
     
     <!-- Default Tabs -->
     <ul class="nav nav-tabs" id="myTab" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Stock Items/Products</button>
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Stock Records</button>
       </li>
     </ul>
     <div class="tab-content pt-2" id="myTabContent">
       <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
         <div class="d-flex flex-column">
           <div class="d-flex flex-row justify-content-end">
-            <a href="{% url 'inventory:store-products-new' store_id=store.id %}" class="btn btn-outline-primary" style="width: 150px; display: inline-block; text-align: center; text-decoration: none;">
+            <a href="{% url 'inventory:received-stock-new' store_id=store.id %}" 
+            class="btn btn-outline-primary" 
+            style="width: 150px; display: inline-block; text-align: center; text-decoration: none;">
               <i class="bi bi-plus"></i><span>Add</span>
             </a>
           </div>

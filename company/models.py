@@ -30,6 +30,8 @@ class Company(CommonFieldsMixin):
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
+    def __str__(self):
+        return self.name
 
 class Store(models.Model):
     STORE_TYPES = [('RETAIL', 'RETAIL'),('WHOLESALE', 'WHOLESALE'),]
@@ -46,7 +48,9 @@ class Store(models.Model):
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
-    
+    def __str__(self):
+        return self.name
+
 class PosCenter(CommonFieldsMixin):
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length = 225)
@@ -67,7 +71,7 @@ class SupplierEntity(CommonFieldsMixin):
         return self.name
     
 class Provider(CommonFieldsMixin):
-    PROVIDER_TYPES = (('SUPPLIER', 'Supplier'),('STORE', 'Store'),)
+    PROVIDER_TYPES = [('SUPPLIER', 'Supplier'),('STORE', 'Store'),]
     
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
     provider_type = models.CharField(max_length=10,choices=PROVIDER_TYPES,default="Supplier")

@@ -216,174 +216,34 @@ def products_new(request, store_id = None, company_id = None):
     return render(request, 'products/new/index.html', context=context) 
 
 
-class StockListCreateView(CompanyMixin, View):
-    form_class = ProductForm
-    initial = {"unit_price": 0}
-    template_name = "stock/index.html"
+def received_stock_list(request, store_id):
+    store = Store.objects.get(pk=store_id)
+    company = store.company
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(initial=self.initial)
-        data = Product.objects.all()
-        return render(request, self.template_name, {"form": form, "results": data})
+    items = ReceivedStock.objects.filter(store = store)
+    context = {
+        "company": company,
+        "store": store,
+        "items": items
+        }
 
-    def post(self, request, *args, **kwargs): 
-        form = self.form_class(request.POST)
-        if form.is_valid():
-            form.instance.company = self.get_company()
-            form.instance.created_by = self.get_user()
-            product = form.save(commit=False)
-            product.name = product.name.capitalize()
-            product.save() 
-
-            if self.request.is_ajax(): # Using Ajax 
-                return JsonResponse({'success': True, 'name': product.name})
-        else: # Form is Invalid
-            if self.request.is_ajax(): # Using Ajax 
-                return JsonResponse({'success': False, 'errors': form.errors})
-        
-        return render(request, self.template_name, {"form": form})
+    return render(request, 'received_stock/list/index.html', context=context) 
 
 
-class StockCreateView(CompanyFormMixin, CreateView):
-    model = Product
-    form_class = ProductForm
-    template_name = 'stock/index.html'
-
-    def form_valid(self, form):
-        form.instance.company = self.get_company()
-        form.instance.created_by = self.get_user()
-        product = form.save(commit=False)
-        product.name = product.name.capitalize()
-        product.save() 
-        print(product.company)    
-        print(product.created_by)                  
-
-        if self.request.is_ajax():
-            # If it's an AJAX request, return a JsonResponse
-            return JsonResponse({'success': True, 'name': product.name})
-        else:
-            # If it's a regular form submission, redirect to success URL
-            return super().form_valid(form)
-
-
-    def form_invalid(self, form):
-        print("form.errors")
-
-        if self.request.is_ajax():
-            return JsonResponse({'success': False, 'errors': form.errors})
-        else:
-            # If it's a regular form submission and the form is invalid, render the form
-            return self.render_to_response(self.get_context_data(form=form))
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        # print("context")
-        # print(context["company"])
-        return context
-
-
-def settings_index(request):
-    company_id = request.session.get('company_id', None)
-    company = None
-    if company_id is not None:
-        company = Company.objects.get(pk=company_id)
-    elif request.user.company:
-        company = request.user.company
-
-    productVariantForm = ProductVariantForm(prefix="ProductVariantForm")
-    productCategoryForm = ProductCategoryForm(prefix="productCategoryForm")
-    productUnitsForm = ProductUnitsForm(prefix="productUnitsForm")
-
-    productVariants = ProductVariant.objects.all()
-    productCategories = ProductCategory.objects.all()
-    productUnits = ProductUnits.objects.all()
+def received_stock_new(request, store_id):
+    store = Store.objects.get(pk=store_id)
+    company = store.company
 
     context = {
-        "company" : company,
-        "productVariants" : productVariants,
-        "productCategories" : productCategories,
-        "productUnits" : productUnits,
-        "productVariantForm": productVariantForm,
-        "productCategoryForm": productCategoryForm,
-        "productUnitsForm": productUnitsForm}
-    
-    if request.method == "POST":
-        form_prefix = request.POST.get('form_prefix')
-        # print(form_prefix)
- 
-        if form_prefix == 'productVariantForm':
-            productVariantForm_data = ProductVariantForm(request.POST or None,prefix="productVariantForm")
-            if productVariantForm_data.is_valid():
-                product_variant = productVariantForm_data.save(commit=False)
-                product_variant.name = product_variant.name.capitalize()
-                product_variant.company = company
-                product_variant.save()
-                return JsonResponse({'success': True, 'name': product_variant.name})
-            else:
-                return JsonResponse({'success': False, 'errors': productVariantForm_data.errors})
-        
-        if form_prefix == 'productCategoryForm':
-            productCategoryForm_data = ProductCategoryForm(request.POST or None,prefix="productCategoryForm")
-            if productCategoryForm_data.is_valid():
-                product_category = productCategoryForm_data.save(commit=False)
-                product_category.name = product_category.name.capitalize()
-                product_category.company = company
-                product_category.save()
-                return JsonResponse({'success': True, 'name': product_category.name})
-            else:
-                return JsonResponse({'success': False, 'errors': productCategoryForm_data.errors})
-        
-        if form_prefix == 'productUnitsForm':
-            productUnitsForm_data = ProductUnitsForm(request.POST or None,prefix="productUnitsForm")
-            if productUnitsForm_data.is_valid():
-                product_unit = productUnitsForm_data.save(commit=False)
-                product_unit.name = product_unit.name.lower()
-                product_unit.company = company
-                product_unit.save()
-                return JsonResponse({'success': True, 'name': product_unit.name})
-            else:
-                return JsonResponse({'success': False, 'errors': productUnitsForm_data.errors})
-        
-        return JsonResponse({'success': False, 'errors': {"name": "Form Prefix"}})
+        "company": company,
+        "store": store}
 
-    return render(request, 'stock/settings/index.html', context=context)       
-
-
-def stock_index(request):
-    company_id = request.session.get('company_id', None)
-    company = None
-    if company_id is not None:
-        company = Company.objects.get(pk=company_id)
-    elif request.user.company:
-        company = request.user.company
-
-    form = ProductForm()
-
-    context = {
-        "company" :company,
-        "form": form}
-
-    if request.method == "POST":
-        form_data = ProductForm(request.POST, request.FILES)
-        if form_data.is_valid():
-            product = form_data.save(commit=False)
-            product.name = product.name.capitalize()
-            product.save()
-            return JsonResponse({'success': True, 'name': product.name})
-        else:
-            return JsonResponse({'success': False, 'errors': form_data.errors})
-
-    return render(request, 'stock/index.html', context=context)       
-
-
-def stock_new(request):
-    context = {}
-    form = ReceivedStockForm()
+    form = ReceivedStockForm(company=company)
     ReceivedStockItemFormSet = formset_factory(ReceivedStockItemForm, extra=1)
     formset = ReceivedStockItemFormSet(prefix='items')
 
     if request.method == "POST":
-        form_data = ReceivedStockForm(request.POST)
+        form_data = ReceivedStockForm(request.POST,company=company)
         formset_data = ReceivedStockItemFormSet(request.POST, prefix='items')
 
         print(form_data)
@@ -391,20 +251,21 @@ def stock_new(request):
 
         if form_data.is_valid() and formset_data.is_valid():
             received_stock = form_data.save(commit=False)
-            received_stock.company = None
-            received_stock.branch = None
-            received_stock.created_by = None
+            received_stock.company = company
+            received_stock.store = store
+            received_stock.created_by = request.user
             # received_stock.save()
 
             for formset_data_item in formset_data:
                 item = formset_data_item.save(commit=False)
                 item.received_stock = received_stock
-                item.company = None
-                item.branch = None
-                item.created_by = None
+                item.company = company
+                item.store = store
+                item.created_by = request.user
                 # item.save()
 
             context['success_message'] = 'Stock added successfully'
+            # return redirect('inventory:received-stock-list', store_id=store_id)
         else:
             context['form'] = form_data
             context['formset'] = formset_data
@@ -412,6 +273,213 @@ def stock_new(request):
     
     context['form'] = form  
     context['formset'] = formset  
-    return render(request, 'stock/new/index.html', context=context)       
+    return render(request, 'received_stock/new/index.html', context=context) 
+
+
+
+
+
+
+
+
+
+
+
+# class StockListCreateView(CompanyMixin, View):
+#     form_class = ProductForm
+#     initial = {"unit_price": 0}
+#     template_name = "stock/index.html"
+
+#     def get(self, request, *args, **kwargs):
+#         form = self.form_class(initial=self.initial)
+#         data = Product.objects.all()
+#         return render(request, self.template_name, {"form": form, "results": data})
+
+#     def post(self, request, *args, **kwargs): 
+#         form = self.form_class(request.POST)
+#         if form.is_valid():
+#             form.instance.company = self.get_company()
+#             form.instance.created_by = self.get_user()
+#             product = form.save(commit=False)
+#             product.name = product.name.capitalize()
+#             product.save() 
+
+#             if self.request.is_ajax(): # Using Ajax 
+#                 return JsonResponse({'success': True, 'name': product.name})
+#         else: # Form is Invalid
+#             if self.request.is_ajax(): # Using Ajax 
+#                 return JsonResponse({'success': False, 'errors': form.errors})
+        
+#         return render(request, self.template_name, {"form": form})
+
+# class StockCreateView(CompanyFormMixin, CreateView):
+#     model = Product
+#     form_class = ProductForm
+#     template_name = 'stock/index.html'
+
+#     def form_valid(self, form):
+#         form.instance.company = self.get_company()
+#         form.instance.created_by = self.get_user()
+#         product = form.save(commit=False)
+#         product.name = product.name.capitalize()
+#         product.save() 
+#         print(product.company)    
+#         print(product.created_by)                  
+
+#         if self.request.is_ajax():
+#             # If it's an AJAX request, return a JsonResponse
+#             return JsonResponse({'success': True, 'name': product.name})
+#         else:
+#             # If it's a regular form submission, redirect to success URL
+#             return super().form_valid(form)
+
+
+#     def form_invalid(self, form):
+#         print("form.errors")
+
+#         if self.request.is_ajax():
+#             return JsonResponse({'success': False, 'errors': form.errors})
+#         else:
+#             # If it's a regular form submission and the form is invalid, render the form
+#             return self.render_to_response(self.get_context_data(form=form))
+
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         # print("context")
+#         # print(context["company"])
+#         return context
+
+
+# def settings_index(request):
+#     company_id = request.session.get('company_id', None)
+#     company = None
+#     if company_id is not None:
+#         company = Company.objects.get(pk=company_id)
+#     elif request.user.company:
+#         company = request.user.company
+
+#     productVariantForm = ProductVariantForm(prefix="ProductVariantForm")
+#     productCategoryForm = ProductCategoryForm(prefix="productCategoryForm")
+#     productUnitsForm = ProductUnitsForm(prefix="productUnitsForm")
+
+#     productVariants = ProductVariant.objects.all()
+#     productCategories = ProductCategory.objects.all()
+#     productUnits = ProductUnits.objects.all()
+
+#     context = {
+#         "company" : company,
+#         "productVariants" : productVariants,
+#         "productCategories" : productCategories,
+#         "productUnits" : productUnits,
+#         "productVariantForm": productVariantForm,
+#         "productCategoryForm": productCategoryForm,
+#         "productUnitsForm": productUnitsForm}
+    
+#     if request.method == "POST":
+#         form_prefix = request.POST.get('form_prefix')
+#         # print(form_prefix)
+ 
+#         if form_prefix == 'productVariantForm':
+#             productVariantForm_data = ProductVariantForm(request.POST or None,prefix="productVariantForm")
+#             if productVariantForm_data.is_valid():
+#                 product_variant = productVariantForm_data.save(commit=False)
+#                 product_variant.name = product_variant.name.capitalize()
+#                 product_variant.company = company
+#                 product_variant.save()
+#                 return JsonResponse({'success': True, 'name': product_variant.name})
+#             else:
+#                 return JsonResponse({'success': False, 'errors': productVariantForm_data.errors})
+        
+#         if form_prefix == 'productCategoryForm':
+#             productCategoryForm_data = ProductCategoryForm(request.POST or None,prefix="productCategoryForm")
+#             if productCategoryForm_data.is_valid():
+#                 product_category = productCategoryForm_data.save(commit=False)
+#                 product_category.name = product_category.name.capitalize()
+#                 product_category.company = company
+#                 product_category.save()
+#                 return JsonResponse({'success': True, 'name': product_category.name})
+#             else:
+#                 return JsonResponse({'success': False, 'errors': productCategoryForm_data.errors})
+        
+#         if form_prefix == 'productUnitsForm':
+#             productUnitsForm_data = ProductUnitsForm(request.POST or None,prefix="productUnitsForm")
+#             if productUnitsForm_data.is_valid():
+#                 product_unit = productUnitsForm_data.save(commit=False)
+#                 product_unit.name = product_unit.name.lower()
+#                 product_unit.company = company
+#                 product_unit.save()
+#                 return JsonResponse({'success': True, 'name': product_unit.name})
+#             else:
+#                 return JsonResponse({'success': False, 'errors': productUnitsForm_data.errors})
+        
+#         return JsonResponse({'success': False, 'errors': {"name": "Form Prefix"}})
+
+#     return render(request, 'stock/settings/index.html', context=context)       
+
+
+# def stock_index(request):
+#     company_id = request.session.get('company_id', None)
+#     company = None
+#     if company_id is not None:
+#         company = Company.objects.get(pk=company_id)
+#     elif request.user.company:
+#         company = request.user.company
+
+#     form = ProductForm()
+
+#     context = {
+#         "company" :company,
+#         "form": form}
+
+#     if request.method == "POST":
+#         form_data = ProductForm(request.POST, request.FILES)
+#         if form_data.is_valid():
+#             product = form_data.save(commit=False)
+#             product.name = product.name.capitalize()
+#             product.save()
+#             return JsonResponse({'success': True, 'name': product.name})
+#         else:
+#             return JsonResponse({'success': False, 'errors': form_data.errors})
+
+#     return render(request, 'stock/index.html', context=context)       
+
+
+# def stock_new(request):
+#     context = {}
+#     form = ReceivedStockForm()
+#     ReceivedStockItemFormSet = formset_factory(ReceivedStockItemForm, extra=1)
+#     formset = ReceivedStockItemFormSet(prefix='items')
+
+#     if request.method == "POST":
+#         form_data = ReceivedStockForm(request.POST)
+#         formset_data = ReceivedStockItemFormSet(request.POST, prefix='items')
+
+#         print(form_data)
+#         print(formset_data)
+
+#         if form_data.is_valid() and formset_data.is_valid():
+#             received_stock = form_data.save(commit=False)
+#             received_stock.company = None
+#             received_stock.branch = None
+#             received_stock.created_by = None
+#             # received_stock.save()
+
+#             for formset_data_item in formset_data:
+#                 item = formset_data_item.save(commit=False)
+#                 item.received_stock = received_stock
+#                 item.company = None
+#                 item.branch = None
+#                 item.created_by = None
+#                 # item.save()
+
+#             context['success_message'] = 'Stock added successfully'
+#         else:
+#             context['form'] = form_data
+#             context['formset'] = formset_data
+#             return render(request, 'stock/index.html', context=context)
+    
+#     context['form'] = form  
+#     context['formset'] = formset  
+#     return render(request, 'stock/new/index.html', context=context)       
         
                     

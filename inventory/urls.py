@@ -40,8 +40,15 @@ urlpatterns = [
     path('inventory/products/new/store/<int:store_id>/',
         views.products_new, name="store-products-new"),
 
-    path('stock/',views.StockListCreateView.as_view(), name="stock"),
-    path('stock/new/',views.StockCreateView.as_view(), name="stock"),
-    path('stock/incoming/new/',views.stock_new, name="stock-new"),
-    path('stock/settings/',views.settings_index,name="settings"),
+
+    path('inventory/received_stock/list/store/<int:store_id>/',
+        views.received_stock_list, name="received-stock-list"),
+    path('inventory/received_stock/new/store/<int:store_id>/',
+        views.received_stock_new, name="received-stock-new"),
+
+
+    # path('stock/',views.StockListCreateView.as_view(), name="stock"),
+    # path('stock/new/',views.StockCreateView.as_view(), name="stock"),
+    # path('stock/incoming/new/',views.stock_new, name="stock-new"),
+    # path('stock/settings/',views.settings_index,name="settings"),
 ]

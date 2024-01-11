@@ -1,7 +1,7 @@
 from django import forms
 from .models import ProductVariant, ProductCategory, ProductUnits
 from .models import Product, ReceivedStock, ReceivedStockItem
-from company.models import SupplierEntity
+from company.models import SupplierEntity, Provider, Store
 from django.forms import inlineformset_factory
 
 class ProductCategoryForm(forms.ModelForm):
@@ -55,14 +55,38 @@ class ProductForm(forms.ModelForm):
         exclude = ['company','unique_no','updated_by_id','updated_at','created_by','created_at']
 
 class ReceivedStockForm(forms.ModelForm):
+
+    provider_type = forms.ChoiceField(
+        choices = Provider.PROVIDER_TYPES,
+        widget=forms.RadioSelect()
+    )
+
+    supplier = forms.ModelChoiceField(
+        queryset= None,  # Provide the queryset
+        required= False,
+    )
+
+    store = forms.ModelChoiceField(
+        queryset= None,  # Provide the queryset
+        required= False,
+    )
     
     class Meta:
         model = ReceivedStock
         fields = [
-            'provider','delivered_by_name','delivered_by_phone',
-            'received_date','delivery_notes',
-        ]
+            # 'provider',
+            'delivered_by_name','delivered_by_phone',
+            'received_date','delivery_notes',]
         exclude = ['company','branch','updated_by_id','updated_at','created_by','created_at']
+
+
+    def __init__(self, *args, company=None, **kwargs):
+        super(ReceivedStockForm, self).__init__(*args, **kwargs)
+
+        if company:
+            self.fields['supplier'].queryset = SupplierEntity.objects.filter(company=company)
+            self.fields['store'].queryset = Store.objects.filter(company=company)
+
 
 
 class ReceivedStockItemForm(forms.ModelForm):
