@@ -47,7 +47,8 @@
                     <th scope="col">Variant</th>
                     <th scope="col">Units</th>
                     <th scope="col">Unit Price</th>
-                    <th scope="col">QTY</th>
+                    <th scope="col">Avail QTY</th>
+                    <th scope="col">Actual QTY</th>
                     <th scope="col">Min Order Qty</th>
                     <th scope="col">Created At</th>
                   </tr>
@@ -63,12 +64,13 @@
                       <p>No image!</p>
                       {% endif %}
                     </td>
-                    <td>{{result.name}}</td>
-                    <td>{{result.category.name}}</td>
-                    <td>{{result.variant.name}}</td>
-                    <td>{{result.units.name}}</td>
+                    <td>{{result.product.name}}</td>
+                    <td>{{result.product.category.name}}</td>
+                    <td>{{result.product.variant.name}}</td>
+                    <td>{{result.product.units.name}}</td>
                     <td>{{result.unit_price}}</td>
                     <td>{{result.available_qty}}</td>
+                    <td>{{result.actual_qty}}</td>
                     <td>{{result.reorder_min_qty}}</td>
                     <td>{{result.created_at}}</td>
                   </tr>

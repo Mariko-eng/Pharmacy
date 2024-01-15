@@ -28,23 +28,15 @@ urlpatterns = [
     path('inventory/products/suppliers/list/store/<int:store_id>/',
         views.suppliers_list, name="store-product-suppliers-list"),
     
-    #Products-list
-    path('inventory/products/list/company/<int:company_id>/',
-        views.products_list, name="company-products-list"),
-    path('inventory/products/list/store/<int:store_id>/',
-        views.products_list, name="store-products-list"),
-
-    #Products-new
-    path('inventory/products/new/company/<int:company_id>/',
-        views.products_new, name="company-products-new"),
-    path('inventory/products/new/store/<int:store_id>/',
-        views.products_new, name="store-products-new"),
-
-
-    path('inventory/received_stock/list/store/<int:store_id>/',
-        views.received_stock_list, name="received-stock-list"),
-    path('inventory/received_stock/new/store/<int:store_id>/',
-        views.received_stock_new, name="received-stock-new"),
+    #Store Products-list
+    path('store/inventory/products/list/store/<int:store_id>/',
+        views.store_products_list, name="store-products-list"),
+    path('store/<int:store_id>/inventory/products/new/',
+        views.store_products_new, name="store-products-new"),
+    path('store/<int:store_id>/inventory/received_stock/list/',
+        views.store_received_stock_list, name="received-stock-list"),
+    path('store/<int:store_id>/inventory/received_stock/new/',
+        views.store_received_stock_new, name="received-stock-new"),
 
 
     # path('stock/',views.StockListCreateView.as_view(), name="stock"),

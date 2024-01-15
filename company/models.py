@@ -71,10 +71,10 @@ class SupplierEntity(CommonFieldsMixin):
         return self.name
     
 class Provider(CommonFieldsMixin):
-    PROVIDER_TYPES = [('SUPPLIER', 'Supplier'),('STORE', 'Store'),]
+    PROVIDER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
     
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
-    provider_type = models.CharField(max_length=10,choices=PROVIDER_TYPES,default="Supplier")
+    provider_type = models.CharField(max_length=10,choices=PROVIDER_TYPES,default="SUPPLIER")
     supplier_entity = models.ForeignKey(SupplierEntity,on_delete=models.SET_NULL,null=True)
     supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)

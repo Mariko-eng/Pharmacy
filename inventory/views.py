@@ -1,15 +1,18 @@
 from django.shortcuts import render, redirect
+from django.db import transaction
+from django.forms import ValidationError
 from django.views import View
 from django.views.generic import ListView,CreateView
 from django.http import JsonResponse
 from .forms import ProductCategoryForm, ProductVariantForm
 from .forms import ProductUnitsForm, SupplierEntityForm
-from .forms import ProductForm, ReceivedStockForm,ReceivedStockItemForm
-from .models import ProductVariant, ProductCategory, ProductUnits, Product
+from .forms import StoreProductForm, ReceivedStockForm,ReceivedStockItemForm
+from .models import ProductVariant, ProductCategory, ProductUnits, Product, StoreProduct
 from .models import ReceivedStock, ReceivedStockItem
 from .mixins import CompanyMixin, CompanyFormMixin
-from company.models import Company, Store, SupplierEntity
+from company.models import Company, Store, SupplierEntity, Provider
 from django.forms import formset_factory
+from .forms import RequiredFormSet
 
 
 def product_categories_list(request,store_id = None, company_id = None):
@@ -157,8 +160,8 @@ def suppliers_list(request, store_id = None, company_id = None):
     return render(request, 'suppliers/index.html', context=context) 
 
 
-def products_list(request, store_id = None, company_id = None):
-    products = Product.objects.none()
+def store_products_list(request, store_id):
+    products = StoreProduct.objects.none()
 
     context = { "products" : products }
 
@@ -168,18 +171,53 @@ def products_list(request, store_id = None, company_id = None):
         company = store.company
         context["store"] = store
         context["company"] = company
-    elif company_id is not None:
-        company = Company.objects.get(pk=company_id)
-        context["company"] = company
 
-    products = Product.objects.filter(company = company)
+    products = StoreProduct.objects.filter(store = store)
     context["products"] = products
 
     return render(request, 'products/list/index.html', context=context) 
 
 
-def products_new(request, store_id = None, company_id = None):
-    form = ProductForm()
+# def products_new(request, store_id = None, company_id = None):
+#     form = ProductForm()
+
+#     context = { "form" : form}
+
+#     store = None
+#     if store_id is not None:
+#         store = Store.objects.get(pk=store_id)
+#         company = store.company
+#         context["store"] = store
+#         context["company"] = company
+#     elif company_id is not None:
+#         company = Company.objects.get(pk=company_id)
+#         context["company"] = company
+
+#     if request.method == "POST":
+#         form = ProductForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             product = form.save(commit=False)
+#             if Product.objects.filter(name = product.name.capitalize(), company = company).exists():
+#                 form.errors['name'] = ["Name ALready Exists!"]
+#                 context['form'] = form
+#                 return render(request, 'products/new/index.html', context=context)
+#             product.name = product.name.capitalize()
+#             product.company = company
+#             product.save()
+
+#             if store_id is not None:
+#                 return redirect('inventory:store-products-list', store_id=store_id)
+            
+#             if company_id is not None:
+#                 return redirect('inventory:company-products-list', company_id=company_id)
+#         else:
+#             context["form"] = form
+
+#     return render(request, 'products/new/index.html', context=context) 
+
+
+def store_products_new(request, store_id):
+    form = StoreProductForm()
 
     context = { "form" : form}
 
@@ -189,34 +227,52 @@ def products_new(request, store_id = None, company_id = None):
         company = store.company
         context["store"] = store
         context["company"] = company
-    elif company_id is not None:
-        company = Company.objects.get(pk=company_id)
-        context["company"] = company
 
     if request.method == "POST":
-        form = ProductForm(request.POST, request.FILES)
+        form = StoreProductForm(request.POST, request.FILES)
         if form.is_valid():
-            product = form.save(commit=False)
-            if Product.objects.filter(name = product.name.capitalize(), company = company).exists():
-                form.errors['name'] = ["Name ALready Exists!"]
-                context['form'] = form
-                return render(request, 'products/new/index.html', context=context)
-            product.name = product.name.capitalize()
-            product.company = company
+            name = form.cleaned_data.get("name")
+            category = form.cleaned_data.get("category")
+            variant = form.cleaned_data.get("variant")
+            units = form.cleaned_data.get("units")
+            description = form.cleaned_data.get("description")
+            item_photo = form.cleaned_data.get("item_photo", None)
+            unit_price = form.cleaned_data.get("unit_price")
+            reorder_min_qty = form.cleaned_data.get("reorder_min_qty")
+            is_for_sale = form.cleaned_data.get("is_for_sale", True)
+            is_consummable = form.cleaned_data.get("is_consummable", False)
+
+            product, _  = Product.objects.get_or_create(
+                company = company,
+                name = name,
+                category = category,
+                variant = variant,
+                units = units
+            )
+
+            product.created_by = request.user
             product.save()
 
-            if store_id is not None:
-                return redirect('inventory:store-products-list', store_id=store_id)
-            
-            if company_id is not None:
-                return redirect('inventory:company-products-list', company_id=company_id)
+
+            store_product, _ = StoreProduct.objects.get_or_create(store= store, product = product)
+
+            store_product.description = description
+            store_product.item_photo = item_photo
+            store_product.unit_price = unit_price
+            store_product.reorder_min_qty = reorder_min_qty
+            store_product.is_for_sale = is_for_sale
+            store_product.is_consummable = is_consummable
+            store_product.created_by = request.user
+            store_product.save()
+
+            return redirect('inventory:store-products-list', store_id=store_id)
         else:
             context["form"] = form
 
     return render(request, 'products/new/index.html', context=context) 
 
 
-def received_stock_list(request, store_id):
+def store_received_stock_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
 
@@ -230,7 +286,7 @@ def received_stock_list(request, store_id):
     return render(request, 'received_stock/list/index.html', context=context) 
 
 
-def received_stock_new(request, store_id):
+def store_received_stock_new(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
 
@@ -239,22 +295,57 @@ def received_stock_new(request, store_id):
         "store": store}
 
     form = ReceivedStockForm(company=company)
-    ReceivedStockItemFormSet = formset_factory(ReceivedStockItemForm, extra=1)
+    
+    # ReceivedStockItemFormSet = formset_factory(ReceivedStockItemForm, extra=1, validate_min=True)
+    ReceivedStockItemFormSet = formset_factory(ReceivedStockItemForm, formset=RequiredFormSet, extra=1, validate_min=True)
+
     formset = ReceivedStockItemFormSet(prefix='items')
 
     if request.method == "POST":
         form_data = ReceivedStockForm(request.POST,company=company)
         formset_data = ReceivedStockItemFormSet(request.POST, prefix='items')
 
-        print(form_data)
-        print(formset_data)
-
         if form_data.is_valid() and formset_data.is_valid():
-            received_stock = form_data.save(commit=False)
+            provider_type = form_data.cleaned_data.get("provider_type", None)
+            supplier_entity =  form_data.cleaned_data.get("supplier", None)
+            supplier_store =  form_data.cleaned_data.get("store", None)
+            
+            if provider_type == "SUPPLIER" and supplier_entity is None:
+                form_data.add_error("supplier", ValidationError("Select a supplier!"))
+                context['form'] = form_data
+                context['formset'] = formset 
+                return render(request, 'received_stock/new/index.html', context=context)
+            elif provider_type == "STORE" and supplier_store is None:
+                form_data.add_error("store", ValidationError("Select a store!"))
+                context['form'] = form_data
+                context['formset'] = formset 
+                return render(request, 'received_stock/new/index.html', context=context)
+
+            provider , created =  Provider.objects.get_or_create(
+                company = company,
+                provider_type = provider_type,
+                supplier_entity = supplier_entity,
+                supplier_store = supplier_store,
+            )
+
+            if created:
+                provider.created_by = request.user
+                provider.save()
+            
+            received_stock = ReceivedStock(
+                provider = provider,
+                delivered_by_name = form_data.cleaned_data.get("delivered_by_name"),
+                delivered_by_phone = form_data.cleaned_data.get("delivered_by_phone"),
+                received_date = form_data.cleaned_data.get("received_date"),
+                delivery_notes = form_data.cleaned_data.get("delivery_notes"),
+                company = company,
+                store = store,
+            )
+            
             received_stock.company = company
             received_stock.store = store
             received_stock.created_by = request.user
-            # received_stock.save()
+            received_stock.save()
 
             for formset_data_item in formset_data:
                 item = formset_data_item.save(commit=False)
@@ -262,14 +353,19 @@ def received_stock_new(request, store_id):
                 item.company = company
                 item.store = store
                 item.created_by = request.user
-                # item.save()
+                item.save() 
+
+                qty_received = formset_data_item.cleaned_data.get("qty_received")
+                store_product = item.store_product
+                store_product.available_qty +=  qty_received
+                store_product.save()
 
             context['success_message'] = 'Stock added successfully'
-            # return redirect('inventory:received-stock-list', store_id=store_id)
+            return redirect('inventory:received-stock-list', store_id=store_id)
         else:
             context['form'] = form_data
             context['formset'] = formset_data
-            return render(request, 'stock/index.html', context=context)
+            return render(request, 'received_stock/new/index.html', context=context)
     
     context['form'] = form  
     context['formset'] = formset  

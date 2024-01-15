@@ -42,36 +42,26 @@
               <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
                 <thead>
                   <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Photo</th>
-                    <th scope="col">Name</th>
-                    <th scope="col">Category</th>
-                    <th scope="col">Variant</th>
-                    <th scope="col">Units</th>
-                    <th scope="col">Unit Price</th>
-                    <th scope="col">QTY</th>
-                    <th scope="col">Min Order Qty</th>
+                    <th scope="col">Supplier</th>
+                    <th scope="col">Items</th>
+                    <th scope="col">Delivered By Name</th>
+                    <th scope="col">Delivered By Contact</th>
+                    <th scope="col">Received Date</th>
+                    <th scope="col">Status</th>
+
                     <th scope="col">Created At</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for result in products %}
+                  {% for result in items %}
                   <tr>
-                    <td>{{result.unique_no}}</td>
-                    <td>
-                      {% if result.item_photo %}
-                      <img src="{{ result.item_photo.url }}" alt="Photo" class="rounded-circle" width="40">
-                      {% else %}
-                      <p>No image!</p>
-                      {% endif %}
-                    </td>
-                    <td>{{result.name}}</td>
-                    <td>{{result.category.name}}</td>
-                    <td>{{result.variant.name}}</td>
-                    <td>{{result.units.name}}</td>
-                    <td>{{result.unit_price}}</td>
-                    <td>{{result.available_qty}}</td>
-                    <td>{{result.reorder_min_qty}}</td>
+                    <td>{{result.provider_details.name}}</td>
+                    <td>{{result.items_count}}</td>
+                    <td>{{result.delivered_by_name}}</td>
+                    <td>{{result.delivered_by_phone}}</td>
+                    <td>{{result.received_date}}</td>
+                    <td>{{result.status}}</td>
+
                     <td>{{result.created_at}}</td>
                   </tr>
                   {% endfor %}
