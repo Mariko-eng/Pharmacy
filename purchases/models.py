@@ -1,11 +1,11 @@
 from django.db import models
-from company.models import Company
+from company.models import Company, Supplier
 from company.models import Store
-from company.models import Provider
 from company.mixins import CommonFieldsMixin
 from inventory.models import Product
 
 class PurchaseOrderRequest(CommonFieldsMixin):
+    SUPPLIER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),
         ('APPROVED', 'Approved'),
@@ -16,7 +16,9 @@ class PurchaseOrderRequest(CommonFieldsMixin):
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
-    provider = models.ForeignKey(Provider,on_delete=models.SET_NULL,null=True)
+    supplier_type = models.CharField(max_length=10,choices=SUPPLIER_TYPES,default="SUPPLIER")
+    supplier_entity = models.ForeignKey(Supplier,on_delete=models.SET_NULL,null=True)
+    supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True, related_name="purchase_order_requests")
     order_date = models.DateField(null=True)
     expected_delivery_date = models.DateField(null=True)
     attached_file = models.FileField(upload_to="files")

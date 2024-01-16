@@ -216,105 +216,7 @@
                 <hr class="text-primary" />
             </div>
             {% endfor %}
-            
-            {% comment %} <div class="row">
-                <div class="col-md-2">
-                    <p class="text-center text-small">Product</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Batch No</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Qty Received</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Total Cost(SHS)</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Mfg Date</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Exp Date</p>
-                </div>
-            </div> {% endcomment %}
-            
-            {% comment %} {{ formset.management_form }}
-            {% for form in formset.forms %}
-            <div class="row form-row my-1">
-                <div class="col-md-2">
-                    {% if form.errors.store_product %}
-                    {% render_field form.store_product|add_class:"form-control is-invalid"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.store_product.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.store_product|add_class:"form-control"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.batch_no %}
-                    {% render_field form.batch_no|add_class:"form-control is-invalid"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.batch_no.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.batch_no|add_class:"form-control"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.qty_received %}
-                    {% render_field form.qty_received|add_class:"form-control is-invalid"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.qty_received.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.qty_received|add_class:"form-control"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.total_cost %}
-                    {% render_field form.total_cost|add_class:"form-control is-invalid"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.total_cost.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.total_cost|add_class:"form-control"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.manufactured_date %}
-                    {% render_field form.manufactured_date|add_class:"form-control is-invalid" type="date"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.manufactured_date.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.manufactured_date|add_class:"form-control" type="date"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.expiry_date %}
-                    <div class="input-group">
-                        {% render_field form.expiry_date|add_class:"form-control is-invalid" type="date"%}
-                        <div class="input-group-append">
-                            <span class="btn btn-success add-form-row p-0 text-center" style="width: 20px; height:20px;">+</span>
-                        </div>
-                    </div>
-                    <div class="invalid-feedback">
-                        {{ form.errors.expiry_date.0 }}
-                    </div>
-                    {% else %}
-                    <div class="input-group">
-                        {% render_field form.expiry_date|add_class:"form-control" type="date"%}
-                        <div class="input-group-append">
-                            <span class="btn btn-success add-form-row p-0 text-center" style="width: 20px; height:20px;">+</span>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %} {% endcomment %}
-            
-            
+                        
             <div class="col-12 d-flex justify-content-center mt-5">
                 <button class="btn btn-primary" type="submit" style="width: 300px;">Add New Stock</button>
             </div>
@@ -355,20 +257,20 @@
         //  conditionRow1.find('.remove-formset-item')
         // .removeClass('d-none')
         // .addClass('d-block');
-        
+
         conditionRow1.find('.remove-formset-item')
         .removeClass('d-none')
         .addClass('d-block');
-        
-        
+
+
         var conditionRow2 = $('.form-row:not(:last)');
         
         conditionRow2.find('.add-formset-item')
         .removeClass('d-block')
         .addClass('d-none');
-        
-        
-        
+
+
+
         
         // conditionRow.find('.btn.add-form-row')
         // .removeClass('btn-success').addClass('btn-danger')
@@ -394,41 +296,45 @@
     }
     
     $(document).ready(function() {
-        var supplierEntitySelect = $('#supplier_entity');
-        var supplierStoreSelect = $('#supplier_store');
+        var supplierSelect = $('#supplier');
+        var storeSelect = $('#store');
         
-        function toggleSupplierField() {
-            var supplierType = $("input[name='supplier_type']:checked").val();
+        function toggleProviderField() {
+            var providerType = $("input[name='provider_type']:checked").val();
             
-            // console.log($("input[name='supplier_type']:checked").val())
+            // console.log($("input[name='provider_type']:checked").val())
+            // console.log(providerType)
             
-            if (supplierType === "" || supplierType === undefined){                
-                supplierEntitySelect.prop('disabled', true);
-                supplierEntitySelect.val('').trigger('change');
+            if (providerType === "" || providerType === undefined){                
+                supplierSelect.prop('disabled', true);
+                supplierSelect.val('').trigger('change');
                 
-                supplierStoreSelect.prop('disabled', true);
-                supplierStoreSelect.val('').trigger('change');
+                storeSelect.prop('disabled', true);
+                storeSelect.val('').trigger('change');
+                
                 return;
             }
             
-            if (supplierType === "SUPPLIER"){
-                supplierEntitySelect.prop('disabled', false);
+            console.log("here 3")
+            
+            if (providerType === "SUPPLIER"){
+                supplierSelect.prop('disabled', false);
                 
-                supplierStoreSelect.val('').trigger('change');
-                supplierStoreSelect.prop('disabled', true);
+                storeSelect.val('').trigger('change');
+                storeSelect.prop('disabled', true);
             }
             
-            if (supplierType === "STORE"){
-                supplierStoreSelect.prop('disabled', false);
+            if (providerType === "STORE"){
+                storeSelect.prop('disabled', false);
                 
-                supplierEntitySelect.val('').trigger('change');
-                supplierEntitySelect.prop('disabled', true);
+                supplierSelect.val('').trigger('change');
+                supplierSelect.prop('disabled', true);
             }
         }   
         
-        toggleSupplierField()
+        toggleProviderField()
         
-        $("input[name='supplier_type']").change(toggleSupplierField);
+        $("input[name='provider_type']").change(toggleProviderField);
     })
     
     
@@ -446,25 +352,25 @@
         addForm('.form-row:last', 'items');
         return false;
     });
-    
-    
-    
+        
+        
+        
     $(document).on('click', '.remove-form', function(e){
         e.preventDefault();
         deleteForm('items', $(this));
         return false;
     });
-    
-    
-    // $(document).on('click', '.remove-form-row', function(e){
-        //    e.preventDefault();
-        //    deleteForm('items', $(this));
-        //    return false;
-        // });
         
-    </script>
-    
-    
-    {% endblock %}
-    
-    
+        
+        // $(document).on('click', '.remove-form-row', function(e){
+            //    e.preventDefault();
+            //    deleteForm('items', $(this));
+            //    return false;
+            // });
+            
+        </script>
+        
+        
+        {% endblock %}
+        
+        

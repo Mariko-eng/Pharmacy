@@ -5,14 +5,16 @@ from django.views import View
 from django.views.generic import ListView,CreateView
 from django.http import JsonResponse
 from .forms import ProductCategoryForm, ProductVariantForm
-from .forms import ProductUnitsForm, SupplierEntityForm
+from .forms import ProductUnitsForm, SupplierForm
 from .forms import StoreProductForm, ReceivedStockForm,ReceivedStockItemForm
 from .models import ProductVariant, ProductCategory, ProductUnits, Product, StoreProduct
 from .models import ReceivedStock, ReceivedStockItem
 from .mixins import CompanyMixin, CompanyFormMixin
-from company.models import Company, Store, SupplierEntity, Provider
+from company.models import Company, Store, Supplier
 from django.forms import formset_factory
+from django.forms.models import modelformset_factory
 from .forms import RequiredFormSet
+from django.shortcuts import get_object_or_404
 
 
 def product_categories_list(request,store_id = None, company_id = None):
@@ -125,7 +127,7 @@ def product_units_list(request,store_id = None, company_id = None):
 
 
 def suppliers_list(request, store_id = None, company_id = None):
-    form = SupplierEntityForm()
+    form = SupplierForm()
 
     context = { "form" : form}
 
@@ -139,15 +141,15 @@ def suppliers_list(request, store_id = None, company_id = None):
         company = Company.objects.get(pk=company_id)
         context["company"] = company
 
-    suppliers = SupplierEntity.objects.filter(company = company)
+    suppliers = Supplier.objects.filter(company = company)
     context["suppliers"] = suppliers
 
     if request.is_ajax():
         if request.method == "POST":
-            form = SupplierEntityForm(request.POST)
+            form = SupplierForm(request.POST)
             if form.is_valid():
                 supplier = form.save(commit=False)
-                if SupplierEntity.objects.filter(name = supplier.name.capitalize(), company = company).exists():
+                if Supplier.objects.filter(name = supplier.name.capitalize(), company = company).exists():
                     form.errors['name'] = ["Name ALready Exists!"]
                     return JsonResponse({'success': False, 'errors': form.errors})
                 supplier.name = supplier.name.capitalize()
@@ -306,34 +308,26 @@ def store_received_stock_new(request, store_id):
         formset_data = ReceivedStockItemFormSet(request.POST, prefix='items')
 
         if form_data.is_valid() and formset_data.is_valid():
-            provider_type = form_data.cleaned_data.get("provider_type", None)
-            supplier_entity =  form_data.cleaned_data.get("supplier", None)
-            supplier_store =  form_data.cleaned_data.get("store", None)
+            supplier_type = form_data.cleaned_data.get("supplier_type", None)
+            supplier_entity =  form_data.cleaned_data.get("supplier_entity", None)
+            supplier_store =  form_data.cleaned_data.get("supplier_store", None)
             
-            if provider_type == "SUPPLIER" and supplier_entity is None:
-                form_data.add_error("supplier", ValidationError("Select a supplier!"))
+            if supplier_type == "SUPPLIER" and supplier_entity is None:
+                form_data.add_error("supplier_entity", ValidationError("Select a supplier!"))
                 context['form'] = form_data
                 context['formset'] = formset 
                 return render(request, 'received_stock/new/index.html', context=context)
-            elif provider_type == "STORE" and supplier_store is None:
-                form_data.add_error("store", ValidationError("Select a store!"))
+            elif supplier_type == "STORE" and supplier_store is None:
+                form_data.add_error("supplier_store", ValidationError("Select a store!"))
                 context['form'] = form_data
                 context['formset'] = formset 
                 return render(request, 'received_stock/new/index.html', context=context)
 
-            provider , created =  Provider.objects.get_or_create(
-                company = company,
-                provider_type = provider_type,
-                supplier_entity = supplier_entity,
-                supplier_store = supplier_store,
-            )
-
-            if created:
-                provider.created_by = request.user
-                provider.save()
             
             received_stock = ReceivedStock(
-                provider = provider,
+                supplier_type = supplier_type,
+                supplier_entity = supplier_entity,
+                supplier_store = supplier_store,
                 delivered_by_name = form_data.cleaned_data.get("delivered_by_name"),
                 delivered_by_phone = form_data.cleaned_data.get("delivered_by_phone"),
                 received_date = form_data.cleaned_data.get("received_date"),
@@ -370,6 +364,62 @@ def store_received_stock_new(request, store_id):
     context['form'] = form  
     context['formset'] = formset  
     return render(request, 'received_stock/new/index.html', context=context) 
+
+
+def store_received_stock_edit(request, store_id, received_stock_id):
+    store = get_object_or_404(Store, pk=store_id)
+    company = store.company
+
+    received_stock = get_object_or_404(ReceivedStock, pk=received_stock_id, store=store)
+
+    context = {
+        "company": company,
+        "store": store,
+        "received_stock": received_stock,
+    }
+
+    form = ReceivedStockForm(instance = received_stock, company=company)
+
+    ReceivedStockItemFormSet = modelformset_factory(ReceivedStockItem,form=ReceivedStockItemForm, extra=0)
+    qs = received_stock.receivedstockitem_set.all()
+    formset = ReceivedStockItemFormSet(prefix='items',queryset=qs)
+
+    if request.method == "POST":
+        form_data = ReceivedStockForm(request.POST, instance=received_stock, company=company)
+        formset_data = ReceivedStockItemFormSet(request.POST, prefix='items', queryset=ReceivedStockItem.objects.filter(received_stock=received_stock))
+
+        if form_data.is_valid() and formset_data.is_valid():
+            # Update the received stock details
+            form_data.save()
+
+            # Update each item in the formset
+            for formset_data_item in formset_data:
+                item = formset_data_item.save(commit=False)
+                item.received_stock = received_stock
+                item.company = company
+                item.store = store
+                item.created_by = request.user
+                item.save()
+
+                # Update store product quantities
+                qty_received = formset_data_item.cleaned_data.get("qty_received")
+                store_product = item.store_product
+                store_product.available_qty += qty_received
+                store_product.save()
+
+            context['success_message'] = 'Stock edited successfully'
+            return redirect('inventory:received-stock-list', store_id=store_id)
+        else:
+            context['form'] = form_data
+            context['formset'] = formset_data
+            return render(request, 'received_stock/edit/index.html', context=context)
+
+    context['form'] = form
+    context['formset'] = formset
+    return render(request, 'received_stock/edit/index.html', context=context)
+
+
+
 
 
 

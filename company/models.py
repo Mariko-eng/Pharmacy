@@ -58,7 +58,7 @@ class PosCenter(CommonFieldsMixin):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
 
-class SupplierEntity(CommonFieldsMixin):
+class Supplier(CommonFieldsMixin):
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=225)
@@ -70,15 +70,15 @@ class SupplierEntity(CommonFieldsMixin):
     def __str__(self):
         return self.name
     
-class Provider(CommonFieldsMixin):
-    PROVIDER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
+# class Provider(CommonFieldsMixin):
+#     PROVIDER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
     
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
-    provider_type = models.CharField(max_length=10,choices=PROVIDER_TYPES,default="SUPPLIER")
-    supplier_entity = models.ForeignKey(SupplierEntity,on_delete=models.SET_NULL,null=True)
-    supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
-    updated_by = models.CharField(max_length=225,null=True,blank=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="providers_createdby")
+#     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
+#     provider_type = models.CharField(max_length=10,choices=PROVIDER_TYPES,default="SUPPLIER")
+#     supplier_entity = models.ForeignKey(SupplierEntity,on_delete=models.SET_NULL,null=True)
+#     supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
+#     updated_by = models.CharField(max_length=225,null=True,blank=True)
+#     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="providers_createdby")
 
 
 class Customer(CommonFieldsMixin):

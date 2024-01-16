@@ -1,7 +1,7 @@
 from django import forms
 from .models import ProductVariant, ProductCategory, ProductUnits
 from .models import Product, StoreProduct, ReceivedStock, ReceivedStockItem
-from company.models import SupplierEntity, Provider, Store
+from company.models import Supplier, Store
 from django.forms import inlineformset_factory
 from django.forms import BaseFormSet
 
@@ -20,41 +20,10 @@ class ProductUnitsForm(forms.ModelForm):
         model = ProductUnits
         fields = ['name']
 
-class SupplierEntityForm(forms.ModelForm):
+class SupplierForm(forms.ModelForm):
     class Meta:
-        model = SupplierEntity
+        model = Supplier
         fields = ['name','phone','email','location']
-
-# class ProductForm(forms.ModelForm):
-#     name = forms.CharField(max_length=30)
-#     description = forms.CharField(widget=forms.Textarea) # For type TextField
-#     item_photo = forms.ImageField(required=False)
-#     category = forms.ModelChoiceField(
-#         queryset= ProductCategory.objects.all(),  # Provide the queryset
-#         required= True,  # Set to True if you want it to be required
-#     )
-#     variant = forms.ModelChoiceField(
-#         queryset= ProductVariant.objects.all(),  # Provide the queryset
-#         required= True,  # Set to True if you want it to be required
-#     )
-#     units = forms.ModelChoiceField(
-#         queryset= ProductUnits.objects.all(),  # Provide the queryset
-#         required= True,  # Set to True if you want it to be required
-#     )
-#     unit_price = forms.DecimalField(initial=0)
-#     reorder_min_qty = forms.DecimalField(initial=0)
-
-#     class Meta:
-#         model = Product
-#         fields = [
-#             'name',
-#             'description',
-#             'variant',
-#             'category',
-#             'units',
-#         ]
-#         exclude = ['company','unique_no','updated_by','updated_at','created_by','created_at']
-
 
 class StoreProductForm(forms.ModelForm):
     name = forms.CharField(max_length=30)
@@ -94,18 +63,17 @@ class StoreProductForm(forms.ModelForm):
 
 class ReceivedStockForm(forms.ModelForm):
 
-    provider_type = forms.ChoiceField(
-        choices = Provider.PROVIDER_TYPES,
+    supplier_type = forms.ChoiceField(
+        choices = ReceivedStock.SUPPLIER_TYPES,
         widget = forms.RadioSelect(),
-        initial = ""
     )
 
-    supplier = forms.ModelChoiceField(
+    supplier_entity = forms.ModelChoiceField(
         queryset= None,  # Provide the queryset
         required= False,
     )
 
-    store = forms.ModelChoiceField(
+    supplier_store = forms.ModelChoiceField(
         queryset= None,  # Provide the queryset
         required= False,
     )
@@ -113,7 +81,7 @@ class ReceivedStockForm(forms.ModelForm):
     class Meta:
         model = ReceivedStock
         fields = [
-            # 'provider',
+            'supplier_type',
             'delivered_by_name','delivered_by_phone',
             'received_date','delivery_notes',]
         exclude = ['company','store','updated_by_id','updated_at','created_by','created_at']
@@ -123,8 +91,17 @@ class ReceivedStockForm(forms.ModelForm):
         super(ReceivedStockForm, self).__init__(*args, **kwargs)
 
         if company:
-            self.fields['supplier'].queryset = SupplierEntity.objects.filter(company=company)
-            self.fields['store'].queryset = Store.objects.filter(company=company)
+            self.fields['supplier_entity'].queryset = Supplier.objects.filter(company=company)
+            self.fields['supplier_store'].queryset = Store.objects.filter(company=company)
+
+                    # Check if an instance is passed and set the initial value for supplier_entity
+        instance = kwargs.get('instance')
+        if instance and instance.supplier_entity:
+            self.initial['supplier_entity'] = instance.supplier_entity
+
+        if instance and instance.supplier_store:
+            self.initial['supplier_store'] = instance.supplier_store
+
 
 class ReceivedStockItemForm(forms.ModelForm):
     class Meta:

@@ -28,15 +28,19 @@ urlpatterns = [
     path('inventory/products/suppliers/list/store/<int:store_id>/',
         views.suppliers_list, name="store-product-suppliers-list"),
     
-    #Store Products-list
+    #Store Products
     path('store/inventory/products/list/store/<int:store_id>/',
         views.store_products_list, name="store-products-list"),
     path('store/<int:store_id>/inventory/products/new/',
         views.store_products_new, name="store-products-new"),
+
+    #Store Recieved Stock     
     path('store/<int:store_id>/inventory/received_stock/list/',
         views.store_received_stock_list, name="received-stock-list"),
     path('store/<int:store_id>/inventory/received_stock/new/',
         views.store_received_stock_new, name="received-stock-new"),
+    path('store/<int:store_id>/inventory/received_stock/edit/<int:received_stock_id>/',
+        views.store_received_stock_edit, name="received-stock-edit"),
 
 
     # path('stock/',views.StockListCreateView.as_view(), name="stock"),

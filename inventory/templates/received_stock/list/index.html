@@ -48,8 +48,8 @@
                     <th scope="col">Delivered By Contact</th>
                     <th scope="col">Received Date</th>
                     <th scope="col">Status</th>
-
                     <th scope="col">Created At</th>
+                    <th scope="col">Action</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -61,8 +61,8 @@
                     <td>{{result.delivered_by_phone}}</td>
                     <td>{{result.received_date}}</td>
                     <td>{{result.status}}</td>
-
                     <td>{{result.created_at}}</td>
+                    <td><a href={% url 'inventory:received-stock-edit' store_id=store.id received_stock_id=result.id %}>Edit</a></td>
                   </tr>
                   {% endfor %}
                 </tbody>

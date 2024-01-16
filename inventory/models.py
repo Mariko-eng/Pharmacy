@@ -2,7 +2,7 @@ from django.db import models
 from company.models import Company
 from company.models import Store
 from company.models import PosCenter
-from company.models import Provider
+from company.models import Supplier
 from company.mixins import CommonFieldsMixin
 
 class ProductCategory(CommonFieldsMixin):
@@ -37,7 +37,7 @@ class Product(CommonFieldsMixin):
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
     unique_no = models.CharField(max_length=255,unique=True)
-    name = models.CharField(max_length=255,unique=True)
+    name = models.CharField(max_length=255)
     # description = models.TextField(blank=True, null=True)
     category = models.ForeignKey(ProductCategory,on_delete=models.SET_NULL, null=True)
     variant = models.ForeignKey(ProductVariant,on_delete=models.SET_NULL, null=True)
@@ -53,6 +53,9 @@ class Product(CommonFieldsMixin):
 
     def __str__(self):
         return self.name
+    
+    class Meta:
+        unique_together = ('name', 'company')
     
 class StoreProduct(CommonFieldsMixin):
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
@@ -73,15 +76,19 @@ class StoreProduct(CommonFieldsMixin):
         return self.product.name
     
 class ReceivedStock(CommonFieldsMixin):
+    SUPPLIER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
     STATUS_TYPES = [('PENDING', 'PENDING'),('APPROVED', 'APPROVED'),('CANCELLED', 'CANCELLED'),]
 
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
-    provider = models.ForeignKey(Provider,on_delete=models.SET_NULL,null=True)
-    delivered_by_name = models.CharField(max_length=255,unique=True)
-    delivered_by_phone = models.CharField(max_length=255,unique=True)
+    
+    supplier_type = models.CharField(max_length=10,choices=SUPPLIER_TYPES,default="SUPPLIER")
+    supplier_entity = models.ForeignKey(Supplier,on_delete=models.SET_NULL,null=True)
+    supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True, related_name="received_stock")
+    delivered_by_name = models.CharField(max_length=255)
+    delivered_by_phone = models.CharField(max_length=255)
     received_date = models.DateField(null=True)
     delivery_notes = models.TextField(null=True,blank=True)
     status = models.CharField(max_length=10,choices=STATUS_TYPES, default="PENDING")
@@ -91,10 +98,10 @@ class ReceivedStock(CommonFieldsMixin):
 
     @property
     def provider_details(self):
-        if self.provider.provider_type == "SUPPLIER":
-            return self.provider.supplier_entity
-        elif self.provider.provider_type == "STORE":
-            return self.provider.supplier_store
+        if self.supplier_type == "SUPPLIER":
+            return self.supplier_entity
+        elif self.supplier_type == "STORE":
+            return self.supplier_store
         else:
             return "Nan"
     
@@ -109,7 +116,7 @@ class ReceivedStockItem(CommonFieldsMixin):
     # Data
     received_stock = models.ForeignKey(ReceivedStock,on_delete=models.CASCADE)
     store_product = models.ForeignKey(StoreProduct,on_delete=models.CASCADE)
-    batch_no = models.CharField(max_length=255,unique=True)
+    batch_no = models.CharField(max_length=255)
     qty_received = models.DecimalField(max_digits=12, decimal_places=3)
     unit_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     total_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0)
