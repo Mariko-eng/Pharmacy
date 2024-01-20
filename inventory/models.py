@@ -139,9 +139,9 @@ class StockRequest(CommonFieldsMixin):
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
-    request_date = models.DateField(auto_now_add=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+    request_date = models.DateField(null=True)
     request_notes = models.TextField(null=True,blank=True)
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="stock_requests_createdby")
     # created_at = models.DateTimeField(auto_now_add=True)

@@ -1,6 +1,7 @@
 from django import forms
 from .models import ProductVariant, ProductCategory, ProductUnits
 from .models import Product, StoreProduct, ReceivedStock, ReceivedStockItem
+from .models import StockRequest, StockRequestItem
 from company.models import Supplier, Store
 from django.forms import inlineformset_factory
 from django.forms import BaseFormSet
@@ -61,6 +62,12 @@ class StoreProductForm(forms.ModelForm):
         exclude = ['company','updated_by','updated_at','created_by','created_at']
 
 
+class RequiredFormSet(BaseFormSet):
+    def __init__(self, *args, **kwargs):
+        super(RequiredFormSet, self).__init__(*args, **kwargs)
+        for form in self.forms:
+            form.empty_permitted = False
+
 class ReceivedStockForm(forms.ModelForm):
 
     supplier_type = forms.ChoiceField(
@@ -84,7 +91,7 @@ class ReceivedStockForm(forms.ModelForm):
             'supplier_type',
             'delivered_by_name','delivered_by_phone',
             'received_date','delivery_notes',]
-        exclude = ['company','store','updated_by_id','updated_at','created_by','created_at']
+        exclude = ['company','store','updated_by','updated_at','created_by','created_at']
 
 
     def __init__(self, *args, company=None, **kwargs):
@@ -110,21 +117,31 @@ class ReceivedStockItemForm(forms.ModelForm):
             'store_product','batch_no','qty_received',
             'total_cost','manufactured_date','expiry_date',
         ]
-        exclude = ['company','store','received_stock','updated_by_id','updated_at','created_by','created_at']
+        exclude = ['company','store','received_stock','updated_by','updated_at','created_by','created_at']
 
 
 
-ReceivedStockItemFormSet = inlineformset_factory(
-    ReceivedStock, ReceivedStockItem, form=ReceivedStockItemForm,
-    extra=1, can_delete=True, can_delete_extra=True
-)
-
-# function:: inlineformset_factory(parent_model, model, form=ModelForm, formset=BaseInlineFormSet, fk_name=None, fields=None, exclude=None, extra=3, can_order=False, can_delete=True, max_num=None, formfield_callback=None, widgets=None, validate_max=False, localized_fields=None, labels=None, help_texts=None, error_messages=None, min_num=None, validate_min=False, field_classes=None, absolute_max=None, can_delete_extra=True, renderer=None, edit_only=False)
+# ReceivedStockItemFormSet = inlineformset_factory(
+#     ReceivedStock, ReceivedStockItem, form=ReceivedStockItemForm,
+#     extra=1, can_delete=True, can_delete_extra=True
+# )
 
 
+class StockRequestForm(forms.ModelForm):
+    
+    class Meta:
+        model = StockRequest
+        fields = [
+            'request_date',
+            'request_notes',]
+        exclude = ['company','store','updated_by','updated_at','created_by','created_at']
 
-class RequiredFormSet(BaseFormSet):
-    def __init__(self, *args, **kwargs):
-        super(RequiredFormSet, self).__init__(*args, **kwargs)
-        for form in self.forms:
-            form.empty_permitted = False
+
+
+class StockRequestItemForm(forms.ModelForm):
+    class Meta:
+        model = StockRequestItem
+        fields = [
+            'store_product','quantity',
+        ]
+        exclude = ['company','store','stock_request','updated_by','updated_at','created_by','created_at']

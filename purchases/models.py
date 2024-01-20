@@ -2,7 +2,7 @@ from django.db import models
 from company.models import Company, Supplier
 from company.models import Store
 from company.mixins import CommonFieldsMixin
-from inventory.models import Product
+from inventory.models import StoreProduct
 
 class PurchaseOrderRequest(CommonFieldsMixin):
     SUPPLIER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
@@ -20,12 +20,11 @@ class PurchaseOrderRequest(CommonFieldsMixin):
     supplier_entity = models.ForeignKey(Supplier,on_delete=models.SET_NULL,null=True)
     supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True, related_name="purchase_order_requests")
     order_date = models.DateField(null=True)
-    expected_delivery_date = models.DateField(null=True)
-    attached_file = models.FileField(upload_to="files")
+    delivery_date = models.DateField(null=True) # Expected  Delivery Date
     order_notes = models.TextField(null=True,blank=True)
     payment_terms = models.TextField(null=True,blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
-    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="purchase_orders_createdby")
     # created_at = models.DateTimeField(auto_now_add=True)
     # updated_at = models.DateTimeField(auto_now=True)
@@ -35,10 +34,10 @@ class PurchaseOrderRequestItem(CommonFieldsMixin):
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
-    stock_request = models.ForeignKey(PurchaseOrderRequest, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    order_request = models.ForeignKey(PurchaseOrderRequest, on_delete=models.CASCADE)
+    store_product = models.ForeignKey(StoreProduct,on_delete=models.CASCADE)
     quantity = models.PositiveIntegerField()
-    updated_by_id = models.CharField(max_length=225,null=True,blank=True)
+    updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="purchase_order_items_createdby")
     # created_at = models.DateTimeField(auto_now_add=True)
     # updated_at = models.DateTimeField(auto_now=True)

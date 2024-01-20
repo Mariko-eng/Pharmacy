@@ -1,5 +1,5 @@
 from django.db import models
-from inventory.models import Product
+from inventory.models import StoreProduct
 from company.models import Company,Store,PosCenter,Customer
 from company.mixins import CommonFieldsMixin
 
@@ -39,7 +39,7 @@ class SaleItem(CommonFieldsMixin):
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     pos_center = models.ForeignKey(PosCenter, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    store_product = models.ForeignKey(StoreProduct, on_delete=models.CASCADE)
     quantity_sold = models.PositiveIntegerField()
     price_sold = models.DecimalField(max_digits=10, decimal_places=2)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)

@@ -42,6 +42,15 @@ urlpatterns = [
     path('store/<int:store_id>/inventory/received_stock/edit/<int:received_stock_id>/',
         views.store_received_stock_edit, name="received-stock-edit"),
 
+    
+        #Store Recieved Stock     
+    path('store/<int:store_id>/inventory/stock-requests/list/',
+        views.store_stock_requests_list, name="stock-requests-list"),
+    path('store/<int:store_id>/inventory/stock-requests/new/',
+        views.store_stock_requests_new, name="stock-requests-new"),
+    path('store/<int:store_id>/inventory/stock-requests/edit/<int:stock_request_id>/',
+        views.store_stock_requests_edit, name="stock-requests-edit"),
+
 
     # path('stock/',views.StockListCreateView.as_view(), name="stock"),
     # path('stock/new/',views.StockCreateView.as_view(), name="stock"),

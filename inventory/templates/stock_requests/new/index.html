@@ -8,8 +8,8 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item"><a>Received Stock</a></li>
-            <li class="breadcrumb-item active"><a>Edit</a></li>
+            <li class="breadcrumb-item"><a>Stock Requests</a></li>
+            <li class="breadcrumb-item active"><a>New</a></li>
         </ol>
     </nav>
 </div><!-- End Page Title --> 
@@ -20,7 +20,7 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title"> Edit Received Stock Form</h5>
+        <h5 class="card-title"> New Stock Request Form</h5>
         
         <form class="row g-3 needs-validation" method="post" novalidate >
             
@@ -204,41 +204,27 @@
                         {% endif %}
                     </div>
                 </div>
-                                
+                
+                <div class="d-flex flex-row justify-content-end d-block add-formset-item">
+                    <a class = "add-form text-primary" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Add Item</span></a>
+                </div>
+                
                 <div class="d-flex flex-row justify-content-end d-none remove-formset-item">
-                    <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-trash"></i><span>Remove Item</span></a>
+                    <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Remove Item</span></a>
                 </div>
                 
                 <hr class="text-primary" />
             </div>
-
-            {% comment %} <!-- Include hidden input field for the id if the item already exists --> {% endcomment %}
-            {% if formset_item.instance.id %}
-            <input type="hidden" name="{{ formset.prefix }}-{{ forloop.counter0 }}-id" value="{{ formset_item.instance.id }}">
-            {% endif %}
-
-            {% endfor %}
-            <div class="d-flex flex-row justify-content-start d-block add-formset-item">
-                <a class = "add-form text-primary" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Add Item</span></a>
-            </div>
-                        
+            {% endfor %}            
+            
             <div class="col-12 d-flex justify-content-center mt-5">
-                <button class="btn btn-primary" type="submit" style="width: 300px;">Edit Stock</button>
+                <button class="btn btn-primary" type="submit" style="width: 300px;">Add New Stock</button>
             </div>
         </form>
     </div>
 </div>
 
 <script type='text/javascript'>
-
-    function init(){
-        var conditionRow1 = $('.form-row:not(:first)');
-
-        conditionRow1.find('.remove-formset-item')
-        .removeClass('d-none')
-        .addClass('d-block');
-    }
-
     
     function updateElementIndex(el, prefix, ndx) {
         var id_regex = new RegExp('(' + prefix + '-\\d+)');
@@ -266,25 +252,25 @@
         total++;
         $('#id_' + prefix + '-TOTAL_FORMS').val(total);
         $(selector).after(newElement);
-        var conditionRow1 = $('.form-row:not(:first)');
+        var conditionRow1 = $('.form-row:not(:last)');
         
         //  conditionRow1.find('.remove-formset-item')
         // .removeClass('d-none')
         // .addClass('d-block');
-
+        
         conditionRow1.find('.remove-formset-item')
         .removeClass('d-none')
         .addClass('d-block');
-
-
-        //var conditionRow2 = $('.form-row:not(:last)');
         
-        //conditionRow2.find('.add-formset-item')
-        //.removeClass('d-block')
-        //.addClass('d-none');
-
-
-
+        
+        var conditionRow2 = $('.form-row:not(:last)');
+        
+        conditionRow2.find('.add-formset-item')
+        .removeClass('d-block')
+        .addClass('d-none');
+        
+        
+        
         
         // conditionRow.find('.btn.add-form-row')
         // .removeClass('btn-success').addClass('btn-danger')
@@ -310,49 +296,41 @@
     }
     
     $(document).ready(function() {
-
-        init();
-
-
-        var supplierSelect = $('#supplier');
-        var storeSelect = $('#store');
+        var supplierEntitySelect = $('#supplier_entity');
+        var supplierStoreSelect = $('#supplier_store');
         
-        function toggleProviderField() {
-            var providerType = $("input[name='provider_type']:checked").val();
+        function toggleSupplierField() {
+            var supplierType = $("input[name='supplier_type']:checked").val();
             
-            // console.log($("input[name='provider_type']:checked").val())
-            // console.log(providerType)
+            // console.log($("input[name='supplier_type']:checked").val())
             
-            if (providerType === "" || providerType === undefined){                
-                supplierSelect.prop('disabled', true);
-                supplierSelect.val('').trigger('change');
+            if (supplierType === "" || supplierType === undefined){                
+                supplierEntitySelect.prop('disabled', true);
+                supplierEntitySelect.val('').trigger('change');
                 
-                storeSelect.prop('disabled', true);
-                storeSelect.val('').trigger('change');
-                
+                supplierStoreSelect.prop('disabled', true);
+                supplierStoreSelect.val('').trigger('change');
                 return;
             }
             
-            console.log("here 3")
-            
-            if (providerType === "SUPPLIER"){
-                supplierSelect.prop('disabled', false);
+            if (supplierType === "SUPPLIER"){
+                supplierEntitySelect.prop('disabled', false);
                 
-                storeSelect.val('').trigger('change');
-                storeSelect.prop('disabled', true);
+                supplierStoreSelect.val('').trigger('change');
+                supplierStoreSelect.prop('disabled', true);
             }
             
-            if (providerType === "STORE"){
-                storeSelect.prop('disabled', false);
+            if (supplierType === "STORE"){
+                supplierStoreSelect.prop('disabled', false);
                 
-                supplierSelect.val('').trigger('change');
-                supplierSelect.prop('disabled', true);
+                supplierEntitySelect.val('').trigger('change');
+                supplierEntitySelect.prop('disabled', true);
             }
         }   
         
-        toggleProviderField()
+        toggleSupplierField()
         
-        $("input[name='provider_type']").change(toggleProviderField);
+        $("input[name='supplier_type']").change(toggleSupplierField);
     })
     
     
@@ -370,25 +348,19 @@
         addForm('.form-row:last', 'items');
         return false;
     });
-        
-        
-        
+    
+    
+    
     $(document).on('click', '.remove-form', function(e){
         e.preventDefault();
         deleteForm('items', $(this));
         return false;
     });
+    
         
-        
-        // $(document).on('click', '.remove-form-row', function(e){
-            //    e.preventDefault();
-            //    deleteForm('items', $(this));
-            //    return false;
-            // });
-            
-        </script>
-        
-        
-        {% endblock %}
-        
-        
+    </script>
+    
+    
+    {% endblock %}
+    
+    
