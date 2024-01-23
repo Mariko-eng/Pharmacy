@@ -34,7 +34,7 @@
                         <div class="col-sm-12">
                             {{ radio }}
                         </div>
-                    </div>
+                    </div> 
                     {% endfor %}
                     {% if form.errors.supplier_type %}
                     <div id = "" class="text-danger">
@@ -73,72 +73,58 @@
                 </div>
             </div> 
             
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="delivered_by_name" class="col-sm-12 col-form-label">Delivered By Name</label>
-                    <div class="col-sm-12">
-                        {% if form.errors.delivered_by_name %}
-                        {% render_field form.delivered_by_name|add_class:"form-control is-invalid" %}
-                        <div class="invalid-feedback">
-                            {{ form.errors.delivered_by_name.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field form.delivered_by_name|add_class:"form-control" %}
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <label for="delivered_by_phone" class="col-sm-12 col-form-label">Delivered By Phone</label>
-                    <div class="col-sm-12">
-                        {% if form.errors.delivered_by_phone %}
-                        {% render_field form.delivered_by_phone|add_class:"form-control is-invalid" %}
-                        <div class="invalid-feedback">
-                            {{ form.errors.delivered_by_phone.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field form.delivered_by_phone|add_class:"form-control" %}
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
             
             <div class="row mb-3">
-                <label for="received_date" class="col-sm-2 col-form-label">Received Date</label>
+                <label for="order_date" class="col-sm-2 col-form-label">Order Date</label>
                 <div class="col-sm-10">
-                    {% if form.errors.received_date %}
-                    {% render_field form.received_date|add_class:"form-control is-invalid" type="date" %}
+                    {% if form.errors.order_date %}
+                    {% render_field form.order_date|add_class:"form-control is-invalid" type="date" %}
                     <div class="invalid-feedback">
-                        {{ form.errors.received_date.0 }}
+                        {{ form.errors.order_date.0 }}
                     </div>
                     {% else %}
-                    {% render_field form.received_date|add_class:"form-control" type="date" %}
+                    {% render_field form.order_date|add_class:"form-control" type="date" %}
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <label for="delivery_date" class="col-sm-2 col-form-label">Delivery Date</label>
+                <div class="col-sm-10">
+                    {% if form.errors.delivery_date %}
+                    {% render_field form.delivery_date|add_class:"form-control is-invalid" type="date" %}
+                    <div class="invalid-feedback">
+                        {{ form.errors.delivery_date.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.delivery_date|add_class:"form-control" type="date" %}
                     {% endif %}
                 </div>
             </div>
             
             <div class="row mb-3">
-                <label for="delivery_notes" class="col-sm-2 col-form-label">Delivery Notes</label>
+                <label for="order_notes" class="col-sm-2 col-form-label">Comments / Remarks</label>
                 <div class="col-sm-10">
-                    {% if form.errors.delivery_notes %}
-                    {% render_field form.delivery_notes|add_class:"form-control is-invalid" rows="3" %}
+                    {% if form.errors.order_notes %}
+                    {% render_field form.order_notes|add_class:"form-control is-invalid" rows="3" %}
                     <div class="invalid-feedback">
-                        {{ form.errors.delivery_notes.0 }}
+                        {{ form.errors.order_notes.0 }}
                     </div>
                     {% else %}
-                    {% render_field form.delivery_notes|add_class:"form-control" rows="3" %}
+                    {% render_field form.order_notes|add_class:"form-control" rows="3" %}
                     {% endif %}
                 </div>
             </div>
             
             <hr/ class="mt-4">
-            <h5 class="card-title">Enter Received Items</h5>
+            <h5 class="card-title">Enter Orders Items</h5>
             
-            {{ formset.management_form }}
+             {{ formset.management_form }}
             {% for formset_item in formset.forms %}
             <div class="form-row my-2">
                 <div class="row">
-                    <div class="col-md-2">Product</div>
-                    <div class="col-md-4">
+                    <div class="col-md-1">Product</div>
+                    <div class="col-md-3">
                         {% if formset_item.errors.store_product %}
                         {% render_field formset_item.store_product|add_class:"form-control is-invalid"%}
                         <div class="invalid-feedback">
@@ -148,30 +134,19 @@
                         {% render_field formset_item.store_product|add_class:"form-control"%}
                         {% endif %}
                     </div>
-                    <div class="col-md-2">Batch No</div>
-                    <div class="col-md-4">
-                        {% if formset_item.errors.batch_no %}
-                        {% render_field formset_item.batch_no|add_class:"form-control is-invalid"%}
+                    <div class="col-md-1">Qty</div>
+                    <div class="col-md-2">
+                        {% if formset_item.errors.quantity %}
+                        {% render_field formset_item.quantity|add_class:"form-control is-invalid"%}
                         <div class="invalid-feedback">
-                            {{ formset_item.errors.batch_no.0 }}
+                            {{ formset_item.errors.quantity.0 }}
                         </div>
                         {% else %}
-                        {% render_field formset_item.batch_no|add_class:"form-control"%}
-                        {% endif %}
-                    </div>
-                    <div class="col-md-2">Qty</div>
-                    <div class="col-md-4">
-                        {% if formset_item.errors.qty_received %}
-                        {% render_field formset_item.qty_received|add_class:"form-control is-invalid"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.qty_received.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field formset_item.qty_received|add_class:"form-control"%}
+                        {% render_field formset_item.quantity|add_class:"form-control"%}
                         {% endif %}
                     </div>
                     <div class="col-md-2">Total Cost</div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         {% if formset_item.errors.total_cost %}
                         {% render_field formset_item.total_cost|add_class:"form-control is-invalid"%}
                         <div class="invalid-feedback">
@@ -181,28 +156,6 @@
                         {% render_field formset_item.total_cost|add_class:"form-control"%}
                         {% endif %}
                     </div>
-                    <div class="col-md-2">Mfg Date</div>
-                    <div class="col-md-4">
-                        {% if formset_item.errors.manufactured_date %}
-                        {% render_field formset_item.manufactured_date|add_class:"form-control is-invalid" type="date"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.manufactured_date.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field formset_item.manufactured_date|add_class:"form-control" type="date"%}
-                        {% endif %}
-                    </div>
-                    <div class="col-md-2">Exp Date</div>
-                    <div class="col-md-4">
-                        {% if formset_item.errors.expiry_date %}
-                        {% render_field formset_item.expiry_date|add_class:"form-control is-invalid" type="date"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.expiry_date.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field formset_item.expiry_date|add_class:"form-control" type="date"%}
-                        {% endif %}
-                    </div>
                 </div>
                 
                 <div class="d-flex flex-row justify-content-end d-block add-formset-item">
@@ -210,15 +163,15 @@
                 </div>
                 
                 <div class="d-flex flex-row justify-content-end d-none remove-formset-item">
-                    <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Remove Item</span></a>
+                    <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-trash"></i><span>Remove Item</span></a>
                 </div>
                 
                 <hr class="text-primary" />
             </div>
-            {% endfor %}            
+            {% endfor %}             
             
             <div class="col-12 d-flex justify-content-center mt-5">
-                <button class="btn btn-primary" type="submit" style="width: 300px;">Add New Stock</button>
+                <button class="btn btn-primary" type="submit" style="width: 300px;">Add New Purchase Order</button>
             </div>
         </form>
     </div>

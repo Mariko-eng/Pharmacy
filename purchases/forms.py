@@ -2,7 +2,7 @@ from django import forms
 from .models import PurchaseOrderRequest
 from .models import PurchaseOrderRequestItem 
 from company.models import Supplier, Store
-from django.forms import inlineformset_factory
+# from django.forms import inlineformset_factory
 from django.forms import BaseFormSet
 
 
@@ -55,9 +55,10 @@ class PurchaseOrderRequestForm(forms.ModelForm):
 
 
 class PurchaseOrderRequestItemForm(forms.ModelForm):
+    total_cost = forms.DecimalField(initial=0,max_digits=12, decimal_places=3)
     class Meta:
         model = PurchaseOrderRequestItem
         fields = [
-            'store_product','quantity',
+            'store_product','quantity','total_cost',
         ]
         exclude = ['company','store','order_request','updated_by','updated_at','created_by','created_at']

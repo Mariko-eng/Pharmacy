@@ -136,8 +136,6 @@ class StockRequestForm(forms.ModelForm):
             'request_notes',]
         exclude = ['company','store','updated_by','updated_at','created_by','created_at']
 
-
-
 class StockRequestItemForm(forms.ModelForm):
     class Meta:
         model = StockRequestItem

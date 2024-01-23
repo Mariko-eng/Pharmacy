@@ -1,9 +1,12 @@
 from django.shortcuts import render, redirect
-from django.db import transaction
 from django.forms import ValidationError
 from django.views import View
 from django.views.generic import ListView,CreateView
 from django.http import JsonResponse
+from .forms import RequiredFormSet
+from django.forms import formset_factory
+from django.forms.models import modelformset_factory
+from django.shortcuts import get_object_or_404
 from .forms import ProductCategoryForm, ProductVariantForm
 from .forms import ProductUnitsForm, SupplierForm
 from .forms import StoreProductForm, ReceivedStockForm,ReceivedStockItemForm
@@ -13,10 +16,6 @@ from .models import ReceivedStock, ReceivedStockItem
 from .models import StockRequest, StockRequestItem
 from .mixins import CompanyMixin, CompanyFormMixin
 from company.models import Company, Store, Supplier
-from django.forms import formset_factory
-from django.forms.models import modelformset_factory
-from .forms import RequiredFormSet
-from django.shortcuts import get_object_or_404
 
 
 def product_categories_list(request,store_id = None, company_id = None):
@@ -395,7 +394,6 @@ def store_received_stock_edit(request, store_id, received_stock_id):
     return render(request, 'received_stock/edit/index.html', context=context)
 
 
-
 def store_stock_requests_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -418,14 +416,14 @@ def store_stock_requests_new(request, store_id):
         "company": company,
         "store": store}
 
-    form = StockRequestForm(company=company)
+    form = StockRequestForm() 
     
     StockRequestItemFormSet = formset_factory(StockRequestItemForm, formset=RequiredFormSet, extra=1, validate_min=True)
 
     formset = StockRequestItemFormSet(prefix='items')
 
     if request.method == "POST":
-        form_data = StockRequestForm(request.POST,company=company)
+        form_data = StockRequestForm(request.POST)
         formset_data = StockRequestItemFormSet(request.POST, prefix='items')
 
         if form_data.is_valid() and formset_data.is_valid():
@@ -445,7 +443,7 @@ def store_stock_requests_new(request, store_id):
                 return render(request, 'received_stock/new/index.html', context=context)
 
             
-            received_stock = StockRequest(
+            stock_request = StockRequest(
                 supplier_type = supplier_type,
                 supplier_entity = supplier_entity,
                 supplier_store = supplier_store,
@@ -457,25 +455,20 @@ def store_stock_requests_new(request, store_id):
                 store = store,
             )
             
-            received_stock.company = company
-            received_stock.store = store
-            received_stock.created_by = request.user
-            received_stock.save()
+            stock_request.company = company
+            stock_request.store = store
+            stock_request.created_by = request.user
+            stock_request.save()
 
             for formset_data_item in formset_data:
                 item = formset_data_item.save(commit=False)
-                item.received_stock = received_stock
+                item.stock_request = stock_request
                 item.company = company
                 item.store = store
                 item.created_by = request.user
                 item.save() 
 
-                qty_received = formset_data_item.cleaned_data.get("qty_received")
-                store_product = item.store_product
-                store_product.available_qty +=  qty_received
-                store_product.save()
-
-            context['success_message'] = 'Stock added successfully'
+            context['success_message'] = 'Stock Request added successfully'
             return redirect('inventory:stock-requests-list', store_id=store_id)
         else:
             context['form'] = form_data
@@ -491,22 +484,22 @@ def store_stock_requests_edit(request, store_id, stock_request_id):
     store = get_object_or_404(Store, pk=store_id)
     company = store.company
 
-    received_stock = get_object_or_404(StockRequest, pk=stock_request_id, store=store)
+    stock_request = get_object_or_404(StockRequest, pk=stock_request_id, store=store)
 
     context = {
         "company": company,
         "store": store,
-        "received_stock": received_stock,
+        "stock_request": stock_request,
     }
 
-    form = StockRequestForm(instance = received_stock, company=company)
+    form = StockRequestForm(instance = stock_request)
 
     StockRequestItemFormSet = modelformset_factory(StockRequestItem, form=StockRequestItemForm, extra=0)
-    qs = received_stock.receivedstockitem_set.all()
+    qs = stock_request.receivedstockitem_set.all()
     formset = StockRequestItemFormSet(prefix='items',queryset=qs)
 
     if request.method == "POST":
-        form_data = StockRequestForm(request.POST, instance=received_stock, company=company)
+        form_data = StockRequestForm(request.POST, instance=stock_request)
         formset_data = StockRequestItemFormSet(request.POST, prefix='items', queryset=qs)
 
         if form_data.is_valid() and formset_data.is_valid():
@@ -518,28 +511,16 @@ def store_stock_requests_edit(request, store_id, stock_request_id):
                 item = formset_data_item.save(commit=False)
                 if item.id is None:
                     print("New")
-                    item.received_stock = received_stock
+                    item.stock_request = stock_request
                     item.company = company
                     item.store = store
                     item.created_by = request.user
-                    item.save()
-                
-                    # Update store product quantities
-                    qty_received = formset_data_item.cleaned_data.get("qty_received")
-                    store_product = item.store_product
-                    store_product.available_qty += qty_received
-                    store_product.save()
+                    item.save() # Save Instance
                 else:
                     print("Old")
-                    item.save()
-                    # Update store product quantities
-                    qty_received = formset_data_item.cleaned_data.get("qty_received")
-                    store_product = item.store_product
-                    store_product.available_qty -= store_product.available_qty
-                    store_product.available_qty += qty_received
-                    store_product.save()
+                    item.save() # Update Instance
 
-            context['success_message'] = 'Stock edited successfully'
+            context['success_message'] = 'Stock Request edited successfully'
             return redirect('inventory:stock-requests-list', store_id=store_id)
         else:
             context['form'] = form_data
@@ -550,6 +531,7 @@ def store_stock_requests_edit(request, store_id, stock_request_id):
     context['form'] = form
     context['formset'] = formset
     return render(request, 'stock_requests/edit/index.html', context=context)
+
 
 
 

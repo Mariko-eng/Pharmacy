@@ -108,7 +108,7 @@ class ReceivedStock(CommonFieldsMixin):
     @property
     def items_count(self):
         return self.receivedstockitem_set.count()
-
+ 
 class ReceivedStockItem(CommonFieldsMixin):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)

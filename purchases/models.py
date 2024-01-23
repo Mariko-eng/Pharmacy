@@ -36,7 +36,8 @@ class PurchaseOrderRequestItem(CommonFieldsMixin):
     # Data
     order_request = models.ForeignKey(PurchaseOrderRequest, on_delete=models.CASCADE)
     store_product = models.ForeignKey(StoreProduct,on_delete=models.CASCADE)
-    quantity = models.PositiveIntegerField()
+    quantity = models.DecimalField(max_digits=12, decimal_places=3)
+    total_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="purchase_order_items_createdby")
     # created_at = models.DateTimeField(auto_now_add=True)

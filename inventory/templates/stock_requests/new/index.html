@@ -27,111 +27,35 @@
             {% csrf_token %}
             
             <div class="row mb-3">
-                <label for="supplier_type" class="col-sm-3 col-form-label">Supplier/Store</label>
-                <div class="col-sm-9">
-                    {% for radio in form.supplier_type %}
-                    <div class="row">
-                        <div class="col-sm-12">
-                            {{ radio }}
-                        </div>
+                <label for="request_date" class="col-sm-2 col-form-label">Request Date</label>
+                <div class="col-sm-10">
+                    {% if form.errors.request_date %}
+                    {% render_field form.request_date|add_class:"form-control is-invalid" type="date" %}
+                    <div class="invalid-feedback">
+                        {{ form.errors.request_date.0 }}
                     </div>
-                    {% endfor %}
-                    {% if form.errors.supplier_type %}
-                    <div id = "" class="text-danger">
-                        {{ form.errors.supplier_type.0 }}
-                    </div>
+                    {% else %}
+                    {% render_field form.request_date|add_class:"form-control" type="date" %}
                     {% endif %}
                 </div>
             </div>
-            
+
             <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="supplier_entity" class="col-sm-12 col-form-label">Supplier</label>
-                    <div class="col-sm-12">
-                        {% if form.errors.supplier_entity %}
-                        {% render_field form.supplier_entity|add_class:"form-control is-invalid"|attr:"id:supplier_entity" %}
-                        <div class="invalid-feedback">
-                            {{ form.errors.supplier_entity.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field form.supplier_entity|add_class:"form-control"|attr:"id:supplier_entity" %}
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <label for="supplier_store" class="col-sm-12 col-form-label">Store</label>
-                    <div class="col-sm-12">
-                        {% if form.errors.supplier_store %}
-                        {% render_field form.supplier_store|add_class:"form-control is-invalid"|attr:"id:supplier_store" %}
-                        <div class="invalid-feedback">
-                            {{ form.errors.supplier_store.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field form.supplier_store|add_class:"form-control"|attr:"id:supplier_store" %}
-                        {% endif %}
-                    </div>
-                </div>
-            </div> 
-            
-            <div class="row mb-3">
-                <div class="col-md-6">
-                    <label for="delivered_by_name" class="col-sm-12 col-form-label">Delivered By Name</label>
-                    <div class="col-sm-12">
-                        {% if form.errors.delivered_by_name %}
-                        {% render_field form.delivered_by_name|add_class:"form-control is-invalid" %}
-                        <div class="invalid-feedback">
-                            {{ form.errors.delivered_by_name.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field form.delivered_by_name|add_class:"form-control" %}
-                        {% endif %}
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <label for="delivered_by_phone" class="col-sm-12 col-form-label">Delivered By Phone</label>
-                    <div class="col-sm-12">
-                        {% if form.errors.delivered_by_phone %}
-                        {% render_field form.delivered_by_phone|add_class:"form-control is-invalid" %}
-                        <div class="invalid-feedback">
-                            {{ form.errors.delivered_by_phone.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field form.delivered_by_phone|add_class:"form-control" %}
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            
-            <div class="row mb-3">
-                <label for="received_date" class="col-sm-2 col-form-label">Received Date</label>
+                <label for="request_notes" class="col-sm-2 col-form-label">Comments / Remarks</label>
                 <div class="col-sm-10">
-                    {% if form.errors.received_date %}
-                    {% render_field form.received_date|add_class:"form-control is-invalid" type="date" %}
+                    {% if form.errors.request_notes %}
+                    {% render_field form.request_notes|add_class:"form-control is-invalid" rows="3" %}
                     <div class="invalid-feedback">
-                        {{ form.errors.received_date.0 }}
+                        {{ form.errors.request_notes.0 }}
                     </div>
                     {% else %}
-                    {% render_field form.received_date|add_class:"form-control" type="date" %}
-                    {% endif %}
-                </div>
-            </div>
-            
-            <div class="row mb-3">
-                <label for="delivery_notes" class="col-sm-2 col-form-label">Delivery Notes</label>
-                <div class="col-sm-10">
-                    {% if form.errors.delivery_notes %}
-                    {% render_field form.delivery_notes|add_class:"form-control is-invalid" rows="3" %}
-                    <div class="invalid-feedback">
-                        {{ form.errors.delivery_notes.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.delivery_notes|add_class:"form-control" rows="3" %}
+                    {% render_field form.request_notes|add_class:"form-control" rows="3" %}
                     {% endif %}
                 </div>
             </div>
             
             <hr/ class="mt-4">
-            <h5 class="card-title">Enter Received Items</h5>
+            <h5 class="card-title">Enter Stock Request Items</h5>
             
             {{ formset.management_form }}
             {% for formset_item in formset.forms %}
@@ -148,59 +72,15 @@
                         {% render_field formset_item.store_product|add_class:"form-control"%}
                         {% endif %}
                     </div>
-                    <div class="col-md-2">Batch No</div>
-                    <div class="col-md-4">
-                        {% if formset_item.errors.batch_no %}
-                        {% render_field formset_item.batch_no|add_class:"form-control is-invalid"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.batch_no.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field formset_item.batch_no|add_class:"form-control"%}
-                        {% endif %}
-                    </div>
                     <div class="col-md-2">Qty</div>
                     <div class="col-md-4">
-                        {% if formset_item.errors.qty_received %}
-                        {% render_field formset_item.qty_received|add_class:"form-control is-invalid"%}
+                        {% if formset_item.errors.quantity %}
+                        {% render_field formset_item.quantity|add_class:"form-control is-invalid"%}
                         <div class="invalid-feedback">
-                            {{ formset_item.errors.qty_received.0 }}
+                            {{ formset_item.errors.quantity.0 }}
                         </div>
                         {% else %}
-                        {% render_field formset_item.qty_received|add_class:"form-control"%}
-                        {% endif %}
-                    </div>
-                    <div class="col-md-2">Total Cost</div>
-                    <div class="col-md-4">
-                        {% if formset_item.errors.total_cost %}
-                        {% render_field formset_item.total_cost|add_class:"form-control is-invalid"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.total_cost.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field formset_item.total_cost|add_class:"form-control"%}
-                        {% endif %}
-                    </div>
-                    <div class="col-md-2">Mfg Date</div>
-                    <div class="col-md-4">
-                        {% if formset_item.errors.manufactured_date %}
-                        {% render_field formset_item.manufactured_date|add_class:"form-control is-invalid" type="date"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.manufactured_date.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field formset_item.manufactured_date|add_class:"form-control" type="date"%}
-                        {% endif %}
-                    </div>
-                    <div class="col-md-2">Exp Date</div>
-                    <div class="col-md-4">
-                        {% if formset_item.errors.expiry_date %}
-                        {% render_field formset_item.expiry_date|add_class:"form-control is-invalid" type="date"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.expiry_date.0 }}
-                        </div>
-                        {% else %}
-                        {% render_field formset_item.expiry_date|add_class:"form-control" type="date"%}
+                        {% render_field formset_item.quantity|add_class:"form-control"%}
                         {% endif %}
                     </div>
                 </div>
@@ -210,7 +90,7 @@
                 </div>
                 
                 <div class="d-flex flex-row justify-content-end d-none remove-formset-item">
-                    <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Remove Item</span></a>
+                    <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-trash"></i><span>Remove Item</span></a>
                 </div>
                 
                 <hr class="text-primary" />
