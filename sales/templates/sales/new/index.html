@@ -1,0 +1,425 @@
+{% extends 'base/store/index.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">
+    <h1>Store : {{ store.name }}!</h1>
+    
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item"><a>Sales</a></li>
+            <li class="breadcrumb-item active"><a>New</a></li>
+        </ol>
+    </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title"> New Sale Form</h5>
+        
+        <form class="row g-3 needs-validation" method="post" novalidate >
+            
+            {% csrf_token %}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="customer_name" class="col-sm-12 col-form-label">Customer Name</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.customer_name %}
+                        {% render_field form.customer_name|add_class:"form-control is-invalid"|attr:"id:customer_name" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.customer_name.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.customer_name|add_class:"form-control"|attr:"id:customer_name" %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="customer_phone" class="col-sm-12 col-form-label">Customer Phone</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.customer_phone %}
+                        {% render_field form.customer_phone|add_class:"form-control is-invalid"|attr:"id:customer_phone" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.customer_phone.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.customer_phone|add_class:"form-control"|attr:"id:customer_phone" %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div> 
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="customer_email" class="col-sm-12 col-form-label">Customer Email</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.customer_email %}
+                        {% render_field form.customer_email|add_class:"form-control is-invalid"|attr:"id:customer_email" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.customer_email.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.customer_email|add_class:"form-control"|attr:"id:customer_email" %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="customer_address" class="col-sm-12 col-form-label">Customer Address</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.customer_address %}
+                        {% render_field form.customer_address|add_class:"form-control is-invalid"|attr:"id:customer_address" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.customer_address.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.customer_address|add_class:"form-control"|attr:"id:customer_address" %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div> 
+            
+            <div class="row mb-3">
+                <label for="sale_remarks" class="col-sm-2 col-form-label">Comments / Remarks</label>
+                <div class="col-sm-10">
+                    {% if form.errors.sale_remarks %}
+                    {% render_field form.sale_remarks|add_class:"form-control is-invalid" rows="3" %}
+                    <div class="invalid-feedback">
+                        {{ form.errors.sale_remarks.0 }}
+                    </div>
+                    {% else %}
+                    {% render_field form.sale_remarks|add_class:"form-control" rows="3" %}
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="payment_option" class="col-sm-12 col-form-label">Payment Option</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.payment_option %}
+                        {% render_field form.payment_option|add_class:"form-control is-invalid"|attr:"id:payment_option" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.payment_option.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.payment_option|add_class:"form-control"|attr:"id:payment_option" %}
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="payment_details" class="col-sm-12 col-form-label">Payment Details</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.payment_details %}
+                        {% render_field form.payment_details|add_class:"form-control is-invalid"|attr:"id:payment_details" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.payment_details.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.payment_details|add_class:"form-control"|attr:"id:payment_details" %}
+                        {% endif %}
+                    </div>
+                </div>
+            </div> 
+            
+            <hr/ class="mt-4">
+            <h5 class="card-title">Cart Items</h5>
+            
+            <select id = "selectedProduct" class="js-select-products" name="state">
+                <option value="">--</option>
+                {% for store_product in store_products %}
+                <option value="{{ store_product.id }}">{{store_product.product.name}}</option>
+                {% endfor %} 
+            </select>
+            
+            {% comment %} <div class="d-flex flex-row justify-content-end d-block add-formset-item">
+                <a class = "add-form text-primary" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Add Item</span></a>
+            </div> {% endcomment %}
+            
+            
+            <div id="empty-form" style="display:none;">
+                <div class="empty-form-row my-2">
+                    <div class="row">
+                        <div class="col-md-2">Product</div>
+                        <div class="col-md-4">
+                            {% if empty_form.errors.store_product %}
+                            {% render_field empty_form.store_product|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ empty_form.errors.store_product.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field empty_form.store_product|add_class:"form-control"%}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-2">Qty</div>
+                        <div class="col-md-4">
+                            {% if empty_form.errors.quantity %}
+                            {% render_field empty_form.quantity|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ empty_form.errors.quantity.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field empty_form.quantity|add_class:"form-control"%}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex flex-row justify-content-end d-block remove-formset-item">
+                        <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-trash"></i><span>Remove Item</span></a>
+                    </div>
+                    
+                    <hr class="text-primary" />
+                </div>
+            </div>
+            
+            <div class= "form-container">
+                {{ formset.management_form }}
+                {% comment %} <div  class="form-row my-2">
+                </div> {% endcomment %}
+            </div>
+            
+            {% comment %} <div>
+                {{ formset.management_form }}
+                {% for formset_item in formset.forms %}
+                <div class="form-row my-2">
+                    <div class="row">
+                        <div class="col-md-2">Product</div>
+                        <div class="col-md-4">
+                            {% if formset_item.errors.store_product %}
+                            {% render_field formset_item.store_product|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.store_product.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.store_product|add_class:"form-control"%}
+                            {% endif %}
+                        </div>
+                        <div class="col-md-2">Qty</div>
+                        <div class="col-md-4">
+                            {% if formset_item.errors.quantity %}
+                            {% render_field formset_item.quantity|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.quantity.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.quantity|add_class:"form-control"%}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex flex-row justify-content-end d-none remove-formset-item">
+                        <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-trash"></i><span>Remove Item</span></a>
+                    </div>
+                    
+                    <hr class="text-primary" />
+                </div>
+                {% endfor %}   
+            </div>           
+            {% endcomment %}
+            
+            
+            <div class="col-12 d-flex justify-content-center mt-5">
+                <button class="btn btn-primary" type="submit" style="width: 300px;">Add New Sale</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script type='text/javascript'>
+    
+    $(document).ready(function() {
+        
+        $('.js-select-products').select2();
+        
+    })
+    
+    
+    
+    $('#selectedProduct').on('change', function() {
+        // Get the selected value
+        var selectedValue = $(this).val();
+        
+        // Log or do something with the selected value
+        console.log('Selected Product ID:', selectedValue);
+        
+        addForm('.form-row:last', 'items', selectedValue);
+    });
+    
+    function addForm(selector, prefix, selectProductId) {
+        console.log("New  Add")
+
+        var formContainer = $('.form-container');
+ 
+        // Count the number of child elements with class 'row'
+        var formRowCount = formContainer.find('.form-row').length;
+
+        var newElement = $('.empty-form-row').clone(true);
+
+        if(formRowCount > 0){
+            console.log("formRowCount", formRowCount)
+            newElement = $(selector).clone(true);
+        }
+        
+        newElement.removeClass('empty-form-row').addClass('form-row');
+        // newElement.removeClass('empty-form-row');
+        
+        var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+        
+        console.log("total", total)
+        
+        newElement.find('select').each(function(){
+            var name = $(this).attr('name').replace('test_items', 'items').replace('-' + (total) + '-', '-' + (Number(total)+1) + '-');
+            // var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
+                        
+            var id = 'id_' + name;
+            
+            $(this).attr({'name': name, 'id': id}).val('');
+            // $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+            
+            var selectedOption = $(this).find('option:selected');
+            var notSelectedOptions = $(this).find('option:not(selected)');
+            
+            notSelectedOptions.each(function(e){
+                if (selectProductId == $(this).val()) {
+                    $(this).prop('selected', true);
+                }
+                
+            })
+        }) 
+
+        newElement.find('input').each(function() {
+            var forValue = $(this).attr('name');
+            if (forValue) {
+                forValue = forValue.replace('test_items', 'items').replace('-' + (total) + '-', '-' + (Number(total)+1) + '-');;
+                var id = 'id_' + forValue;
+                $(this).attr({'id': id});
+                $(this).attr({'name': forValue});
+                $(this).attr({'for': forValue});
+            }
+
+        });
+        
+        total++;  
+        
+        $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+
+        
+        // $(selector).append(newElement);
+        $('.form-container').append(newElement);
+        
+    }
+    
+    
+    
+    function addForm1(selector, prefix, selectProductId) {
+        var newElement = $('.empty-form-row').clone(true);
+        //var newElement = $(selector).clone(true);
+        
+        var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+        
+        console.log("total", total)
+        
+        newElement.find('select').each(function(){
+            console.log($(this).attr('name'))
+            
+            // var name = $(this).attr('name').replace('test_items', 'items').replace('-' + (total-1) + '-', '-' + total + '-');
+            // var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
+            
+            console.log("total  - ", total)
+            console.log("total+1 - ", Number(total)+1)
+            
+            var name = $(this).attr('name').replace('-' + Number(total) + '-', '-' + (Number(total) + 1) + '-');
+            
+            var id = 'id_' + name;
+            
+            $(this).attr({'name': name, 'id': id}).val('');
+            // $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+            
+            console.log("id" ,id)
+            console.log("name " ,name)
+            
+            var selectedOption = $(this).find('option:selected');
+            var notSelectedOptions = $(this).find('option:not(selected)');
+            
+            notSelectedOptions.each(function(e){
+                if (selectProductId == $(this).val()) {
+                    $(this).prop('selected', true);
+                }
+                
+            })
+        }) 
+        
+        newElement.find('label').each(function() {
+            var forValue = $(this).attr('for');
+            if (forValue) {
+                forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+                $(this).attr({'for': forValue});
+            }
+        });
+        
+        newElement.find('input').each(function() {
+            var forValue = $(this).attr('name');
+            if (forValue) {
+                forValue = forValue.replace('-' + (total-1) + '-', '-' + total + '-');
+                $(this).attr({'for': forValue});
+            }
+        });
+        
+        // total++;  
+        total = total + 1;
+        
+        $('#id_' + prefix + '-TOTAL_FORMS').val(total);
+        
+        $(selector).after(newElement);
+        
+        return ;
+    }
+    
+    function updateElementIndex(el, prefix, ndx) {
+        var id_regex = new RegExp('(' + prefix + '-\\d+)');
+        var replacement = prefix + '-' + ndx;
+        if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
+        if (el.id) el.id = el.id.replace(id_regex, replacement);
+        if (el.name) el.name = el.name.replace(id_regex, replacement);
+    }
+    
+    function deleteForm(prefix, btn) {
+        var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+        // console.log(total)
+        if (total > 1){
+            btn.closest('.form-row').remove();
+            var forms = $('.form-row');
+            $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
+            for (var i=0, formCount=forms.length; i<formCount; i++) {
+                $(forms.get(i)).find(':input').each(function() {
+                    updateElementIndex(this, prefix, i);
+                });
+            }
+        }
+        return false;
+    }
+    
+    
+    // $(document).on('click', '.add-form', function(e){
+        //    e.preventDefault();
+        //    addForm('.form-row:last', 'items');
+        //    return false;
+        // });
+        
+        $(document).on('click', '.remove-form', function(e){
+            e.preventDefault();
+            deleteForm('items', $(this));
+            return false;
+        });
+        
+    </script>
+    
+    
+    {% endblock %}
+    
+    

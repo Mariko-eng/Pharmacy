@@ -68,8 +68,6 @@ def store_purchase_orders_new(request, store_id):
                 delivered_by_phone = form_data.cleaned_data.get("delivered_by_phone"),
                 received_date = form_data.cleaned_data.get("received_date"),
                 delivery_notes = form_data.cleaned_data.get("delivery_notes"),
-                company = company,
-                store = store,
             )
             
             order_request.company = company

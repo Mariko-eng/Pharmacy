@@ -321,7 +321,7 @@
         </form>
     </div>
 </div>
-
+ 
 <script type='text/javascript'>
     
     function updateElementIndex(el, prefix, ndx) {
@@ -331,15 +331,20 @@
         if (el.id) el.id = el.id.replace(id_regex, replacement);
         if (el.name) el.name = el.name.replace(id_regex, replacement);
     }
+
+    var selectProductId = 2;
     
     function addForm(selector, prefix) {
         var newElement = $(selector).clone(true);
         var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+
+
         newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
             var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
             var id = 'id_' + name;
             $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
         });
+
         newElement.find('label').each(function() {
             var forValue = $(this).attr('for');
             if (forValue) {
@@ -352,23 +357,16 @@
         $(selector).after(newElement);
         var conditionRow1 = $('.form-row:not(:last)');
         
-        //  conditionRow1.find('.remove-formset-item')
-        // .removeClass('d-none')
-        // .addClass('d-block');
         
         conditionRow1.find('.remove-formset-item')
         .removeClass('d-none')
         .addClass('d-block');
-        
         
         var conditionRow2 = $('.form-row:not(:last)');
         
         conditionRow2.find('.add-formset-item')
         .removeClass('d-block')
         .addClass('d-none');
-        
-        
-        
         
         // conditionRow.find('.btn.add-form-row')
         // .removeClass('btn-success').addClass('btn-danger')
