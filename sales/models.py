@@ -11,7 +11,7 @@ from company.mixins import CommonFieldsMixin
 
 class Sale(CommonFieldsMixin):
     PAYMENT_oPTIONS = [
-        ('Cash', 'Casn'),
+        ('Cash', 'Cash'),
         ('Airtel MOney', 'Airtel MOney'),
         ('MTN MOney', 'MTN MOney'),
         ('Cheque', 'Cheque')

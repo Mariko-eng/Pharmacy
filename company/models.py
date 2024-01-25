@@ -57,6 +57,9 @@ class PosCenter(CommonFieldsMixin):
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
+    def __str__(self):
+        return f"{self.name} - {self.store.name}"
+
 
 class Supplier(CommonFieldsMixin):
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)

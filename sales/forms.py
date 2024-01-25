@@ -40,12 +40,12 @@ class SaleForm(forms.ModelForm):
     def __init__(self, *args, user=None, store=None, **kwargs):
         super(SaleForm, self).__init__(*args, **kwargs)
 
-        # if user:
-        #     if user.account_type == AccessGroups.POS_ATTENDANT:
-        #         self.fields['pos_center'].queryset = user.userprofile.pos_center
-        #     else:
-        #         if store:
-        #             self.fields['pos_center'].queryset = PosCenter.objects.filter(store=store)
+        if user:
+            if user.account_type == AccessGroups.POS_ATTENDANT:
+                self.fields['pos_center'].queryset = user.userprofile.pos_center
+            else:
+                if store:
+                    self.fields['pos_center'].queryset = PosCenter.objects.filter(store=store)
 
 
 class SaleItemForm(forms.ModelForm):
