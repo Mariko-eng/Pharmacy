@@ -33,7 +33,8 @@ class PurchaseOrderRequestForm(forms.ModelForm):
     class Meta:
         model = PurchaseOrderRequest
         fields = [
-            'order_date','delivery_date',
+            'order_date',
+            'delivery_date',
             'order_notes','payment_terms',]
         exclude = ['company','store','updated_by','updated_at','created_by','created_at']
 

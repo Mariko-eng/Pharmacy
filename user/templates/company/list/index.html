@@ -84,9 +84,9 @@
                         </div>
                     </div>
                     <div class="row mb-3">
-                        <label for="phone_number" class="col-sm-3 col-form-label">Phone Number</label>
+                        <label for="phone" class="col-sm-3 col-form-label">Phone Number</label>
                         <div class="col-sm-9">
-                            {% render_field form.phone_number|add_class:"form-control"|attr:"id:phone_number" %}
+                            {% render_field form.phone|add_class:"form-control"|attr:"id:phone" %}
                             <div id = "phoneNumberError" class="invalid-feedback">
                                 Provide a valid last phone number
                             </div>
@@ -127,8 +127,8 @@
                         $('#last_name').addClass('is-valid');
                         $('#email').removeClass('is-invalid');
                         $('#email').addClass('is-valid');
-                        $('#phone_number').removeClass('is-invalid');
-                        $('#phone_number').addClass('is-valid');
+                        $('#phone').removeClass('is-invalid');
+                        $('#phone').addClass('is-valid');
                         
                         $('#createCompanyModal').modal('hide');
                         window.location.reload()
@@ -171,12 +171,12 @@
                         }
                         
                         if(data.errors.last_name){
-                            $('#phone_number').removeClass('is-valid');
-                            $('#phone_number').addClass('is-invalid');
-                            $('#phoneNumberError').text(data.errors.phone_number[0])
+                            $('#phone').removeClass('is-valid');
+                            $('#phone').addClass('is-invalid');
+                            $('#phoneNumberError').text(data.errors.phone[0])
                         }else{
-                            $('#phone_number').removeClass('is-invalid');
-                            $('#phone_number').addClass('is-valid');
+                            $('#phone').removeClass('is-invalid');
+                            $('#phone').addClass('is-valid');
                         }
                     }
                 }

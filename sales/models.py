@@ -1,15 +1,15 @@
 from django.db import models
 from inventory.models import StoreProduct
 from company.models import Company,Store,PosCenter,Customer
-from company.mixins import CommonFieldsMixin
+from company.mixins import Base
 
-# class PaymentMethod(CommonFieldsMixin):
+# class PaymentMethod(Base):
 #     #Owner
 #     company = models.ForeignKey(Company,on_delete=models.CASCADE)
 #     # Data    
 #     name = models.CharField(max_length=255,unique=True)
 
-class Sale(CommonFieldsMixin):
+class Sale(Base):
     PAYMENT_oPTIONS = [
         ('Cash', 'Cash'),
         ('Airtel MOney', 'Airtel MOney'),
@@ -23,7 +23,7 @@ class Sale(CommonFieldsMixin):
         ('CANCELLED', 'Cancelled'),
         ('REVOKED', 'Revoked'),]
 
-    #Owner
+    #Owner 
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
@@ -37,11 +37,24 @@ class Sale(CommonFieldsMixin):
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Completed')
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="sales_createdby")
-    # created_at = models.DateTimeField(auto_now_add=True)
-    # updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ("-created_at",)
+
+    @property
+    def items_count(self):
+        return self.saleitem_set.count()
+    
+    @property
+    def total_cost(self):
+        total = 0
+        items = self.saleitem_set.all()
+        for item in items:
+            total = total + item.sub_total
+        return total
 
 
-class SaleItem(CommonFieldsMixin):
+class SaleItem(Base):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
@@ -58,3 +71,7 @@ class SaleItem(CommonFieldsMixin):
 
     def __str__(self):
         return f"{self.product.name} - {self.quantity} units sold"
+    
+    @property
+    def sub_total(self):
+        return self.quantity * self.unit_cost

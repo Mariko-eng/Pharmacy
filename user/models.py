@@ -9,7 +9,7 @@ from simple_history.models import HistoricalRecords
 from company.models import Company
 from company.models import Store
 from company.models import PosCenter
-from .mixins import CommonFieldsMixin
+from .mixins import Base
 
 class AccessGroups(models.TextChoices): #Access Group
     APP_ADMIN = 'App Admin', _('App Admin')
@@ -103,7 +103,7 @@ class User(AbstractUser):
         else:
             return "Regular User"
 
-class  UserProfile(CommonFieldsMixin):
+class  UserProfile(Base):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
     company = models.ForeignKey(Company,null=True,on_delete=models.SET_NULL)
     store = models.ForeignKey(Store,null=True,on_delete=models.SET_NULL)

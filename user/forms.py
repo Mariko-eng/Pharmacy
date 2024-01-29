@@ -1,8 +1,9 @@
 from django import forms
 from django.contrib.auth.models import Permission
+from .models import User
 from .models import Company
 from .models import Store
-from .models import User
+from .models import PosCenter
 from .permissions import DefaultRoles
 from .permissions import AccessGroups
 # from .models import AppRoles
@@ -14,18 +15,18 @@ class AppUserForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.CharField(max_length=30)
-    phone_number = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=30)
     is_superuser = forms.BooleanField(initial=False, required=False)
     is_staff = forms.BooleanField(initial = True)
     class Meta:
         model = User
-        fields = ['first_name','last_name', 'email', 'phone_number', 'is_superuser', 'is_staff',]
+        fields = ['first_name','last_name', 'email', 'phone', 'is_superuser', 'is_staff',]
 
 class CompanyUserForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.CharField(max_length=30)
-    phone_number = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=30)
     account_type = forms.ChoiceField(
         choices=[('', '---------')] + AccessGroups.choices,
         widget=forms.RadioSelect()
@@ -69,7 +70,7 @@ class CompanyUserForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ['first_name','last_name', 'email', 'phone_number',]
+        fields = ['first_name','last_name', 'email', 'phone',]
 
     def clean(self):
         cleaned_data = super().clean()
@@ -97,52 +98,85 @@ class CompanyRoleFrom(forms.Form):
     name = forms.CharField(max_length=30)        
 
 
-# class CompanyStaffUserFormA(forms.ModelForm):
-#     first_name = forms.CharField(max_length=30)
-#     last_name = forms.CharField(max_length=30)
-#     email = forms.CharField(max_length=30)
-#     phone_number = forms.CharField(max_length=30)
-#     branch = forms.ModelChoiceField(
-#         queryset= None,  # Provide the queryset
-#         required= True,  # Set to True if you want it to be required
-#     )
+class CompanyAdminUserForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30)
+    last_name = forms.CharField(max_length=30)
+    email = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=30)
 
-#     def __init__(self, *args, company=None, **kwargs):
-#         super(CompanyStaffUserFormA, self).__init__(*args, **kwargs)
-        
-#         # Filter the queryset based on the company
-#         if company:
-#             self.fields['branch'].queryset = Store.objects.filter(company=company)
-#     class Meta:
-#         model = User
-#         fields = ['first_name','last_name', 'email', 'phone_number']
+    class Meta:
+        model = User
+        fields = ['first_name','last_name', 'email', 'phone',]
 
-# class CompanyStaffUserFormB(forms.ModelForm):
-#     first_name = forms.CharField(max_length=30)
-#     last_name = forms.CharField(max_length=30)
-#     email = forms.CharField(max_length=30)
-#     phone_number = forms.CharField(max_length=30)
-#     class Meta:
-#         model = User
-#         fields = ['first_name','last_name', 'email', 'phone_number']
 
-# class CompanyPosAttendantForm(forms.ModelForm):
-#     first_name = forms.CharField(max_length=30)
-#     last_name = forms.CharField(max_length=30)
-#     email = forms.CharField(max_length=30)
-#     phone_number = forms.CharField(max_length=30)
-#     pos = forms.ModelChoiceField(
-#         queryset= None,  # Provide the queryset
-#         required= True,  # Set to True if you want it to be required
-#     )
+class StoreAdminUserForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30)
+    last_name = forms.CharField(max_length=30)
+    email = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=30)
+    roles = forms.MultipleChoiceField(
+        choices=[('', '---------')] + DefaultRoles.choices,
+        widget= forms.CheckboxSelectMultiple())
+    store = forms.ModelChoiceField(
+        queryset= None,
+        required= True,
+        widget=forms.RadioSelect()
+    )
 
-#     def __init__(self, *args, branch=None, **kwargs):
-#         super(CompanyPosAttendantForm, self).__init__(*args, **kwargs)
-        
-#         # Filter the queryset based on the company
-#         if branch:
-#             self.fields['pos'].queryset = CompanyPos.objects.filter(branch=branch)
-#     class Meta:
-#         model = User
-#         fields = ['first_name','last_name', 'email', 'phone_number']
+    class Meta:
+        model = User
+        fields = ['first_name','last_name', 'email', 'phone',]
+
+    def __init__(self, *args, company=None, store=None, **kwargs):
+        super(StoreAdminUserForm, self).__init__(*args, **kwargs)
+
+        # Get the default choices from the DefaultRoles enum
+        role_choices = [(role.value, role.label) for role in DefaultRoles]
+        # Exclude APP_ADMIN from the choices
+        role_choices = [choice for choice in role_choices if choice[0] != DefaultRoles.APP_ADMIN]
+        # Exclude ACCOUNT_HOLDER from the choices
+        role_choices = [choice for choice in role_choices if choice[0] != DefaultRoles.ACCOUNT_HOLDER]
+        # Exclude COMPANY_ADMIN from the choices
+        role_choices = [choice for choice in role_choices if choice[0] != DefaultRoles.COMPANY_ADMIN]
+        # Exclude CASHIER from the choices
+        role_choices = [choice for choice in role_choices if choice[0] != DefaultRoles.CASHIER]
+        # Set the updated choices for the 'role' field
+        self.fields['roles'].choices = role_choices
+
+        if store:
+            self.fields['store'].queryset = Store.objects.filter(id=store.id)
+            self.fields['store'].initial = store
+        elif company:
+            self.fields['store'].queryset = Store.objects.filter(company=company)
+
+
+class POSAttendantUserForm(forms.ModelForm):
+    first_name = forms.CharField(max_length=30)
+    last_name = forms.CharField(max_length=30)
+    email = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=30)
+    store = forms.ModelChoiceField(
+        queryset= None,
+        required= True,
+        widget=forms.RadioSelect()
+    )
+    pos_center = forms.ModelChoiceField(
+        queryset= None,
+        required= True,
+        widget=forms.RadioSelect()
+    )
+
+    class Meta:
+        model = User
+        fields = ['first_name','last_name', 'email', 'phone',]
+
+    def __init__(self, *args, company = None, store = None, **kwargs):
+        super(POSAttendantUserForm, self).__init__(*args, **kwargs)
+
+        if store:
+            self.fields['store'].queryset = Store.objects.filter(id=store.id)
+            self.fields['store'].initial = store
+            self.fields['pos_center'].queryset = PosCenter.objects.filter(store=store)
+        elif company:
+            self.fields['store'].queryset = Store.objects.filter(company=company)
 

@@ -345,3 +345,13 @@ def pos_delete_view(request, store_id, pos_id):
         "pos_center": pos_center}
     
     return render(request, 'pos/new/index.html', context = context)
+
+
+@login_required(login_url='/login')
+def pos_sales_list_view(request, pos_id):
+    pass
+
+
+@login_required(login_url='/login')
+def pos_sales_new_view(request, pos_id):
+    pass

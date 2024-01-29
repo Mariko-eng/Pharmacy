@@ -1,0 +1,72 @@
+{% extends 'base/store/index.html' %}
+{% load widget_tweaks %}
+
+
+{% block pagetitle%}
+<div class="pagetitle">
+    <h1>Hello, {{ request.session.company_name|default:"Guest" }}!</h1>
+
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">Home</a></li>
+      <li class="breadcrumb-item"><a href="#">Store</a></li>
+      <li class="breadcrumb-item active"><a>Users</a></li>
+    </ol>
+  </nav>
+    
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+{% block content %}
+
+<div class="container-fluid">
+    
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">{{ access_group|default:"ALL" }} Users</h5>
+            
+            <div class="d-flex flex-column">
+                {% if access_group == "Store Admin" or access_group == "POS Attendant" %}
+                <div class="d-flex flex-row justify-content-end p-2">
+                    <a href="{% url 'user:users-store-new' store_id=store.id %}?access_group={{access_group}}" class="btn btn-outline-primary" style="width: 180px; display: inline-block; text-align: center; font-size: 12px; text-decoration: none;">
+                        <i class="bi bi-plus"></i><span>
+                            {% if access_group == "Store Admin" %}
+                            Add Store Admin
+                            {% endif %}
+                            {% if access_group == "POS Attendant" %}
+                            Add POS Attendant
+                            {% endif %}
+                        </span>
+                    </a>
+                </div>
+                {% endif %}
+                <div class="table-responsive small">
+                    <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Role</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Email</th>
+                                <th scope="col">Contact</th>
+                                <th scope="col">Store</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in users %}
+                            <tr>
+                                <td>{{user.created_at}}</td>
+                                <td>{% for group in user.groups.all %}<p>{{group.name}}</p>{% endfor %}</td>
+                                <td>{{user.name}}</td>
+                                <td>{{user.email}}</td>
+                                <td>{{user.phone}}</td>
+                                <td>{{user.userprofile.store}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endblock %}

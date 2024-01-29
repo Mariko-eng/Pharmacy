@@ -6,7 +6,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from simple_history.models import HistoricalRecords
-from .mixins import CommonFieldsMixin
+from .mixins import Base
 from enum import Enum, auto
 from user_old.permissions import app_user_perms
 from user_old.permissions import account_holder_perms
@@ -14,7 +14,7 @@ from user_old.permissions import company_admin_perms
 from user_old.permissions import branch_perms
 from user_old.permissions import pos_perms
 
-class Company(CommonFieldsMixin):
+class Company(Base):
     name = models.CharField(max_length=255, unique=True)
     tin_no = models.CharField(max_length=225,null=True,blank=True)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
@@ -29,7 +29,7 @@ class Company(CommonFieldsMixin):
         return self.name
 
 
-class CompanyBranch(CommonFieldsMixin):
+class CompanyBranch(Base):
     BRANCH_TYPES = [('RETAIL', 'RETAIL'),('WHOLESALE', 'WHOLESALE'),]
     REGION_CHOICES = [('CENTRAL', 'CENTRAL'),('EASTERN', 'EASTERN'),
                       ('WESTERN', 'WESTERN'),('NORTHERN', 'NORTHERN'),
@@ -50,7 +50,7 @@ class CompanyBranch(CommonFieldsMixin):
     def __str__(self):
         return self.name
 
-class CompanyPos(CommonFieldsMixin):
+class CompanyPos(Base):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
     branch = models.ForeignKey(CompanyBranch,on_delete=models.CASCADE)
@@ -249,15 +249,15 @@ class User(AbstractUser):
         else:
             return "Regular User"
     
-class CompanyRole(CommonFieldsMixin):   
+class CompanyRole(Base):   
     group = models.ForeignKey(Group,on_delete=models.CASCADE) 
     name = models.CharField(max_length=100, unique= True)
 
-class BranchRole(CommonFieldsMixin):
+class BranchRole(Base):
     name = models.CharField(max_length=100, unique= True)
     group = models.ForeignKey(Group,on_delete=models.CASCADE)
 
-class UserRoleTrail(CommonFieldsMixin):
+class UserRoleTrail(Base):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     group = models.ForeignKey(Group,on_delete=models.PROTECT)
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
@@ -266,7 +266,7 @@ class UserRoleTrail(CommonFieldsMixin):
     # created_at = models.DateTimeField(auto_now_add=True)
     # updated_at = models.DateTimeField(auto_now=True)
 
-class CompanyStaff(CommonFieldsMixin):
+class CompanyStaff(Base):
     company = models.ForeignKey(Company, on_delete=models.CASCADE)
     branch = models.ForeignKey(CompanyBranch, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -279,7 +279,7 @@ class CompanyStaff(CommonFieldsMixin):
     def __str__(self):
         return self.user.first_name
 
-class PosAttendant(CommonFieldsMixin):
+class PosAttendant(Base):
     company_staff = models.ForeignKey(CompanyStaff, on_delete=models.CASCADE)
     company_pos = models.ForeignKey(CompanyPos, on_delete=models.CASCADE)
     updated_by_id = models.CharField(max_length=225,null=True,blank=True)
@@ -290,7 +290,7 @@ class PosAttendant(CommonFieldsMixin):
     def __str__(self):
         return self.company_staff.user.first_name
 
-class SupplierEntity(CommonFieldsMixin):
+class SupplierEntity(Base):
     name = models.CharField(max_length=255)
     contact_person = models.CharField(max_length=255, blank=True, null=True)
     contact_number = models.CharField(max_length=15, blank=True, null=True)
@@ -304,7 +304,7 @@ class SupplierEntity(CommonFieldsMixin):
     def __str__(self):
         return self.name
     
-class Provider(CommonFieldsMixin):
+class Provider(Base):
     PROVIDER_TYPES = (('SUPPLIER', 'Supplier'),('BRANCH', 'Branch'),)
     
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
@@ -316,7 +316,7 @@ class Provider(CommonFieldsMixin):
     # created_at = models.DateTimeField(auto_now_add=True)
     # updated_at = models.DateTimeField(auto_now=True)
 
-class Customer(CommonFieldsMixin):
+class Customer(Base):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=255,blank=True, null=True)
     email = models.EmailField(blank=True, null=True)

@@ -1,7 +1,7 @@
 from django.db import models
-from .mixins import CommonFieldsMixin
+from .mixins import Base
 
-class CompanyApplication(CommonFieldsMixin):
+class CompanyApplication(Base):
     STATUS_TYPES = [('PENDING', 'PENDING'), 
                     ('APPROVED', 'APPROVED'),
                     ('CREATED', 'CREATED'),
@@ -19,7 +19,7 @@ class CompanyApplication(CommonFieldsMixin):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
 
-class Company(CommonFieldsMixin):
+class Company(Base):
     application = models.ForeignKey(CompanyApplication,null=True,on_delete=models.SET_NULL)
     name = models.CharField(max_length=225)
     phone = models.CharField(max_length=225)
@@ -51,7 +51,7 @@ class Store(models.Model):
     def __str__(self):
         return self.name
 
-class PosCenter(CommonFieldsMixin):
+class PosCenter(Base):
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length = 225)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
@@ -61,7 +61,7 @@ class PosCenter(CommonFieldsMixin):
         return f"{self.name} - {self.store.name}"
 
 
-class Supplier(CommonFieldsMixin):
+class Supplier(Base):
     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=225)
@@ -73,7 +73,7 @@ class Supplier(CommonFieldsMixin):
     def __str__(self):
         return self.name
     
-# class Provider(CommonFieldsMixin):
+# class Provider(Base):
 #     PROVIDER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
     
 #     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
@@ -84,7 +84,7 @@ class Supplier(CommonFieldsMixin):
 #     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="providers_createdby")
 
 
-class Customer(CommonFieldsMixin):
+class Customer(Base):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=255,blank=True, null=True)
     email = models.EmailField(blank=True, null=True)

@@ -148,13 +148,13 @@
                                 $('#email').addClass('is-valid');
                             }
                             
-                            if(data.errors.phone_number){
-                                $('#phone_number').removeClass('is-valid');
-                                $('#phone_number').addClass('is-invalid');
-                                $('#phoneNumberError').text(data.errors.email[0])
+                            if(data.errors.phone){
+                                $('#phone').removeClass('is-valid');
+                                $('#phone').addClass('is-invalid');
+                                $('#phoneNumberError').text(data.errors.phone[0])
                             }else{
-                                $('#phone_number').removeClass('is-invalid');
-                                $('#phone_number').addClass('is-valid');
+                                $('#phone').removeClass('is-invalid');
+                                $('#phone').addClass('is-valid');
                             }
                             
                         }

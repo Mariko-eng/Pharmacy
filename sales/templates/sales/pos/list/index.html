@@ -1,9 +1,10 @@
-{% extends 'base/store/index.html' %}
+{% extends 'base/pos/index.html' %}
 {% load widget_tweaks %}
 
 {% block pagetitle%}
 <div class="pagetitle">
   <h1>Store : {{ store.name }}!</h1>
+  <h1>POS : {{ pos.name }}!</h1>
   
   <nav>
     <ol class="breadcrumb">
@@ -30,39 +31,30 @@
     <div class="tab-content pt-2" id="myTabContent">
       <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
         <div class="d-flex flex-column">
-          <div class="d-flex flex-row justify-content-end">
-            <a href="{% url 'sales:sales-new' store_id=store.id %}" 
-            class="btn btn-outline-primary" 
-            style="width: 150px; display: inline-block; text-align: center; text-decoration: none;">
-              <i class="bi bi-plus"></i><span>Add</span>
-            </a>
-          </div>
           <div>
             <div class="table-responsive small">
               <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
                 <thead>
                   <tr>
-                    <th scope="col">Supplier</th>
-                    <th scope="col">Items</th>
-                    <th scope="col">Delivered By Name</th>
-                    <th scope="col">Delivered By Contact</th>
-                    <th scope="col">Received Date</th>
+                    <th scope="col">Date</th>
+                    <th scope="col">POS</th>
+                    <th scope="col">No of items</th>
+                    <th scope="col">Total Cost</th>
+                    <th scope="col">Payment Option</th>
                     <th scope="col">Status</th>
-                    <th scope="col">Created At</th>
                     <th scope="col">Action</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {% for result in items %}
+                  {% for result in sales %}
                   <tr>
-                    <td>{{result.provider_details.name}}</td>
-                    <td>{{result.items_count}}</td>
-                    <td>{{result.delivered_by_name}}</td>
-                    <td>{{result.delivered_by_phone}}</td>
-                    <td>{{result.received_date}}</td>
-                    <td>{{result.status}}</td>
                     <td>{{result.created_at}}</td>
-                    <td><a href={% url 'inventory:received-stock-edit' store_id=store.id received_stock_id=result.id %}>Edit</a></td>
+                    <td>{{result.pos_center}}</td>
+                    <td>{{result.items_count}}</td>
+                    <td>{{result.total_cost}}</td>
+                    <td>{{result.payment_option}}</td>
+                    <td>{{result.status}}</td>
+                    <td><a href="#">Edit</a></td>
                   </tr>
                   {% endfor %}
                 </tbody>

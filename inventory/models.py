@@ -3,9 +3,9 @@ from company.models import Company
 from company.models import Store
 from company.models import PosCenter
 from company.models import Supplier
-from company.mixins import CommonFieldsMixin
+from company.mixins import Base
 
-class ProductCategory(CommonFieldsMixin):
+class ProductCategory(Base):
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     name = models.CharField(max_length=255)
 
@@ -14,7 +14,7 @@ class ProductCategory(CommonFieldsMixin):
     class Meta:
         unique_together = ('name', 'company')
     
-class ProductVariant(CommonFieldsMixin):
+class ProductVariant(Base):
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     name = models.CharField(max_length=255)
 
@@ -23,7 +23,7 @@ class ProductVariant(CommonFieldsMixin):
     class Meta:
         unique_together = ('name', 'company')
 
-class ProductUnits(CommonFieldsMixin): # Units Of Measure
+class ProductUnits(Base): # Units Of Measure
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     name = models.CharField(max_length=255)
 
@@ -32,7 +32,7 @@ class ProductUnits(CommonFieldsMixin): # Units Of Measure
     class Meta:
         unique_together = ('name', 'company')
 
-class Product(CommonFieldsMixin):
+class Product(Base):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     # Data    
@@ -57,7 +57,7 @@ class Product(CommonFieldsMixin):
     class Meta:
         unique_together = ('name', 'company')
     
-class StoreProduct(CommonFieldsMixin):
+class StoreProduct(Base):
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     product = models.ForeignKey(Product,on_delete=models.SET_NULL,null=True)
     # Data
@@ -75,7 +75,7 @@ class StoreProduct(CommonFieldsMixin):
     def __str__(self):
         return self.product.name
     
-class ReceivedStock(CommonFieldsMixin):
+class ReceivedStock(Base):
     SUPPLIER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
     STATUS_TYPES = [('PENDING', 'PENDING'),('APPROVED', 'APPROVED'),('CANCELLED', 'CANCELLED'),]
 
@@ -109,7 +109,7 @@ class ReceivedStock(CommonFieldsMixin):
     def items_count(self):
         return self.receivedstockitem_set.count()
  
-class ReceivedStockItem(CommonFieldsMixin):
+class ReceivedStockItem(Base):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
@@ -128,7 +128,7 @@ class ReceivedStockItem(CommonFieldsMixin):
     def __str__(self):
         return self.store_product.product.name
 
-class StockRequest(CommonFieldsMixin):
+class StockRequest(Base):
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),
         ('APPROVED', 'Approved'),
@@ -150,7 +150,7 @@ class StockRequest(CommonFieldsMixin):
     def __str__(self):
         return f"{self.request_date} - {self.status}"
 
-class StockRequestItem(CommonFieldsMixin):
+class StockRequestItem(Base):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
@@ -166,7 +166,7 @@ class StockRequestItem(CommonFieldsMixin):
     def __str__(self):
         return self.store_product.product.name
 
-class OutgoingConsumable(CommonFieldsMixin):
+class OutgoingConsumable(Base):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)

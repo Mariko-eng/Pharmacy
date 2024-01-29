@@ -24,6 +24,7 @@ urlpatterns = [
     path('company/<int:company_id>/store/edit/<int:store_id>/', views.store_edit_view, name="company-store-edit"),
     path('company/<int:company_id>/store/delete/<int:store_id>/', views.store_delete_view, name="company-store-delete"),
 
+    path('company/<int:company_id>/pos-center/list/', views.pos_list_view, name="company-pos-list"),
     path('company/store/<int:store_id>/pos-center/list/', views.pos_list_view, name="store-pos-list"),
     path('company/store/<int:store_id>/pos-center/<int:pos_id>/', views.pos_detail_view, name="store-pos-detail"),
     path('company/store/<int:store_id>/pos-center/edit/<int:pos_id>/', views.pos_edit_view, name="store-pos-edit"),

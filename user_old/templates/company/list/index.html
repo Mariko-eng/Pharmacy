@@ -111,7 +111,7 @@
             
             const data = $('#companyForm').serialize() // Contains Form Data And CSRF Token As Well
             // console.log(data)
-            
+             
             $.ajax({
                 type: 'POST',
                 url: '{% url "user:company-list" %}',

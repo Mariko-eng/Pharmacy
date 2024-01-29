@@ -10,13 +10,16 @@ from django.http import JsonResponse,HttpResponseServerError
 from django.contrib.auth.models import Group, Permission
 from user.permissions import DefaultRoles
 from .forms import CompanyRoleFrom,CompanyUserForm
+from .forms import CompanyAdminUserForm
+from .forms import StoreAdminUserForm
+from .forms import POSAttendantUserForm
 from .models import AccessGroups
 from .models import User
+from .models import UserProfile
 from .models import Company
 from .models import Store
 from .models import PosCenter
 from .models import CompanyGroup
-
 
 # @unauthenticated_user
 def index(request):
@@ -64,23 +67,23 @@ def home_view(request):
     
     if request.user.account_type == AccessGroups.COMPANY_ADMIN:
         return redirect(reverse('user:company-dashboard'))
-        # return HttpResponseRedirect(reverse('user:company-dashboard'))
     
     if request.user.account_type == AccessGroups.STORE_ADMIN:
-        return redirect(reverse('user:company-dashboard'))
-        # return HttpResponseRedirect(reverse('user:company-dashboard'))
+        return redirect(reverse('user:store-dashboard'))
         
     if request.user.account_type == AccessGroups.POS_ATTENDANT:
-        return redirect(reverse('user:company-dashboard'))
-        # return HttpResponseRedirect(reverse('user:company-dashboard'))
+        return redirect(reverse('user:pos-dashboard'))
         
     raise Http404('Page Not Found!')
 
 ########################### Dashboard ##################
+@login_required(login_url='/login')
 def super_dashboard(request):
     context={}
     return render(request, "dashboard/super/index.html", context=context)
 
+
+@login_required(login_url='/login')
 def company_dashboard(request, company_id = None):
     company = None
     if company_id is not None :
@@ -88,13 +91,14 @@ def company_dashboard(request, company_id = None):
     else :
         company = request.user.userprofile.company
 
-    context={"company" : company}
+    context = { "company" : company }
+
     if company is not None:
         return render(request, "dashboard/company/index.html", context = context)
     else:
         raise Http404('Page Not Found!')
 
-
+@login_required(login_url='/login')
 def store_dashboard(request, store_id = None):
     store = None
     if store_id is not None:
@@ -102,27 +106,22 @@ def store_dashboard(request, store_id = None):
     else :
         store = request.user.userprofile.store
 
-    print(store)
-
-    context={
-        "company" : store.company,
-        "store" : store
-        }
+    context={ "company" : store.company, "store" : store }
 
     if store is not None:
         return render(request, "dashboard/store/index.html", context = context)
     else:
         raise Http404('Page Not Found!')
 
-
+@login_required(login_url='/login')
 def pos_dashboard(request, pos_id = None):
     pos = None
     if pos_id is not None :
         pos = PosCenter.objects.get(pk = pos_id)
     else :
-        pos = request.user.userprofile.store
+        pos = request.user.userprofile.pos_center
 
-    context={"pos" : pos}
+    context = { "company" : pos.store.company, "store" : pos.store, "pos" : pos }
 
     if pos is not None:
         return render(request, "dashboard/pos/index.html", context = context)
@@ -148,17 +147,299 @@ def users_company_list_view(request, company_id):
 
     users = User.objects.filter(userprofile__company=company)
 
-    print(users)
+    access_group = request.GET.get('access_group', None)
+
+    if access_group is not None:
+        users  = users.filter(account_type = access_group)
 
     context = {
         "company": company,
-        "users" : users
+        "users" : users,
+        "access_group": access_group
     }
     return render(request, "user/company/list/index.html", context = context)
 
 
 @login_required(login_url='/login')
 def users_company_new_view(request, company_id):
+    access_group = request.GET.get('access_group', None)
+
+    if  access_group == AccessGroups.COMPANY_ADMIN:
+        return redirect(reverse('user:users-company-admin-new', kwargs={'company_id': company_id}))
+
+    if  access_group == AccessGroups.STORE_ADMIN:
+        return redirect(reverse('user:users-company-store-admin-new', kwargs={'company_id': company_id}))
+
+    return redirect(reverse('user:users-company-list'))
+
+
+@login_required(login_url='/login')
+def users_company_admin_user_new(request, company_id):
+    company = Company.objects.get(pk = company_id)
+    form = CompanyAdminUserForm()
+
+    context = { "company": company, "form": form }
+    
+    if request.method == "POST":
+        form_data = CompanyAdminUserForm(request.POST)
+
+        if form_data.is_valid():
+            first_name = form_data.cleaned_data.get('first_name')
+            last_name = form_data.cleaned_data.get('last_name')
+            phone = form_data.cleaned_data.get('phone')
+            email = form_data.cleaned_data.get('email')
+
+            user = User(
+                username = email,
+                first_name = first_name,
+                last_name = last_name,
+                phone = phone,
+                email = email,
+            )
+            user.account_type = AccessGroups.COMPANY_ADMIN
+            user.set_password(str(email))
+            user.save()
+
+            group, created = Group.objects.get_or_create(
+                name = DefaultRoles.COMPANY_ADMIN
+            )
+
+            user.groups.add(group)
+
+            UserProfile.objects.get_or_create(user=user, company=company)
+
+            messages.info(request, "Company admin account created successfully!")
+            return redirect(reverse('user:users-company-list', kwargs={'company_id': company_id}))
+        else:
+            context['form'] = form_data
+            print(form_data.errors)
+            messages.error(request,"Failed to create company admin account!")
+            
+    return render(request, "user/company/new/company_admin.html", context=context)
+
+
+@login_required(login_url='/login')
+def users_company_store_admin_user_new(request, company_id):
+    company = Company.objects.get(pk = company_id)
+    form = StoreAdminUserForm(company=company)
+
+    context = { "company": company, "form": form }
+    
+    if request.method == "POST":
+        form_data = StoreAdminUserForm(request.POST,company=company)
+
+        if form_data.is_valid():
+            store = form_data.cleaned_data.pop('store', None)
+            roles = form_data.cleaned_data.pop('roles', [])
+
+            if store is None:
+                form_data.errors['store'] = ['Please select a store!']
+                context['form_data'] = form_data
+                return render(request, "user/new/store_admin.html", context=context)
+
+            if not len(roles):
+                form_data.errors['roles'] = ['Select At leaset one role']
+                context['form_data'] = form_data
+                return render(request, "user/new/store_admin.html", context=context)
+
+            first_name = form_data.cleaned_data.get('first_name')
+            last_name = form_data.cleaned_data.get('last_name')
+            phone = form_data.cleaned_data.get('phone')
+            email = form_data.cleaned_data.get('email')
+
+            user = User(
+                username = email,
+                first_name = first_name,
+                last_name = last_name,
+                phone = phone,
+                email = email,
+            )
+            user.account_type = AccessGroups.STORE_ADMIN
+            user.set_password(str(email))
+            user.save()
+
+            for role in roles:
+                group, created = Group.objects.get_or_create(name = role)
+                user.groups.add(group)
+
+            user_profile, created = UserProfile.objects.get_or_create(user=user, company=company)
+            user_profile.store = store
+            user_profile.save()
+
+            messages.info(request, "Store admin account created successfully!")
+            return redirect(reverse('user:users-company-list', kwargs={'company_id': company_id}))
+        else:
+            context['form'] = form_data
+            print(form_data.errors)
+            messages.error(request,"Failed to create store admin account!")
+            
+    return render(request, "user/company/new/store_admin.html", context=context)
+
+
+@login_required(login_url='/login')
+def users_store_list_view(request, store_id):
+
+    store = Store.objects.get(pk = store_id)
+
+    users = User.objects.filter(userprofile__store=store)
+
+    access_group = request.GET.get('access_group', None)
+
+    if access_group is not None:
+        if access_group == AccessGroups.COMPANY_ADMIN:
+            users = User.objects.filter(userprofile__company=store.company)
+            users  = users.filter(account_type = access_group)
+        else:
+            users  = users.filter(account_type = access_group)
+
+    context = {
+        "company": store.company,
+        "store": store,
+        "users" : users,
+        "access_group": access_group
+    }
+    return render(request, "user/store/list/index.html", context = context)
+
+
+@login_required(login_url='/login')
+def users_store_new_view(request, store_id):
+    access_group = request.GET.get('access_group', None)
+
+    if  access_group == AccessGroups.STORE_ADMIN:
+        return redirect(reverse('user:users-store-admin-new', kwargs={'store_id': store_id}))
+
+    if  access_group == AccessGroups.POS_ATTENDANT:
+        return redirect(reverse('user:users-store-pos-attendant-new', kwargs={'store_id': store_id}))
+
+    return redirect(reverse('user:store-index'))
+
+
+@login_required(login_url='/login')
+def users_store_admin_user_new(request, store_id):
+    store = Store.objects.get(pk = store_id)
+    company = store.company
+
+    form = StoreAdminUserForm(company=store.company,store=store)
+
+    context = { "company": company, "store":store, "form": form }
+    
+    if request.method == "POST":
+        form_data = StoreAdminUserForm(request.POST,company=company, store=store)
+
+        if form_data.is_valid():
+            store = form_data.cleaned_data.pop('store', None)
+            roles = form_data.cleaned_data.pop('roles', [])
+
+            if store is None:
+                form_data.errors['store'] = ['Please select a store!']
+                context['form_data'] = form_data
+                return render(request, "user/new/store_admin.html", context=context)
+
+            if not len(roles):
+                form_data.errors['roles'] = ['Select At leaset one role']
+                context['form_data'] = form_data
+                return render(request, "user/new/store_admin.html", context=context)
+
+            first_name = form_data.cleaned_data.get('first_name')
+            last_name = form_data.cleaned_data.get('last_name')
+            phone = form_data.cleaned_data.get('phone')
+            email = form_data.cleaned_data.get('email')
+
+            user = User(
+                username = email,
+                first_name = first_name,
+                last_name = last_name,
+                phone = phone,
+                email = email,
+            )
+            user.account_type = AccessGroups.STORE_ADMIN
+            user.set_password(str(email))
+            user.save()
+
+            for role in roles:
+                group, created = Group.objects.get_or_create(name = role)
+                user.groups.add(group)
+
+            user_profile, created = UserProfile.objects.get_or_create(user=user, company=company)
+            user_profile.store = store
+            user_profile.save()
+
+            messages.info(request, "Store admin account created successfully!")
+            return redirect(reverse('user:users-store-list', kwargs={'store_id': store_id}))
+        else:
+            context['form'] = form_data
+            print(form_data.errors)
+            messages.error(request,"Failed to create store admin account!")
+            
+    return render(request, "user/store/new/store_admin.html", context=context)
+
+
+
+@login_required(login_url='/login')
+def users_store_pos_attendant_user_new(request, store_id):
+    store = Store.objects.get(pk = store_id)
+    company = store.company
+
+    form = POSAttendantUserForm(company=company,store=store)
+
+    context = { "company": company, "store":store, "form": form }
+
+    if request.method == "POST":
+        form_data = POSAttendantUserForm(request.POST,company=company,store=store)
+
+        if form_data.is_valid():
+            store = form_data.cleaned_data.pop('store', None)
+            pos_center = form_data.cleaned_data.pop('pos_center', None)
+
+            if store is None:
+                form_data.errors['store'] = ['Please select a store!']
+                context['form_data'] = form_data
+                return render(request, "user/new/pos_attendant.html", context=context)
+            
+            if pos_center is None:
+                form_data.errors['pos_center'] = ['Please select a pos center!']
+                context['form_data'] = form_data
+                return render(request, "user/new/pos_attendant.html", context=context)
+
+            first_name = form_data.cleaned_data.get('first_name')
+            last_name = form_data.cleaned_data.get('last_name')
+            phone = form_data.cleaned_data.get('phone')
+            email = form_data.cleaned_data.get('email')
+
+            user = User(
+                username = email,
+                first_name = first_name,
+                last_name = last_name,
+                phone = phone,
+                email = email,
+            )
+            user.account_type = AccessGroups.POS_ATTENDANT
+            user.set_password(str(email))
+            user.save()
+
+            group, created = Group.objects.get_or_create(name = DefaultRoles.CASHIER)
+            user.groups.add(group)
+
+            user_profile, created = UserProfile.objects.get_or_create(user=user, company=company)
+            user_profile.store = store
+            user_profile.pos_center = pos_center
+            user_profile.save()
+
+            messages.info(request, "POS attendant account created successfully!")
+            return redirect(reverse('user:users-store-list', kwargs={'store_id': store_id}))
+        else:
+            context['form'] = form_data
+            print(form_data.errors)
+            messages.error(request,"Failed to create a POS attendant account!")
+
+    return render(request, "user/store/new/pos_attendant.html", context=context)
+
+
+    
+
+
+@login_required(login_url='/login')
+def users_company_new_view1(request, company_id):
 
     company = Company.objects.get(pk = company_id)
 
@@ -183,7 +464,7 @@ def users_company_new_view(request, company_id):
                 first_name = form_data.cleaned_data['first_name'],
                 last_name = form_data.cleaned_data['last_name'],
                 email = form_data.cleaned_data['email'],
-                phone_number = form_data.cleaned_data['phone_number'],
+                phone = form_data.cleaned_data['phone'],
             )
 
             user.set_password(str(user.email))
@@ -263,7 +544,6 @@ def users_role_permissions_list_view(request, role_id):
         
     return render(request, "user/super/roles/index.html", context= context)
 
-
 ########################### Company Roles #######################
 
 @login_required(login_url='/login')
@@ -285,7 +565,6 @@ def users_company_roles_list_view(request, company_id):
     }
 
     return render(request, "role/company/list/index.html", context = context)
-
 
 @login_required(login_url='/login')
 def users_company_roles_new_view(request, company_id):
@@ -331,7 +610,6 @@ def users_company_roles_new_view(request, company_id):
 
     return render(request, "role/company/new/index.html", context=context)
 
-
 @login_required(login_url='/login')
 def users_company_role_permissions_list_view(request, company_id, role_id):
     company = Company.objects.get(pk = company_id)
@@ -375,8 +653,6 @@ def users_company_role_permissions_list_view(request, company_id, role_id):
                 group.permissions.remove(existing_perm)
         
     return render(request, "user/super/roles/index.html", context= context)
-
-
 
 #################################
 @login_required(login_url='/login')

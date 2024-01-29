@@ -5,14 +5,14 @@
 {% block pagetitle%}
 <div class="pagetitle">
     <h1>Hello, {{ request.session.company_name|default:"Guest" }}!</h1>
+
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">Home</a></li>
+      <li class="breadcrumb-item active"><a>Users</a></li>
+    </ol>
+  </nav>
     
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">
-                Company Users
-            </a></li>
-        </ol>
-    </nav>
 </div><!-- End Page Title --> 
 {% endblock %} 
 
@@ -22,14 +22,23 @@
     
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Users</h5>
+            <h5 class="card-title">{{ access_group|default:"ALL" }} Users</h5>
             
             <div class="d-flex flex-column">
+                {% if access_group == "Company Admin" or access_group == "Store Admin" %}
                 <div class="d-flex flex-row justify-content-end p-2">
-                    <a href="{% url 'user:users-company-new' company_id=company.id %}" class="btn btn-outline-primary" style="width: 150px; display: inline-block; text-align: center; text-decoration: none;">
-                        <i class="bi bi-plus"></i><span>Add User</span>
+                    <a href="{% url 'user:users-company-new' company_id=company.id %}?access_group={{access_group}}" class="btn btn-outline-primary" style="width: 180px; display: inline-block; text-align: center; font-size: 12px; text-decoration: none;">
+                        <i class="bi bi-plus"></i><span>
+                            {% if access_group == "Company Admin" %}
+                            Add Company Admin
+                            {% endif %}
+                            {% if access_group == "Store Admin" %}
+                            Add Store Admin
+                            {% endif %}
+                        </span>
                     </a>
                 </div>
+                {% endif %}
                 <div class="table-responsive small">
                     <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
                         <thead>
@@ -39,7 +48,7 @@
                                 <th scope="col">Name</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Contact</th>
-                                <th scope="col">Branch</th>
+                                <th scope="col">Store</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -49,8 +58,8 @@
                                 <td>{% for group in user.groups.all %}<p>{{group.name}}</p>{% endfor %}</td>
                                 <td>{{user.name}}</td>
                                 <td>{{user.email}}</td>
-                                <td>{{user.phone_number}}</td>
-                               <td>{% for staff in user.companystaff_set.all %}<p>{{staff.branch.name}}</p>{% endfor %}</td>
+                                <td>{{user.phone}}</td>
+                                <td>{{user.userprofile.store}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

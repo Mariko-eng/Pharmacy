@@ -72,10 +72,10 @@
                     <div class="row mb-3">
                         <label for="name" class="col-sm-3 col-form-label">Phone Number *</label>
                         <div class="col-sm-9">
-                            {% if form.errors.phone_number %}
-                            {% render_field form.phone_number|add_class:"form-control is-invalid"|attr:"id:phone_number" %}
+                            {% if form.errors.phone %}
+                            {% render_field form.phone|add_class:"form-control is-invalid"|attr:"id:phone" %}
                             {% else %}
-                            {% render_field form.phone_number|add_class:"form-control"|attr:"id:phone_number" %}
+                            {% render_field form.phone|add_class:"form-control"|attr:"id:phone" %}
                             {% endif %}
                             <div id = "" class="invalid-feedback">
                                 {{  form.errors.email.0  }}

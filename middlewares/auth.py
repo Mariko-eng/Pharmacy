@@ -22,6 +22,8 @@ class AuthenticationBackend(ModelBackend):
                 user = UserModel._default_manager.get(username=username)
             except UserModel.DoesNotExist:
                 return None
+            
+        # print(user.password)
                     
         if user.is_superuser:
             if user.check_password(password):
