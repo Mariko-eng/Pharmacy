@@ -1,3 +1,4 @@
+from uuid import uuid4
 from django.db import models
 from django.utils import timezone
 from company.models import Company, Supplier
@@ -7,6 +8,13 @@ from inventory.models import StoreProduct
 
 class PurchaseOrderRequest(Base):
     SUPPLIER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
+
+    PAYMENT_PERIODS = [
+        ('Instant', 'Instant'),
+        ('After 7 days', 'After 7 days'),
+        ('After 14 days', 'After 14 days'),
+        ('After 30 days', 'After 30 days'),
+        ('After 60 days', 'After 60 days'),]
     STATUS_CHOICES = (
         ('PENDING', 'Pending'),
         ('APPROVED', 'Approved'),
@@ -23,10 +31,42 @@ class PurchaseOrderRequest(Base):
     order_date = models.DateField(default=timezone.now)
     delivery_date = models.DateField(null=True) # Expected  Delivery Date
     order_notes = models.TextField(null=True,blank=True)
-    payment_terms = models.TextField(null=True,blank=True)
+    payment_period = models.CharField(max_length=25, choices=PAYMENT_PERIODS, default='Instant')
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='PENDING')
+
+    #Utility fields
+    uniqueId = models.CharField(null=True, blank=True, max_length=100)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="purchase_orders_createdby")
+
+    class Meta:
+        ordering = ("-created_at",)
+    
+    @property
+    def order_unique_id(self):
+        if self.uniqueId is None:
+            self.uniqueId = str(uuid4()).split('-')[4]
+            self.save()
+            
+        return self.uniqueId
+
+    @property
+    def items_count(self):
+        return self.purchaseorderrequestitem_set.count()
+    
+    @property
+    def total_cost(self):
+        total = 0
+        items = self.purchaseorderrequestitem_set.all()
+        for item in items:
+            total = total + item.total_cost
+        return total
+    
+    def save(self, *args, **kwargs):
+        if self.uniqueId is None:
+            self.uniqueId = str(uuid4()).split('-')[4]
+
+        super(PurchaseOrderRequest, self).save(*args, **kwargs)
 
 class PurchaseOrderRequestItem(Base):
     #Owner

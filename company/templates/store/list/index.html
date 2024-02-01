@@ -8,12 +8,13 @@
     
     <nav>
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">
-                Company Stores
-            </a></li>
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active"><a>Stores</a></li>
+            <li class="breadcrumb-item active"><a>List</a></li>
         </ol>
     </nav>
-</div><!-- End Page Title --> 
+</div>
+<!-- End Page Title --> 
 {% endblock %} 
 
 
@@ -43,7 +44,7 @@
                             {% if stores %}
                             {% for store in stores %}
                             <div class="col-xs-12 col-sm-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
-                                <a href="{% url 'user:store-dashbaord'  store_id=store.id %}">
+                                <a href="{% url 'user:store-dashboard'  store_id=store.id %}">
                                     <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
                                         <i class="bi bi-house text-white" style="font-size: 2em;"></i>
                                     </div>
@@ -64,15 +65,15 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title text-center">Add Store</h5>
+                <h5 class="modal-title text-center">Add Stores</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body row g-3 needs-validation">
-                <form id = "branchForm" method="post" novalidate >
-                    <input type="hidden" id="companyId" name="companyId" value="{{company.id}}">
+                <form id = "storeForm" method="post" novalidate >
+                    <input type="hidden" id="companyId" name="companyId" value="{{company.id}}"/>
                     {% csrf_token %}
-                        {% comment %} <label for="name" class="col-sm-12 col-form-label">Store Name/Identification</label> {% endcomment %}
-                        <div class="row my-2">
+                    {% comment %} <label for="name" class="col-sm-12 col-form-label">Store Name/Identification</label> {% endcomment %}
+                    <div class="row my-2">
                         <div class="col-sm-12">
                             {% render_field form.name|add_class:"form-control"|attr:"id:name" placeholder="Enter Name" %}
                             <div id = "nameError" class="invalid-feedback">
@@ -130,139 +131,143 @@
                         </div>
                     </div>
                     <div>
-                        <h5>Store Location Details</b>
-                            <div class="row my-2">
-                                <div class="col-6">
-                                    <div class="row">
-                                        <label for="location_district" class="col-sm-3 col-form-label">District</label>
-                                        <div class="col-sm-9">
-                                            {% render_field form.location_district|add_class:"form-control"|attr:"id:location_district" %}
-                                            <div id = "locationDistrictError" class="invalid-feedback">
-                                                Provide a valid district
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-6">
-                                    <div class="row">
-                                        <label for="location_village" class="col-sm-3 col-form-label">Village</label>
-                                        <div class="col-sm-9">
-                                            {% render_field form.location_village|add_class:"form-control"|attr:"id:location_village" %}
-                                            <div id = "locationVillageError" class="invalid-feedback">
-                                                Provide a valid village
-                                            </div>
+                        <h5>Store Location Details</h5>
+                        <div class="row my-2">
+                            <div class="col-6">
+                                <div class="row">
+                                    <label for="location_district" class="col-sm-3 col-form-label">District</label>
+                                    <div class="col-sm-9">
+                                        {% render_field form.location_district|add_class:"form-control"|attr:"id:location_district" %}
+                                        <div id = "locationDistrictError" class="invalid-feedback">
+                                            Provide a valid district
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </form>
+                            <div class="col-6">
+                                <div class="row">
+                                    <label for="location_village" class="col-sm-3 col-form-label">Village</label>
+                                    <div class="col-sm-9">
+                                        {% render_field form.location_village|add_class:"form-control"|attr:"id:location_village" %}
+                                        <div id = "locationVillageError" class="invalid-feedback">
+                                            Provide a valid village
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="button" id ="formSubmitButton" class="btn btn-primary">Save</button>
-                    </div>
-                </div>
+                </form>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" id ="formSubmitButton" class="btn btn-primary">Save</button>
             </div>
         </div>
-        <!-- End Modal Dialog Scrollable-->
-        
-        <script type='text/javascript'>
+    </div>
+</div>
+</div>
+</div>
+<!-- End Modal Dialog Scrollable-->
+
+<script type='text/javascript'>
+    
+    $(document).ready(function() {  
+        $("#formSubmitButton").click(function () {
             
-            $(document).ready(function() {  
-                $("#formSubmitButton").click(function () {
-                    
-                    const data = $('#branchForm').serialize() // Contains Form Data And CSRF Token As Well
+            const data = $('#storeForm').serialize() // Contains Form Data And CSRF Token As Well
+            // console.log(data)
+            
+            const id = $('#companyId').val();
+            
+            $.ajax({
+                type: 'POST',
+                url: '{% url "company:company-store-list" 0 %}'.replace('0', id), 
+                data: data,
+                success: function (data) {
                     // console.log(data)
-                    
-                    const id = $('#companyId').val();
-                    
-                    $.ajax({
-                        type: 'POST',
-                        url: '{% url "company:company-store-list" 0 %}'.replace('0', id), 
-                        data: data,
-                        success: function (data) {
-                            // console.log(data)
-                            if (data.success) {
-                                // Close the modal on success
-                                $('#name').removeClass('is-invalid');
-                                $('#name').addClass('is-valid');
-                                $('#store_type').removeClass('is-invalid');
-                                $('#store_type').addClass('is-valid');
-                                $('#status').removeClass('is-invalid');
-                                $('#status').addClass('is-valid');
-                                $('#email').removeClass('is-invalid');
-                                $('#email').addClass('is-valid');
-                                $('#phone').removeClass('is-invalid');
-                                $('#phone').addClass('is-valid');
-                                $('#location_district').removeClass('is-invalid');
-                                $('#location_district').addClass('is-valid');
-                                $('#location_village').removeClass('is-invalid');
-                                $('#location_village').addClass('is-valid');
-                                
-                                $('#createBranchModal').modal('hide');
-                                window.location.reload()            
-                                // Optionally, you can redirect or perform other actions after a successful submission
-                            } else {
-                                if(data.errors.name){
-                                    $('#name').removeClass('is-valid');
-                                    $('#name').addClass('is-invalid');
-                                    $('#nameError').text(data.errors.name[0])
-                                }else{
-                                    $('#name').removeClass('is-invalid');
-                                    $('#name').addClass('is-valid');
-                                }
-                                if(data.errors.store_type){
-                                    $('#store_type').removeClass('is-valid');
-                                    $('#store_type').addClass('is-invalid');
-                                    $('#storeTypeError').text(data.errors.store_type[0])
-                                }else{
-                                    $('#store_type').removeClass('is-invalid');
-                                    $('#store_type').addClass('is-valid');
-                                }
-                                if(data.errors.status){
-                                    $('#status').removeClass('is-valid');
-                                    $('#status').addClass('is-invalid');
-                                    $('#statusError').text(data.errors.status[0])
-                                }else{
-                                    $('#status').removeClass('is-invalid');
-                                    $('#status').addClass('is-valid');
-                                }
-                                if(data.errors.email){
-                                    $('#email').removeClass('is-valid');
-                                    $('#email').addClass('is-invalid');
-                                    $('#emailError').text(data.errors.email[0])
-                                }else{
-                                    $('#email').removeClass('is-invalid');
-                                    //$('#email').addClass('is-valid');
-                                }
-                                if(data.errors.phone){
-                                    $('#phone').removeClass('is-valid');
-                                    $('#phone').addClass('is-invalid');
-                                    $('#phoneError').text(data.errors.phone[0])
-                                }else{
-                                    $('#phone').removeClass('is-invalid');
-                                    $('#phone').addClass('is-valid');
-                                }
-                                if(data.errors.location_district){
-                                    $('#location_district').removeClass('is-valid');
-                                    $('#location_district').addClass('is-invalid');
-                                    $('#locationDistrictError').text(data.errors.location_district[0])
-                                }else{
-                                    $('#location_district').removeClass('is-invalid');
-                                    $('#location_district').addClass('is-valid');
-                                }
-                                if(data.errors.location_village){
-                                    $('#location_village').removeClass('is-valid');
-                                    $('#location_village').addClass('is-invalid');
-                                    $('#locationVillageError').text(data.errors.location_village[0])
-                                }else{
-                                    $('#location_village').removeClass('is-invalid');
-                                    $('#location_village').addClass('is-valid');
-                                }
-                            }
+                    if (data.success) {
+                        // Close the modal on success
+                        $('#name').removeClass('is-invalid');
+                        $('#name').addClass('is-valid');
+                        $('#store_type').removeClass('is-invalid');
+                        $('#store_type').addClass('is-valid');
+                        $('#status').removeClass('is-invalid');
+                        $('#status').addClass('is-valid');
+                        $('#email').removeClass('is-invalid');
+                        $('#email').addClass('is-valid');
+                        $('#phone').removeClass('is-invalid');
+                        $('#phone').addClass('is-valid');
+                        $('#location_district').removeClass('is-invalid');
+                        $('#location_district').addClass('is-valid');
+                        $('#location_village').removeClass('is-invalid');
+                        $('#location_village').addClass('is-valid');
+                        
+                        $('#createBranchModal').modal('hide');
+                        window.location.reload()            
+                        // Optionally, you can redirect or perform other actions after a successful submission
+                    } else {
+                        if(data.errors.name){
+                            $('#name').removeClass('is-valid');
+                            $('#name').addClass('is-invalid');
+                            $('#nameError').text(data.errors.name[0])
+                        }else{
+                            $('#name').removeClass('is-invalid');
+                            $('#name').addClass('is-valid');
                         }
-                    })
-                })
+                        if(data.errors.store_type){
+                            $('#store_type').removeClass('is-valid');
+                            $('#store_type').addClass('is-invalid');
+                            $('#storeTypeError').text(data.errors.store_type[0])
+                        }else{
+                            $('#store_type').removeClass('is-invalid');
+                            $('#store_type').addClass('is-valid');
+                        }
+                        if(data.errors.status){
+                            $('#status').removeClass('is-valid');
+                            $('#status').addClass('is-invalid');
+                            $('#statusError').text(data.errors.status[0])
+                        }else{
+                            $('#status').removeClass('is-invalid');
+                            $('#status').addClass('is-valid');
+                        }
+                        if(data.errors.email){
+                            $('#email').removeClass('is-valid');
+                            $('#email').addClass('is-invalid');
+                            $('#emailError').text(data.errors.email[0])
+                        }else{
+                            $('#email').removeClass('is-invalid');
+                            //$('#email').addClass('is-valid');
+                        }
+                        if(data.errors.phone){
+                            $('#phone').removeClass('is-valid');
+                            $('#phone').addClass('is-invalid');
+                            $('#phoneError').text(data.errors.phone[0])
+                        }else{
+                            $('#phone').removeClass('is-invalid');
+                            $('#phone').addClass('is-valid');
+                        }
+                        if(data.errors.location_district){
+                            $('#location_district').removeClass('is-valid');
+                            $('#location_district').addClass('is-invalid');
+                            $('#locationDistrictError').text(data.errors.location_district[0])
+                        }else{
+                            $('#location_district').removeClass('is-invalid');
+                            $('#location_district').addClass('is-valid');
+                        }
+                        if(data.errors.location_village){
+                            $('#location_village').removeClass('is-valid');
+                            $('#location_village').addClass('is-invalid');
+                            $('#locationVillageError').text(data.errors.location_village[0])
+                        }else{
+                            $('#location_village').removeClass('is-invalid');
+                            $('#location_village').addClass('is-valid');
+                        }
+                    }
+                }
             })
-        </script>
-        {% endblock %}
+        })
+    })
+</script>
+{% endblock %}

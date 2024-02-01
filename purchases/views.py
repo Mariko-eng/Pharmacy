@@ -15,11 +15,11 @@ def store_purchase_orders_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
 
-    order_requests = PurchaseOrderRequest.objects.filter(store = store)
+    purchase_orders = PurchaseOrderRequest.objects.filter(store = store)
     context = {
         "company": company,
         "store": store,
-        "order_requests": order_requests
+        "purchase_orders": purchase_orders
         }
 
     return render(request, 'purchase_orders/list/index.html', context=context) 
@@ -29,9 +29,7 @@ def store_purchase_orders_new(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
 
-    context = {
-        "company": company,
-        "store": store}
+    context = { "company": company, "store": store }
 
     form = PurchaseOrderRequestForm(company=company)
     
@@ -63,11 +61,10 @@ def store_purchase_orders_new(request, store_id):
             order_request = PurchaseOrderRequest(
                 supplier_type = supplier_type,
                 supplier_entity = supplier_entity,
-                supplier_store = supplier_store,
-                delivered_by_name = form_data.cleaned_data.get("delivered_by_name"),
-                delivered_by_phone = form_data.cleaned_data.get("delivered_by_phone"),
-                received_date = form_data.cleaned_data.get("received_date"),
-                delivery_notes = form_data.cleaned_data.get("delivery_notes"),
+                supplier_store = supplier_store,  
+                order_date = form_data.cleaned_data.get("order_date"),
+                delivery_date = form_data.cleaned_data.get("delivery_date"),
+                order_notes = form_data.cleaned_data.get("order_notes"),
             )
             
             order_request.company = company
@@ -95,11 +92,11 @@ def store_purchase_orders_new(request, store_id):
     return render(request, 'purchase_orders/new/index.html', context=context) 
 
 
-def store_purchase_orders_edit(request, store_id, order_request_id):
+def store_purchase_orders_edit(request, store_id, purchase_order_id):
     store = get_object_or_404(Store, pk=store_id)
     company = store.company
 
-    order_request = get_object_or_404(PurchaseOrderRequest, pk=order_request_id, store=store)
+    order_request = get_object_or_404(PurchaseOrderRequest, pk=purchase_order_id, store=store)
 
     context = {
         "company": company,

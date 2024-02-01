@@ -35,8 +35,8 @@ class PurchaseOrderRequestForm(forms.ModelForm):
         fields = [
             'order_date',
             'delivery_date',
-            'order_notes','payment_terms',]
-        exclude = ['company','store','updated_by','updated_at','created_by','created_at']
+            'order_notes',] 
+        exclude = ['company','store','payment_period','updated_by','updated_at','created_by','created_at']
 
 
     def __init__(self, *args, company=None, **kwargs):
@@ -56,7 +56,7 @@ class PurchaseOrderRequestForm(forms.ModelForm):
 
 
 class PurchaseOrderRequestItemForm(forms.ModelForm):
-    total_cost = forms.DecimalField(initial=0,max_digits=12, decimal_places=3)
+    total_cost = forms.DecimalField(max_digits=12, decimal_places=3)
     class Meta:
         model = PurchaseOrderRequestItem
         fields = [

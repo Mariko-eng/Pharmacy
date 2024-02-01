@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
@@ -6,10 +7,22 @@ from django.http import JsonResponse
 from .forms import RequiredFormSet
 from .forms import SaleForm,PosSaleForm
 from .forms import SaleItemForm
-from company.models import Store, Customer, PosCenter
+from company.models import Company, Store, Customer, PosCenter
 from inventory.models import StoreProduct
 from .models import Sale
 from .models import SaleItem
+
+
+def company_sales_list(request, company_id):
+    company = Company.objects.get(pk=company_id)
+
+    sales = Sale.objects.filter(company = company)
+    context = {
+            "company": company,
+            "sales": sales
+        }
+
+    return render(request, 'sales/company/list/index.html', context=context) 
 
 
 def store_sales_list(request, store_id):
@@ -24,6 +37,46 @@ def store_sales_list(request, store_id):
         }
 
     return render(request, 'sales/store/list/index.html', context=context) 
+
+def store_sales_detail(request, store_id, sale_id):
+    store = Store.objects.get(pk=store_id)
+    company = store.company
+
+    sale = Sale.objects.get(pk = sale_id)
+    context = {
+            "company": company,
+            "store": store,
+            "sale": sale
+        }
+
+    return render(request, 'sales/store/detail/index.html', context=context) 
+
+def store_sales_invoice(request, store_id, sale_id):
+    store = Store.objects.get(pk=store_id)
+    company = store.company
+
+    sale = Sale.objects.get(pk = sale_id)
+
+    context = { 
+        "company": company,
+        "store": store,
+        "title": "Sale Invoice" ,
+        "sale": sale
+        }
+
+    sale = sale.generate_invoice( context = context)
+
+    print(sale.customer)
+    
+    # Prepare the sale data to be returned as JSON
+    sale_data = {
+        "sale_id": sale.id,
+        "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
+
+    }
+
+    return JsonResponse(sale_data)
+
 
 
 def store_sales_new(request, store_id):
@@ -72,9 +125,8 @@ def store_sales_new(request, store_id):
                 sale = Sale(
                     customer = customer,
                     payment_option = form_data.cleaned_data.get("payment_option"),
-                    payment_details = form_data.cleaned_data.get("payment_details"),
-                    sale_date = form_data.cleaned_data.get("sale_date"),
-                    sale_remarks = form_data.cleaned_data.get("sale_remarks"),
+                    payment_period = form_data.cleaned_data.get("payment_period"),
+                    remarks = form_data.cleaned_data.get("remarks"),
                 )
 
                 pos_data =form_data.cleaned_data.get("pos_center")
@@ -84,6 +136,11 @@ def store_sales_new(request, store_id):
                 sale.store = store
                 sale.created_by = request.user
                 sale.save()
+
+                if form_data.cleaned_data.get("payment_period") == "INSTANT":
+                    payment_status = "CURRENT"
+                    sale.payment_status = payment_status
+                    sale.save()
 
                 for formset_data_item in formset_data:
                     item = formset_data_item.save(commit=False)
@@ -222,9 +279,8 @@ def pos_sales_new(request, pos_id):
                 sale = Sale(
                     customer = customer,
                     payment_option = form_data.cleaned_data.get("payment_option"),
-                    payment_details = form_data.cleaned_data.get("payment_details"),
-                    sale_date = form_data.cleaned_data.get("sale_date"),
-                    sale_remarks = form_data.cleaned_data.get("sale_remarks"),
+                    payment_period = form_data.cleaned_data.get("payment_period"),
+                    remarks = form_data.cleaned_data.get("remarks"),
                 )
 
                 sale.company = company
@@ -232,6 +288,11 @@ def pos_sales_new(request, pos_id):
                 sale.pos_center = pos
                 sale.created_by = request.user
                 sale.save()
+
+                if form_data.cleaned_data.get("payment_period") == "INSTANT":
+                    payment_status = "CURRENT"
+                    sale.payment_status = payment_status
+                    sale.save()
 
                 for formset_data_item in formset_data:
                     item = formset_data_item.save(commit=False)

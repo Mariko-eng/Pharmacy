@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse, resolve
 from django.contrib.auth.decorators import login_required
 from pharmacy.utils import generate_random_number
 from django.shortcuts import get_object_or_404
@@ -15,8 +16,25 @@ from user.models import AccessGroups, User, UserProfile
 from user.permissions import DefaultRoles
 from .models import CompanyApplication
 from .models import Company, Store, PosCenter
+from .tasks import send_company_approval_email
 
 ################### - Company Application - ################# 
+
+def test_mail(request):
+    recipient_email = "yigamarkgabriel333@gmail.com"
+    activation_code = "234344"
+    redirect_view_name = 'company:company-account-activate'  # Use the correct view name
+
+    # Reverse the view name to get the relative path
+    relative_path = reverse(redirect_view_name)
+
+    # Build the absolute URL by combining it with the base URL
+    redirect_url = request.build_absolute_uri(relative_path)
+
+    # print(redirect_url)
+    send_company_approval_email(recipient_email, activation_code, redirect_url)
+    return JsonResponse({'status': 'Sent!'})
+
 
 def company_application_add_view(request):
     form = CompanyApplicationRegisterForm()
@@ -42,6 +60,36 @@ def company_application_add_view(request):
     return render(request, 'company/application/new/index.html', context=context)
 
 
+def company_application_edit_status(request, app_id, new_status):
+    valid_statuses = ['PENDING', 'APPROVED' , 'CREATED' ,'DECLINED', 'CANCELLED']
+
+    if new_status not in valid_statuses:
+        messages.error(request, 'Invalid status provided.')
+        return render(request, 'company/application/list/index.html')
+
+    # Retrieve the object based on the primary key
+    obj = get_object_or_404(CompanyApplication, pk = app_id)
+
+    # Change the status
+    obj.status = new_status
+    obj.save()
+
+    if new_status == "APPROVED":
+        recipient_email = obj.email
+        activation_code = obj.activation_code
+        redirect_view_name = 'company:company-account-activate'  # Use the correct view name
+        # Reverse the view name to get the relative path
+        relative_path = reverse(redirect_view_name)
+        # Build the absolute URL by combining it with the base URL
+        redirect_url = request.build_absolute_uri(relative_path)
+        # print(redirect_url)
+        send_company_approval_email(recipient_email, activation_code, redirect_url)
+
+
+    messages.success(request, f'Status of application changed to {new_status}.')
+    return redirect('company:company-application-list')
+
+
 def company_account_activate_view(request):
     form = CompanyAccountActivationForm()
 
@@ -58,32 +106,35 @@ def company_account_activate_view(request):
                 companyApplication = CompanyApplication.objects.filter(email = email, activation_code = activation_code).first()
 
                 if companyApplication.status == "DECLINED":
-                    messages.info(request, "Company application was not successful!")
+                    messages.info(request, "Company application was declined!")
                     return render(request, 'company/activation/index.html', context=context)
-
-                company, created = Company.objects.get_or_create(
-                    name = companyApplication.name,
-                    phone = companyApplication.phone,
-                    email = email,
-                    location = companyApplication.location,
-                    logo = companyApplication.logo,
-                    activation_code = activation_code)
-
-                if companyApplication.status != "APPROVED":
-                    companyApplication.status = "APPROVED"
-                    companyApplication.save()
-                    messages.info(request, "Company account activated successfully!")
-                else:
+                
+                if companyApplication.status == "CREATED":
                     messages.info(request, "Company account already activated!")                    
-
-                return redirect('company:company-admin-user-register', company_id = company.id)
+                    return redirect('company:company-admin-user-register', company_id = company.id)
+                
+                if companyApplication.status == "APPROVED":
+                    company, created = Company.objects.get_or_create(
+                        name = companyApplication.name,
+                        phone = companyApplication.phone,
+                        email = companyApplication.email,
+                        location = companyApplication.location,
+                        logo = companyApplication.logo,
+                        activation_code = activation_code
+                    )
+                    
+                    companyApplication.status = "CREATED"
+                    companyApplication.save()
+                    messages.info(request, "Company account activated successfully!")                  
+                    return redirect('company:company-admin-user-register', company_id = company.id)
             else:
                 messages.error(request,"Failed To Activate Company!")
                 form.errors['activation_code'] = ['You have submitted a Wrong code!'] 
         else:
             messages.error(request,"Failed To Submit Application!")
 
-    return render(request, 'company/activation/index.html', context=context)
+    return render(request, 'company/application/activation/index.html', context=context)
+
 
 def company_admin_user_register_view(request, company_id):
     company = Company.objects.get(pk = company_id)
@@ -130,16 +181,17 @@ def company_admin_user_register_view(request, company_id):
             print(form_data.errors)
             messages.error(request,"Failed to create company admin account!")
             
-    return render(request, 'company/admin_account/new.html', context=context)
+    return render(request, 'company/application/admin_account/new.html', context=context)
 
 
 @login_required(login_url='/login')
 def company_application_list_view(request):
-    data = CompanyApplication.objects.all()
+    applications = CompanyApplication.objects.all()
 
-    context = { "data" : data }
+    context = { "applications" : applications }
     
-    return render(request, 'company/new/index.html', context = context)
+    return render(request, 'company/application/list/index.html', context = context)
+
 
 @login_required(login_url='/login')
 def company_application_detail_view(request, pk):
@@ -147,7 +199,8 @@ def company_application_detail_view(request, pk):
 
     context = { "data" : data }
     
-    return render(request, 'company/new/index.html', context = context)
+    return render(request, 'company/application/detail/index.html', context = context)
+
 
 @login_required(login_url='/login')
 def company_application_edit_view(request, pk):
@@ -155,26 +208,28 @@ def company_application_edit_view(request, pk):
 
     context = { "data" : data }
     
-    return render(request, 'company/new/index.html', context = context)
+    return render(request, 'company/application/new/index.html', context = context)
+
 
 @login_required(login_url='/login')
-def company_application_delete_view(request, pk):
-    data = CompanyApplication.objects.all(pk = pk)
+def company_application_delete_view(request, app_id):
+    app = CompanyApplication.objects.all(pk = app_id)
 
-    context = { "data" : data }
+    app.hard_delete()
+
+    return redirect('company:company-application-list')
     
-    return render(request, 'company/new/index.html', context = context)
 
 
 ###################### - Company - ####################
 
 @login_required(login_url='/login')
 def company_list_view(request):
-    data = Company.objects.all()
+    companies = Company.objects.all()
 
-    context = { "data" : data }
+    context = { "companies" : companies }
     
-    return render(request, 'company/new/index.html', context = context)
+    return render(request, 'company/list/index.html', context = context)
 
 
 @login_required(login_url='/login')
@@ -185,6 +240,7 @@ def company_detail_view(request, company_id):
     
     return render(request, 'company/detail/index.html', context = context)
 
+
 @login_required(login_url='/login')
 def company_edit_view(request, company_id):
     data = Company.objects.all(pk = company_id)
@@ -192,6 +248,7 @@ def company_edit_view(request, company_id):
     context = { "data" : data }
     
     return render(request, 'company/new/index.html', context = context)
+
 
 @login_required(login_url='/login')
 @csrf_exempt  # Use this decorator if you don't need CSRF protection for this view
@@ -214,8 +271,9 @@ def company_delete_view(request, pk):
 
 ###################### - Company Store - ####################
 
+
 @login_required(login_url='/login')
-def store_list_view(request, company_id):
+def company_store_list_view(request, company_id):
     company = Company.objects.get(pk=company_id) 
     stores = Store.objects.filter(company = company)
 
@@ -239,39 +297,40 @@ def store_list_view(request, company_id):
     
     return render(request, 'store/list/index.html', context = context)
 
+
+
+
 @login_required(login_url='/login')
-def store_detail_view(request, company_id, store_id):
-    company = Company.objects.get(pk= company_id) 
+def store_profile_view(request, store_id):
     store = Store.objects.get(pk = store_id) 
 
-    context = { 
-        "company" : company,
-        "store" : store }
+    if request.is_ajax():
+        if request.method == 'POST':
+            form = StoreForm(request.POST, instance=store)
+            if form.is_valid():
+                store = form.save(commit=False)
+                store.created_by = request.user
+                store.company = store.company
+                store.save()
+                return JsonResponse({'success': True, 'store_id': store.id})
+            else:
+                return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = StoreForm(instance=store)
+
+    context = {  "company" : store.company, "store" : store, "form": form }
     
     return render(request, 'store/detail/index.html', context = context)
 
-@login_required(login_url='/login')
-def store_edit_view(request, company_id, store_id):
-    company = Company.objects.get(pk= company_id) 
-    store = Store.objects.get(pk = store_id) 
-
-    context = { 
-        "company" : company,
-        "store" : store }
-    
-    return render(request, 'store/new/index.html', context = context)
 
 
 @login_required(login_url='/login')
-def store_delete_view(request, company_id, store_id):
-    company = Company.objects.get(pk= company_id) 
+def store_delete_view(request, store_id):
     store = Store.objects.get(pk = store_id) 
 
-    context = { 
-        "company" : company,
-        "store" : store }
-    
-    return render(request, 'store/new/index.html', context = context)
+    store.hard_delete()
+
+    return JsonResponse({'success': True})
 
 
 ###################### - Company PosCenter - ####################
@@ -307,6 +366,7 @@ def pos_list_view(request, store_id):
         'pos_centers': pos_centers }
     
     return render(request, 'pos/list/index.html', context = context)
+
 
 @login_required(login_url='/login')
 def pos_detail_view(request, store_id, pos_id):

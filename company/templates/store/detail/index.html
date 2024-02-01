@@ -1,0 +1,336 @@
+{% extends 'base/store/index.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">
+  <h1>Store : {{ store.name }}!</h1>
+  
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">Home</a></li>
+      <li class="breadcrumb-item active"><a>Store</a></li>
+      <li class="breadcrumb-item active"><a>Profile</a></li>
+    </ol>
+  </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="row">
+  <div class="col-xl-4">
+    
+    <div class="card">
+      <div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
+        
+        <i class="bi bi-house text-primary" style="font-size: 4em;"></i>
+        
+        <h2>{{ store.name }}</h2>
+        <h3>{{ location_district }} - {{location_village}}</h3>
+        <div class="social-links mt-2">
+          <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
+          <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
+          <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
+          <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  
+  <div class="col-xl-8">
+    
+    <div class="card">
+      <div class="card-body pt-3">
+        <!-- Bordered Tabs -->
+        <ul class="nav nav-tabs nav-tabs-bordered">
+          
+          <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#profile-overview">Overview</button>
+          </li>
+          
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-edit">Edit Profile</button>
+          </li>
+          
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#profile-settings">Settings</button>
+          </li>
+          
+        </ul>
+        <div class="tab-content pt-2">
+          
+          <div class="tab-pane fade show active profile-overview" id="profile-overview">
+            <h5 class="card-title">Profile Details</h5>
+            
+            <div class="row">
+              <div class="col-lg-3 col-md-4 label ">Company</div>
+              <div class="col-lg-9 col-md-8">{{store.name}}</div>
+            </div>
+            
+            <div class="row">
+              <div class="col-lg-3 col-md-4 label">Type</div>
+              <div class="col-lg-9 col-md-8">{{store.store_type}}</div>
+            </div>
+            
+            <div class="row">
+              <div class="col-lg-3 col-md-4 label">Email</div>
+              <div class="col-lg-9 col-md-8">{{store.email}}</div>
+            </div>
+            
+            <div class="row">
+              <div class="col-lg-3 col-md-4 label">Email</div>
+              <div class="col-lg-9 col-md-8">{{store.phone}}</div>
+            </div>
+            
+            <div class="row">
+              <div class="col-lg-3 col-md-4 label">Address</div>
+              <div class="col-lg-9 col-md-8">{{store.location_district}} - {{store.location_village}}</div>
+            </div>
+            
+          </div>
+          
+          <div class="tab-pane fade profile-edit pt-3" id="profile-edit">
+            
+            <!-- Profile Edit Form -->
+            <form id = "storeForm" method="post" novalidate >
+              {% csrf_token %}
+              <input type="hidden" id="storeId" name="storeId" value="{{store.id}}">
+              
+              <div class="row mb-3">
+                <label for="name" class="col-md-4 col-lg-3 col-form-label">Name</label>
+                <div class="col-md-8 col-lg-9">
+                  {% render_field form.name|add_class:"form-control"|attr:"id:name" placeholder="Enter Name" %}
+                  <div id = "nameError" class="invalid-feedback">
+                    Provide a valid name
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <label for="store_type" class="col-md-4 col-lg-3 col-form-label">Type</label>
+                <div class="col-md-8 col-lg-9">
+                  {% render_field form.store_type|add_class:"form-select"|attr:"id:store_type" %}
+                  <div id = "storeTypeError" class="invalid-feedback">
+                    Please Select Store Type
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <label for="status" class="col-md-4 col-lg-3 col-form-label">Status</label>
+                <div class="col-md-8 col-lg-9">
+                  {% render_field form.status|add_class:"form-select"|attr:"id:status" %}
+                  <div id = "statusError" class="invalid-feedback">
+                    Please Select Status
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <label for="email" class="col-md-4 col-lg-3 col-form-label">Email</label>
+                <div class="col-md-8 col-lg-9">
+                  {% render_field form.email|add_class:"form-control"|attr:"id:email" placeholder="Enter email" %}
+                  <div id = "emailError" class="invalid-feedback">
+                    Provide a valid email
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <label for="phone" class="col-md-4 col-lg-3 col-form-label">Phone</label>
+                <div class="col-md-8 col-lg-9">
+                  {% render_field form.phone|add_class:"form-control"|attr:"id:phone" placeholder="Enter phone number" %}
+                  <div id = "phoneError" class="invalid-feedback">
+                    Provide a valid phone number
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <label for="location_district" class="col-md-4 col-lg-3 col-form-label">District</label>
+                <div class="col-md-8 col-lg-9">
+                  {% render_field form.location_district|add_class:"form-control"|attr:"id:location_district" %}
+                  <div id = "locationDistrictError" class="invalid-feedback">
+                    Provide a valid district
+                  </div>
+                </div>
+              </div>
+              
+              <div class="row mb-3">
+                <label for="village" class="col-md-4 col-lg-3 col-form-label">Village</label>
+                <div class="col-md-8 col-lg-9">
+                  {% render_field form.location_village|add_class:"form-control"|attr:"id:location_village" %}
+                  <div id = "locationVillageError" class="invalid-feedback">
+                    Provide a valid village
+                  </div>
+                </div>
+              </div>
+              
+              <div class="text-center">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+              </div>
+            </form><!-- End Profile Edit Form -->
+            
+          </div>
+          
+          <div class="tab-pane fade pt-3" id="profile-settings">
+            
+            <!-- Settings Form -->
+            <form id="deleteStoreForm" method="POST">
+              <!-- ... your form content ... -->
+              <div class="d-flex justify-content-between">
+                <div class="text-center">
+                  Delete this store?
+                </div>
+                <div class="text-center">
+                  <button type="button" id="deleteStoreButton" class="btn btn-danger">Delete Store</button>
+                </div>
+              </div>
+            </form>
+            <!-- End settings Form -->
+            
+          </div>          
+        </div><!-- End Bordered Tabs -->
+        
+      </div>
+    </div>
+    
+  </div>
+</div>
+
+<script type='text/javascript'>
+  
+  $(document).ready(function() {  
+
+    $("#storeForm").submit(function (e) {
+      
+      e.preventDefault();
+      
+      const data = $('#storeForm').serialize() // Contains Form Data And CSRF Token As Well
+      console.log(data)
+      
+      // const id = $('#companyId').val();
+      const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+      
+      console.log(csrfToken)
+      
+      $.ajax({
+        type: 'POST',
+        headers: {
+          'X-CSRFToken': csrfToken,
+        },
+        url: '{% url "company:store-profile" 0 %}'.replace('0', {{store.id}}), 
+        data: data,
+        success: function (data) {
+          // console.log(data)
+          if (data.success) {
+            // Close the modal on success
+            $('#name').removeClass('is-invalid');
+            $('#name').addClass('is-valid');
+            $('#store_type').removeClass('is-invalid');
+            $('#store_type').addClass('is-valid');
+            $('#status').removeClass('is-invalid');
+            $('#status').addClass('is-valid');
+            $('#email').removeClass('is-invalid');
+            $('#email').addClass('is-valid');
+            $('#phone').removeClass('is-invalid');
+            $('#phone').addClass('is-valid');
+            $('#location_district').removeClass('is-invalid');
+            $('#location_district').addClass('is-valid');
+            $('#location_village').removeClass('is-invalid');
+            $('#location_village').addClass('is-valid');
+            
+            window.location.reload()            
+            // Optionally, you can redirect or perform other actions after a successful submission
+          } else {
+            if(data.errors.name){
+              $('#name').removeClass('is-valid');
+              $('#name').addClass('is-invalid');
+              $('#nameError').text(data.errors.name[0])
+            }else{
+              $('#name').removeClass('is-invalid');
+              $('#name').addClass('is-valid');
+            }
+            if(data.errors.store_type){
+              $('#store_type').removeClass('is-valid');
+              $('#store_type').addClass('is-invalid');
+              $('#storeTypeError').text(data.errors.store_type[0])
+            }else{
+              $('#store_type').removeClass('is-invalid');
+              $('#store_type').addClass('is-valid');
+            }
+            if(data.errors.status){
+              $('#status').removeClass('is-valid');
+              $('#status').addClass('is-invalid');
+              $('#statusError').text(data.errors.status[0])
+            }else{
+              $('#status').removeClass('is-invalid');
+              $('#status').addClass('is-valid');
+            }
+            if(data.errors.email){
+              $('#email').removeClass('is-valid');
+              $('#email').addClass('is-invalid');
+              $('#emailError').text(data.errors.email[0])
+            }else{
+              $('#email').removeClass('is-invalid');
+              //$('#email').addClass('is-valid');
+            }
+            if(data.errors.phone){
+              $('#phone').removeClass('is-valid');
+              $('#phone').addClass('is-invalid');
+              $('#phoneError').text(data.errors.phone[0])
+            }else{
+              $('#phone').removeClass('is-invalid');
+              $('#phone').addClass('is-valid');
+            }
+            if(data.errors.location_district){
+              $('#location_district').removeClass('is-valid');
+              $('#location_district').addClass('is-invalid');
+              $('#locationDistrictError').text(data.errors.location_district[0])
+            }else{
+              $('#location_district').removeClass('is-invalid');
+              $('#location_district').addClass('is-valid');
+            }
+            if(data.errors.location_village){
+              $('#location_village').removeClass('is-valid');
+              $('#location_village').addClass('is-invalid');
+              $('#locationVillageError').text(data.errors.location_village[0])
+            }else{
+              $('#location_village').removeClass('is-invalid');
+              $('#location_village').addClass('is-valid');
+            }
+          }
+        }
+      })
+    })
+
+    $("#deleteStoreButton").on("click", function () {
+            // Show confirmation dialog
+            var isConfirmed = confirm("Are you sure you want to delete the store?");
+
+            if (isConfirmed) {
+                // User confirmed, send AJAX request to delete the store
+                $.ajax({
+                    url: '{% url "company:store-delete" 0 %}'.replace('0', {{store.id}}), 
+                    type: "GET",  // Change this to the appropriate HTTP method
+                    success: function (data) {
+                        // The store is deleted successfully
+                        console.log("Store deleted successfully");
+
+                        // Redirect to a new page
+                        window.location.href = "/home"; // Change this to the actual URL for the new page
+                    },
+                    error: function (error) {
+                        // Handle error case
+                        console.error("Error deleting store:", error);
+                    }
+                });
+            }
+        });
+  })
+</script>
+
+{% endblock %}
+

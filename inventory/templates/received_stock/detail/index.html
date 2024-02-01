@@ -1,0 +1,104 @@
+{% extends 'base/store/index.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">
+    <h1>Store : {{ store.name }}!</h1>
+    
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active"><a>Received Stock</a></li>
+        </ol>
+    </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Received Stock</h5>
+        
+        <hr />   
+        <!-- Content -->
+        <div class="row">
+            <div class="col-5">
+                <h5>Summary</h5>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Unique NO</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{received_stock.uniqueId}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Supplier Type</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{received_stock.supplier_type}}</div>
+                </div>
+               <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Date Received</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{received_stock.received_date}}</div>
+                </div>
+                {% comment %} <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Date Recorded</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{received_stock.created_at}}</div>
+                </div> {% endcomment %}
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Delivered BY</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{received_stock.delivered_by_name}} - {{received_stock.delivered_by_phone}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Status</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{received_stock.status}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">No of Items</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{received_stock.items_count}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Total Cost</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{received_stock.total_cost}}</div>
+                </div>
+            </div>
+            <div class="col-7">
+                <h5>Items List</h5>
+                <div class="table-responsive small">
+                    <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">Item</th>
+                                <th scope="col">Batch NO</th>
+                                <th scope="col">Qauntity</th> 
+                                <th scope="col">Mfg Date</th>
+                                <th scope="col">Exp Date</th> 
+                                <th scope="col">Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in received_stock.receivedstockitem_set.all %}
+                            <tr>
+                                <td>{{result.store_product.product.name}}</td>
+                                <td>{{result.batch_no}}</td>
+                                <td>{{result.qty_received}}</td>
+                                <td>{{result.manufactured_date}}</td>
+                                <td>{{result.expiry_date}}</td>
+                                <td>{{result.total_cost}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+
+<script>
+    
+</script>
+
+{% endblock %}
+

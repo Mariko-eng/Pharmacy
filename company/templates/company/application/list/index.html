@@ -1,0 +1,77 @@
+{% extends 'base/super/index.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{% url 'user:home' %}">Home</a></li>
+      <li class="breadcrumb-item"><a href="#">Companies</a></li>
+      <li class="breadcrumb-item active"><a>Applications<i class="text-blue" style="font-size: 1em;"></i></a></li>
+    </ol>
+  </nav>
+</div>
+<!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<section>
+  <div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Company Applications</h5>
+      
+      <div>
+        <div class="table-responsive small">
+          <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Date</th>
+                <th scope="col">Name</th>
+                <th scope="col">Phone</th>
+                <th scope="col">Email</th>
+                <th scope="col">location</th>
+                <th scope="col">Status</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for result in applications %}
+              <tr>
+                <td>{{result.created_at}}</td>
+                <td>{{result.name}}</td>
+                <td>{{result.phone}}</td>
+                <td>{{result.email}}</td>
+                <td>{{result.location}}</td>
+                <td>{{result.status}}</td>
+                <td>
+                 {% if result.status == "CREATED" %}
+                  <div></div>
+                {% elif result.status == "PENDING" %}
+                    <a href="#" class="text-white btn btn-primary btn-outlined py-0"><i class="bi bi-check"></i></a>
+                    <a href="#" class="text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle"></i></a>
+                {% elif result.status == "APPROVED" %}
+                    <a href="#" class="text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle"></i></a>
+                    <a href="#" class="text-white btn btn-success btn-outlined py-0"><i class="bi bi-envelope"></i></a>
+                {% else %}
+                    <div></div>
+                {% endif %} 
+            </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script type='text/javascript'>
+  
+  
+</script>
+
+{% endblock %}
+

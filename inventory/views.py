@@ -163,22 +163,36 @@ def suppliers_list(request, store_id = None, company_id = None):
     return render(request, 'suppliers/index.html', context=context) 
 
 
-def store_products_list(request, store_id):
-    products = StoreProduct.objects.none()
+def company_products_list(request, company_id):
+    company = Company.objects.get(pk = company_id)
+    products = Product.objects.filter(company =company)
 
-    context = { "products" : products }
+    context = { "company": company, "products" : products }
 
-    store = None
-    if store_id is not None:
-        store = Store.objects.get(pk=store_id)
-        company = store.company
-        context["store"] = store
-        context["company"] = company
-
-    products = StoreProduct.objects.filter(store = store)
-    context["products"] = products
 
     return render(request, 'products/list/index.html', context=context) 
+
+def store_products_list(request, store_id):
+    store = Store.objects.get(pk=store_id)
+    company = store.company
+    products = StoreProduct.objects.get(store=store)
+
+    context = { 
+        "company": company,
+        "store": store,
+        "products" : products
+        }
+
+    return render(request, 'products/list/index.html', context=context) 
+
+def store_products_detail(request, store_id, store_product_id):
+    store = Store.objects.get(pk=store_id)
+    company = store.company
+    product = StoreProduct.objects.get(pk = store_product_id)
+
+    context = { "company": company, "store": store,"product" : product }
+
+    return render(request, 'products/detail/index.html', context=context) 
 
 
 def store_products_new(request, store_id):
@@ -237,6 +251,18 @@ def store_products_new(request, store_id):
     return render(request, 'products/new/index.html', context=context) 
 
 
+def company_received_stock_list(request, company_id):
+    company = Company.objects.get(pk=company_id)
+
+    items = ReceivedStock.objects.filter(company = company)
+    context = {
+        "company": company,
+        "items": items
+        }
+
+    return render(request, 'received_stock/list/index.html', context=context) 
+
+
 def store_received_stock_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -249,6 +275,16 @@ def store_received_stock_list(request, store_id):
         }
 
     return render(request, 'received_stock/list/index.html', context=context) 
+
+
+def store_received_stock_detail(request, store_id, received_stock_id):
+    store = Store.objects.get(pk=store_id)
+    company = store.company
+
+    received_stock = ReceivedStock.objects.get(pk = received_stock_id)
+    context = { "company": company,"store": store, "received_stock": received_stock }
+
+    return render(request, 'received_stock/detail/index.html', context=context) 
 
 
 def store_received_stock_new(request, store_id):
@@ -310,7 +346,7 @@ def store_received_stock_new(request, store_id):
                 item.company = company
                 item.store = store
                 item.created_by = request.user
-                item.save() 
+                item.save()  
 
                 qty_received = formset_data_item.cleaned_data.get("qty_received")
                 store_product = item.store_product
@@ -318,7 +354,7 @@ def store_received_stock_new(request, store_id):
                 store_product.save()
 
             context['success_message'] = 'Stock added successfully'
-            return redirect('inventory:received-stock-list', store_id=store_id)
+            return redirect('inventory:store-received-stock-list', store_id=store_id)
         else:
             context['form'] = form_data
             context['formset'] = formset_data
@@ -394,6 +430,15 @@ def store_received_stock_edit(request, store_id, received_stock_id):
     return render(request, 'received_stock/edit/index.html', context=context)
 
 
+def company_stock_requests_list(request, company_id):
+    company = Company.objects.get(pk=company_id)
+
+    items = StockRequest.objects.filter(company = company)
+    context = { "company": company,"items": items }
+
+    return render(request, 'stock_requests/list/index.html', context=context) 
+
+
 def store_stock_requests_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -406,6 +451,17 @@ def store_stock_requests_list(request, store_id):
         }
 
     return render(request, 'stock_requests/list/index.html', context=context) 
+
+
+def store_stock_requests_detail(request, store_id, stock_request_id):
+    store = Store.objects.get(pk=store_id)
+    company = store.company
+
+    stock_request = StockRequest.objects.get(pk = stock_request_id)
+
+    context = { "company": company, "store": store, "stock_request": stock_request }
+
+    return render(request, 'stock_requests/detail/index.html', context=context) 
 
 
 def store_stock_requests_new(request, store_id):
@@ -422,37 +478,15 @@ def store_stock_requests_new(request, store_id):
 
     formset = StockRequestItemFormSet(prefix='items')
 
-    if request.method == "POST":
+    if request.method == "POST":  
         form_data = StockRequestForm(request.POST)
         formset_data = StockRequestItemFormSet(request.POST, prefix='items')
 
-        if form_data.is_valid() and formset_data.is_valid():
-            supplier_type = form_data.cleaned_data.get("supplier_type", None)
-            supplier_entity =  form_data.cleaned_data.get("supplier_entity", None)
-            supplier_store =  form_data.cleaned_data.get("supplier_store", None)
-            
-            if supplier_type == "SUPPLIER" and supplier_entity is None:
-                form_data.add_error("supplier_entity", ValidationError("Select a supplier!"))
-                context['form'] = form_data
-                context['formset'] = formset 
-                return render(request, 'received_stock/new/index.html', context=context)
-            elif supplier_type == "STORE" and supplier_store is None:
-                form_data.add_error("supplier_store", ValidationError("Select a store!"))
-                context['form'] = form_data
-                context['formset'] = formset 
-                return render(request, 'received_stock/new/index.html', context=context)
-
-            
+        if form_data.is_valid() and formset_data.is_valid():            
             stock_request = StockRequest(
-                supplier_type = supplier_type,
-                supplier_entity = supplier_entity,
-                supplier_store = supplier_store,
-                delivered_by_name = form_data.cleaned_data.get("delivered_by_name"),
-                delivered_by_phone = form_data.cleaned_data.get("delivered_by_phone"),
-                received_date = form_data.cleaned_data.get("received_date"),
-                delivery_notes = form_data.cleaned_data.get("delivery_notes"),
-                company = company,
-                store = store,
+                request_date = form_data.cleaned_data.get("request_date"),
+                delivery_date = form_data.cleaned_data.get("delivery_date"),
+                request_notes = form_data.cleaned_data.get("request_notes"),
             )
             
             stock_request.company = company
@@ -468,8 +502,12 @@ def store_stock_requests_new(request, store_id):
                 item.created_by = request.user
                 item.save() 
 
+                store_product = item.store_product
+                item.available_quantity = store_product.available_qty
+                item.save() 
+
             context['success_message'] = 'Stock Request added successfully'
-            return redirect('inventory:stock-requests-list', store_id=store_id)
+            return redirect('inventory:store-stock-requests-list', store_id=store_id)
         else:
             context['form'] = form_data
             context['formset'] = formset_data
@@ -535,212 +573,3 @@ def store_stock_requests_edit(request, store_id, stock_request_id):
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-# class StockListCreateView(CompanyMixin, View):
-#     form_class = ProductForm
-#     initial = {"unit_price": 0}
-#     template_name = "stock/index.html"
-
-#     def get(self, request, *args, **kwargs):
-#         form = self.form_class(initial=self.initial)
-#         data = Product.objects.all()
-#         return render(request, self.template_name, {"form": form, "results": data})
-
-#     def post(self, request, *args, **kwargs): 
-#         form = self.form_class(request.POST)
-#         if form.is_valid():
-#             form.instance.company = self.get_company()
-#             form.instance.created_by = self.get_user()
-#             product = form.save(commit=False)
-#             product.name = product.name.capitalize()
-#             product.save() 
-
-#             if self.request.is_ajax(): # Using Ajax 
-#                 return JsonResponse({'success': True, 'name': product.name})
-#         else: # Form is Invalid
-#             if self.request.is_ajax(): # Using Ajax 
-#                 return JsonResponse({'success': False, 'errors': form.errors})
-        
-#         return render(request, self.template_name, {"form": form})
-
-# class StockCreateView(CompanyFormMixin, CreateView):
-#     model = Product
-#     form_class = ProductForm
-#     template_name = 'stock/index.html'
-
-#     def form_valid(self, form):
-#         form.instance.company = self.get_company()
-#         form.instance.created_by = self.get_user()
-#         product = form.save(commit=False)
-#         product.name = product.name.capitalize()
-#         product.save() 
-#         print(product.company)    
-#         print(product.created_by)                  
-
-#         if self.request.is_ajax():
-#             # If it's an AJAX request, return a JsonResponse
-#             return JsonResponse({'success': True, 'name': product.name})
-#         else:
-#             # If it's a regular form submission, redirect to success URL
-#             return super().form_valid(form)
-
-
-#     def form_invalid(self, form):
-#         print("form.errors")
-
-#         if self.request.is_ajax():
-#             return JsonResponse({'success': False, 'errors': form.errors})
-#         else:
-#             # If it's a regular form submission and the form is invalid, render the form
-#             return self.render_to_response(self.get_context_data(form=form))
-
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
-#         # print("context")
-#         # print(context["company"])
-#         return context
-
-
-# def settings_index(request):
-#     company_id = request.session.get('company_id', None)
-#     company = None
-#     if company_id is not None:
-#         company = Company.objects.get(pk=company_id)
-#     elif request.user.company:
-#         company = request.user.company
-
-#     productVariantForm = ProductVariantForm(prefix="ProductVariantForm")
-#     productCategoryForm = ProductCategoryForm(prefix="productCategoryForm")
-#     productUnitsForm = ProductUnitsForm(prefix="productUnitsForm")
-
-#     productVariants = ProductVariant.objects.all()
-#     productCategories = ProductCategory.objects.all()
-#     productUnits = ProductUnits.objects.all()
-
-#     context = {
-#         "company" : company,
-#         "productVariants" : productVariants,
-#         "productCategories" : productCategories,
-#         "productUnits" : productUnits,
-#         "productVariantForm": productVariantForm,
-#         "productCategoryForm": productCategoryForm,
-#         "productUnitsForm": productUnitsForm}
-    
-#     if request.method == "POST":
-#         form_prefix = request.POST.get('form_prefix')
-#         # print(form_prefix)
- 
-#         if form_prefix == 'productVariantForm':
-#             productVariantForm_data = ProductVariantForm(request.POST or None,prefix="productVariantForm")
-#             if productVariantForm_data.is_valid():
-#                 product_variant = productVariantForm_data.save(commit=False)
-#                 product_variant.name = product_variant.name.capitalize()
-#                 product_variant.company = company
-#                 product_variant.save()
-#                 return JsonResponse({'success': True, 'name': product_variant.name})
-#             else:
-#                 return JsonResponse({'success': False, 'errors': productVariantForm_data.errors})
-        
-#         if form_prefix == 'productCategoryForm':
-#             productCategoryForm_data = ProductCategoryForm(request.POST or None,prefix="productCategoryForm")
-#             if productCategoryForm_data.is_valid():
-#                 product_category = productCategoryForm_data.save(commit=False)
-#                 product_category.name = product_category.name.capitalize()
-#                 product_category.company = company
-#                 product_category.save()
-#                 return JsonResponse({'success': True, 'name': product_category.name})
-#             else:
-#                 return JsonResponse({'success': False, 'errors': productCategoryForm_data.errors})
-        
-#         if form_prefix == 'productUnitsForm':
-#             productUnitsForm_data = ProductUnitsForm(request.POST or None,prefix="productUnitsForm")
-#             if productUnitsForm_data.is_valid():
-#                 product_unit = productUnitsForm_data.save(commit=False)
-#                 product_unit.name = product_unit.name.lower()
-#                 product_unit.company = company
-#                 product_unit.save()
-#                 return JsonResponse({'success': True, 'name': product_unit.name})
-#             else:
-#                 return JsonResponse({'success': False, 'errors': productUnitsForm_data.errors})
-        
-#         return JsonResponse({'success': False, 'errors': {"name": "Form Prefix"}})
-
-#     return render(request, 'stock/settings/index.html', context=context)       
-
-
-# def stock_index(request):
-#     company_id = request.session.get('company_id', None)
-#     company = None
-#     if company_id is not None:
-#         company = Company.objects.get(pk=company_id)
-#     elif request.user.company:
-#         company = request.user.company
-
-#     form = ProductForm()
-
-#     context = {
-#         "company" :company,
-#         "form": form}
-
-#     if request.method == "POST":
-#         form_data = ProductForm(request.POST, request.FILES)
-#         if form_data.is_valid():
-#             product = form_data.save(commit=False)
-#             product.name = product.name.capitalize()
-#             product.save()
-#             return JsonResponse({'success': True, 'name': product.name})
-#         else:
-#             return JsonResponse({'success': False, 'errors': form_data.errors})
-
-#     return render(request, 'stock/index.html', context=context)       
-
-
-# def stock_new(request):
-#     context = {}
-#     form = ReceivedStockForm()
-#     ReceivedStockItemFormSet = formset_factory(ReceivedStockItemForm, extra=1)
-#     formset = ReceivedStockItemFormSet(prefix='items')
-
-#     if request.method == "POST":
-#         form_data = ReceivedStockForm(request.POST)
-#         formset_data = ReceivedStockItemFormSet(request.POST, prefix='items')
-
-#         print(form_data)
-#         print(formset_data)
-
-#         if form_data.is_valid() and formset_data.is_valid():
-#             received_stock = form_data.save(commit=False)
-#             received_stock.company = None
-#             received_stock.branch = None
-#             received_stock.created_by = None
-#             # received_stock.save()
-
-#             for formset_data_item in formset_data:
-#                 item = formset_data_item.save(commit=False)
-#                 item.received_stock = received_stock
-#                 item.company = None
-#                 item.branch = None
-#                 item.created_by = None
-#                 # item.save()
-
-#             context['success_message'] = 'Stock added successfully'
-#         else:
-#             context['form'] = form_data
-#             context['formset'] = formset_data
-#             return render(request, 'stock/index.html', context=context)
-    
-#     context['form'] = form  
-#     context['formset'] = formset  
-#     return render(request, 'stock/new/index.html', context=context)       
-        
-                    

@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.http import HttpResponseRedirect,Http404
+from django.http import Http404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
@@ -20,6 +20,8 @@ from .models import Company
 from .models import Store
 from .models import PosCenter
 from .models import CompanyGroup
+
+from sales.models import SaleItem
 
 # @unauthenticated_user
 def index(request):
@@ -50,6 +52,7 @@ def index(request):
             messages.info(request, "Please Provide A Valid Username/Email And Paassword")
 
     return render(request,'auth/login/index.html',context)
+
 
 def logoutView(request):
     # Clear the session data
@@ -91,7 +94,20 @@ def company_dashboard(request, company_id = None):
     else :
         company = request.user.userprofile.company
 
-    context = { "company" : company }
+    # Get sales and revenue
+    data1 = SaleItem.get_sales_and_revenue(company=company)
+    data2 = SaleItem.get_sales_data(company=company)
+
+    # print("data1")
+    # print(data1)
+    # print("data2")
+    # print(data2)
+
+    context = { 
+        "company" : company, 
+        "summary": data1,
+        "reports": data2,
+        }
 
     if company is not None:
         return render(request, "dashboard/company/index.html", context = context)
@@ -106,7 +122,22 @@ def store_dashboard(request, store_id = None):
     else :
         store = request.user.userprofile.store
 
-    context={ "company" : store.company, "store" : store }
+    # Get sales and revenue
+    data1 = SaleItem.get_sales_and_revenue(store=store)
+    data2 = SaleItem.get_sales_data(store=store)
+
+    # print("data1")
+    # print(data1)
+    # print("data2")
+    # print(data2)
+
+
+    context = { 
+        "company" : store.company, 
+        "store" : store, 
+        "summary": data1,
+        "reports": data2,
+        }
 
     if store is not None:
         return render(request, "dashboard/store/index.html", context = context)
@@ -121,7 +152,23 @@ def pos_dashboard(request, pos_id = None):
     else :
         pos = request.user.userprofile.pos_center
 
-    context = { "company" : pos.store.company, "store" : pos.store, "pos" : pos }
+        # Get sales and revenue
+    data1 = SaleItem.get_sales_and_revenue(pos=pos)
+    data2 = SaleItem.get_sales_data(pos=pos)
+
+    # print("data1")
+    # print(data1)
+    # print("data2")
+    # print(data2)
+
+    context = { 
+        "company" : pos.store.company,
+        "store" :  pos.store,
+        "pos" : pos,
+        "summary": data1,
+        "reports": data2,
+        }
+
 
     if pos is not None:
         return render(request, "dashboard/pos/index.html", context = context)

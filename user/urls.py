@@ -11,7 +11,7 @@ urlpatterns = [
 
     path('home/',views.home_view,name="home"),
     
-    path('home/dashboard/',views.super_dashboard,name="super-dashbaord"),
+    path('home/dashboard/',views.super_dashboard, name="super-dashboard"),
     path('home/company/<int:company_id>/dashboard/', views.company_dashboard, name="company-dashboard"),
     path('home/company/dashboard/', views.company_dashboard, name="company-dashboard"),
     path('home/store/<int:store_id>/dashboard/', views.store_dashboard, name="store-dashboard"),

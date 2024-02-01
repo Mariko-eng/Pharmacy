@@ -74,7 +74,8 @@
                     
                     {% comment %} <div class="d-flex flex-row justify-content-end d-block add-formset-item">
                         <a class = "add-form text-primary" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Add Item</span></a>
-                    </div> {% endcomment %}
+                    </div> 
+                    {% endcomment %}
                     
                     
                     <div id="empty-form" style="display:none;">
@@ -244,12 +245,12 @@
                                 <label for="payment_option" class="col-sm-12 col-form-label">Payment Option</label>
                                 <div class="col-sm-12">
                                     {% if form.errors.payment_option %}
-                                    {% render_field form.payment_option|add_class:"form-control is-invalid"|attr:"id:payment_option" %}
+                                    {% render_field form.payment_option|add_class:"form-select is-invalid"|attr:"id:payment_option" %}
                                     <div class="invalid-feedback">
                                         {{ form.errors.payment_option.0 }}
                                     </div>
                                     {% else %}
-                                    {% render_field form.payment_option|add_class:"form-control"|attr:"id:payment_option" %}
+                                    {% render_field form.payment_option|add_class:"form-select"|attr:"id:payment_option" %}
                                     {% endif %}
                                 </div>
                             </div>
@@ -259,15 +260,15 @@
                     <div class="col-sm-6">
                         <div class="row mb-3">
                             <div class="col-sm-12">
-                                <label for="payment_details" class="col-sm-12 col-form-label">Payment Details</label>
+                                <label for="payment_period" class="col-sm-12 col-form-label">Payment Period?</label>
                                 <div class="col-sm-12">
-                                    {% if form.errors.payment_details %}
-                                    {% render_field form.payment_details|add_class:"form-control is-invalid"|attr:"id:payment_details" %}
+                                    {% if form.errors.payment_period %}
+                                    {% render_field form.payment_period|add_class:"form-select is-invalid"|attr:"id:payment_period" %}
                                     <div class="invalid-feedback">
-                                        {{ form.errors.payment_details.0 }}
+                                        {{ form.errors.payment_period.0 }}
                                     </div>
                                     {% else %}
-                                    {% render_field form.payment_details|add_class:"form-control"|attr:"id:payment_details" %}
+                                    {% render_field form.payment_period|add_class:"form-select"|attr:"id:payment_period" %}
                                     {% endif %}
                                 </div>
                             </div>
@@ -279,15 +280,15 @@
                     <div class="col-sm-12">
                         <div class="row mb-3">
                             <div class="col-sm-12">
-                                <label for="sale_remarks" class="col-sm-12 col-form-label">Comments / Remarks</label>
+                                <label for="remarks" class="col-sm-12 col-form-label">Comments / Remarks</label>
                                 <div class="col-sm-12">
-                                    {% if form.errors.sale_remarks %}
-                                    {% render_field form.sale_remarks|add_class:"form-control is-invalid"|attr:"id:sale_remarks" rows="2" %}
+                                    {% if form.errors.remarks %}
+                                    {% render_field form.remarks|add_class:"form-control is-invalid"|attr:"id:remarks" rows="2" %}
                                     <div class="invalid-feedback">
-                                        {{ form.errors.sale_remarks.0 }}
+                                        {{ form.errors.remarks.0 }}
                                     </div>
                                     {% else %}
-                                    {% render_field form.sale_remarks|add_class:"form-control"|attr:"id:sale_remarks" rows="3" %}
+                                    {% render_field form.remarks|add_class:"form-control"|attr:"id:remarks" rows="3" %}
                                     {% endif %}
                                 </div>
                             </div>
@@ -431,6 +432,7 @@
                         $(this).val(1);
                         $(this).attr('min', 1)
                     }
+                    
                     if (forValue.includes("sub_total")) {
                         $(this).val(1 * selectProductPrice);
                     }
@@ -574,21 +576,9 @@
                 var customer_email = $('#customer_email').val();
                 var customer_address = $('#customer_address').val();
                 var payment_option = $('#payment_option').val();
-                var payment_details = $('#payment_details').val();
-                var sale_remarks = $('#sale_remarks').val();
+                var remarks = $('#remarks').val();
                 
                 
-                // var formData = {
-                    //    cartItems: formValuesArray,
-                    //    pos_center: pos_center,
-                    //     customer_name: customer_name,
-                    //    customer_phone: customer_phone,
-                    //    customer_email: customer_email,
-                    //    customer_address: customer_address,
-                    //    payment_option: payment_option,
-                    //    payment_details: payment_details,
-                    //    sale_remarks: sale_remarks
-                    //};
                     
                     var formData = {
                         "items-TOTAL_FORMS": parseInt($('input[name="items-TOTAL_FORMS"]').val()) + 0,  // Total number of forms in the formset
@@ -601,8 +591,8 @@
                         "customer_email": customer_email,
                         "customer_address": customer_address,
                         "payment_option": payment_option,
-                        "payment_details": payment_details,
-                        "sale_remarks": sale_remarks,
+                        "payment_period": payment_period,
+                        "remarks": remarks,
                         ...formValuesArray.reduce((acc, item, index) => {
                             Object.keys(item).forEach((key) => {
                                 // console.log("index" ,index)

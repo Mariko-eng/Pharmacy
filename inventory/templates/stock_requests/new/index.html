@@ -27,69 +27,105 @@
             {% csrf_token %}
             
             <div class="row mb-3">
-                <label for="request_date" class="col-sm-2 col-form-label">Request Date</label>
-                <div class="col-sm-10">
-                    {% if form.errors.request_date %}
-                    {% render_field form.request_date|add_class:"form-control is-invalid" type="date" %}
-                    <div class="invalid-feedback">
-                        {{ form.errors.request_date.0 }}
+                <div class="col-sm-6">
+                    <label for="request_date" class="col-sm-12 col-form-label">Request Date</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.request_date %}
+                        {% render_field form.request_date|add_class:"form-control is-invalid" type="date" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.request_date.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.request_date|add_class:"form-control" type="date" %}
+                        {% endif %}
                     </div>
-                    {% else %}
-                    {% render_field form.request_date|add_class:"form-control" type="date" %}
-                    {% endif %}
+                </div>
+                <div class="col-sm-6">
+                    <label for="delivery_date" class="col-sm-12 col-form-label">Exp Delivery Date</label>
+                    <div class="col-sm-12">
+                        {% if form.errors.delivery_date %}
+                        {% render_field form.delivery_date|add_class:"form-control is-invalid" type="date" %}
+                        <div class="invalid-feedback">
+                            {{ form.errors.delivery_date.0 }}
+                        </div>
+                        {% else %}
+                        {% render_field form.delivery_date|add_class:"form-control" type="date" %}
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-
+            
             <div class="row mb-3">
                 <label for="request_notes" class="col-sm-2 col-form-label">Comments / Remarks</label>
                 <div class="col-sm-10">
                     {% if form.errors.request_notes %}
-                    {% render_field form.request_notes|add_class:"form-control is-invalid" rows="3" %}
+                    {% render_field form.request_notes|add_class:"form-control is-invalid" rows="2" %}
                     <div class="invalid-feedback">
                         {{ form.errors.request_notes.0 }}
                     </div>
                     {% else %}
-                    {% render_field form.request_notes|add_class:"form-control" rows="3" %}
+                    {% render_field form.request_notes|add_class:"form-control" rows="2" %}
                     {% endif %}
                 </div>
             </div>
             
             <hr/ class="mt-4">
-            <h5 class="card-title">Enter Stock Request Items</h5>
+            <h5 class="card-title">Add Stock Request Items</h5>
             
             {{ formset.management_form }}
             {% for formset_item in formset.forms %}
             <div class="form-row my-2">
                 <div class="row">
-                    <div class="col-md-2">Product</div>
+                    
                     <div class="col-md-4">
-                        {% if formset_item.errors.store_product %}
-                        {% render_field formset_item.store_product|add_class:"form-control is-invalid"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.store_product.0 }}
+                        <div class="col-md-12 mt-2 mb-2">Product</div>
+                        <div class="col-md-12">
+                            {% if formset_item.errors.store_product %}
+                            {% render_field formset_item.store_product|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.store_product.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.store_product|add_class:"form-control"%}
+                            {% endif %}
                         </div>
-                        {% else %}
-                        {% render_field formset_item.store_product|add_class:"form-control"%}
-                        {% endif %}
                     </div>
-                    <div class="col-md-2">Qty</div>
+                    
                     <div class="col-md-4">
-                        {% if formset_item.errors.quantity %}
-                        {% render_field formset_item.quantity|add_class:"form-control is-invalid"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.quantity.0 }}
+                        <div class="col-md-12 mt-2 mb-2">Qty</div>
+                        <div class="col-md-12">
+                            {% if formset_item.errors.quantity %}
+                            {% render_field formset_item.quantity|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.quantity.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.quantity|add_class:"form-control"%}
+                            {% endif %}
                         </div>
-                        {% else %}
-                        {% render_field formset_item.quantity|add_class:"form-control"%}
-                        {% endif %}
                     </div>
+                    
+                    <div class="col-md-4">
+                        <div class="col-md-12 mt-2 mb-2">Reason</div>
+                        <div class="col-md-12">
+                            {% if formset_item.errors.reason %}
+                            {% render_field formset_item.reason|add_class:"form-select is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.reason.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.reason|add_class:"form-control"%}
+                            {% endif %}
+                        </div>
+                    </div>
+                    
                 </div>
                 
-                <div class="d-flex flex-row justify-content-end d-block add-formset-item">
+                <div class="d-flex flex-row justify-content-end d-block add-formset-item mt-2">
                     <a class = "add-form text-primary" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Add Item</span></a>
                 </div>
                 
-                <div class="d-flex flex-row justify-content-end d-none remove-formset-item">
+                <div class="d-flex flex-row justify-content-end d-none remove-formset-item mt-2">
                     <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-trash"></i><span>Remove Item</span></a>
                 </div>
                 
@@ -117,11 +153,21 @@
     function addForm(selector, prefix) {
         var newElement = $(selector).clone(true);
         var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+        
         newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
             var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
             var id = 'id_' + name;
-            $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+            
+            if (name.includes("reason")) {
+                $(this).attr({'name': name, 'id': id}).removeAttr('checked');
+            }else{
+                $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
+            }
+            
+            
+            // $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
         });
+        
         newElement.find('label').each(function() {
             var forValue = $(this).attr('for');
             if (forValue) {
@@ -237,10 +283,9 @@
         return false;
     });
     
-        
-    </script>
     
-    
-    {% endblock %}
-    
-    
+</script>
+
+
+{% endblock %}
+

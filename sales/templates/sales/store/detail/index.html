@@ -1,0 +1,166 @@
+{% extends 'base/store/index.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">
+    <h1>Store : {{ store.name }}!</h1>
+    
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active"><a>Sales</a></li>
+        </ol>
+    </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Store Sales</h5>
+        <div class="d-flex flex-column">
+            <div class="d-flex justify-content-end">
+                <button 
+                id="invoiceBtn"
+                class="btn btn-outline-primary" 
+                style="width: 180px; display: inline-block; text-align: center; text-decoration: none;"
+                >
+                <span><i class="bi bi-plus"></i>Generate Invoice</span>
+            </button>
+        </div>
+        
+        <hr />
+        
+        <!-- Content -->
+        <div class="row">
+            <div class="col-5">
+                <h5>Sale Information</h5>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Invoice NO</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{sale.sale_unique_id}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">POS</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{sale.pos_center}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Date</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{sale.created_at}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Pay Terms</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{sale.payment_period}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Pay Option</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{sale.payment_option}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Status</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{sale.payment_status}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">No of Items</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{sale.items_count}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Total Cost</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{sale.total_cost}}</div>
+                </div>
+            </div>
+            <div class="col-7">
+                <h5>Sale Items</h5>
+                <div class="table-responsive small">
+                    <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">Item</th>
+                                <th scope="col">Unit Cost</th>
+                                <th scope="col">Qauntity</th>
+                                <th scope="col">Total Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in sale.saleitem_set.all %}
+                            <tr>
+                                <td>{{result.store_product.product.name}}</td>
+                                <td>{{result.unit_cost}}</td>
+                                <td>{{result.quantity}}</td>
+                                <td>{{result.total_cost}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+<!-- Modal -->
+<div class="modal fade" id="filePreviewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title text-center">Invoice</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body row g-3 needs-validation">
+                <!-- PDF.js viewer container -->
+                <iframe id="pdf-viewer" width="100%" height="600px" frameborder="0"></iframe>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+<script>
+    
+    
+    
+    $('#invoiceBtn').on('click', function(){
+        
+        console.log("clicked")
+        
+        var storeId = '{{ store.id }}';
+        var saleId = '{{ sale.id }}';
+        
+        $.ajax({
+            url: '{% url "sales:store-sales-invoice" store_id=0 sale_id=0 %}'.replace('0', storeId).replace('0', saleId),
+            method: 'GET',
+            success: function (data) {
+                // console.log(data)
+                
+                // Assuming the file is a PDF
+                if (data.invoice_url) {
+                    // Initialize PDF.js viewer
+                    // Set the src attribute of the iframe to the PDF URL
+                    $('#pdf-viewer').attr('src', data.invoice_url);
+                    
+                    // Open the modal
+                    $('#filePreviewModal').modal('show');
+                }
+                
+                // Assuming the file is a PDF, you can use a PDF viewer
+                // var filePreview = $('#filePreview');
+                // filePreview.html('<embed src="' + URL.createObjectURL(data) + '" width="100%" height="600px" />');
+            },
+            error: function () {
+                console.log('Error retrieving file');
+            }
+        });
+        
+    })
+    
+</script>
+
+{% endblock %}
+

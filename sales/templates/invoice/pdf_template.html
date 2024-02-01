@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        .invoice {
+            border: 1px solid #ccc;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .invoice-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .invoice-body {
+            border-top: 1px solid #ccc;
+            border-bottom: 1px solid #ccc;
+            padding: 20px 0;
+        }
+
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        .invoice-table th, .invoice-table td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+        }
+
+        .invoice-total {
+            text-align: right;
+            margin-top: 20px;
+            margin-right: 20px;
+            color: blue;
+        }
+
+        .invoice-footer {
+            margin-top: 20px;
+            text-align: center;
+        }
+    </style>
+    <title>Invoice</title>
+</head>
+<body>
+    <div class="invoice">
+        <div class="invoice-header">
+            <h1>Invoice</h1>
+            <h2>{{ company.name }}</h2>
+            <h3>{{ store.name }}</h3>
+            <p>{{sale.created_at}}</p>
+        </div>
+
+        <div class="invoice-body">
+            <h3>Invoice No: <span><b>{{sale.sale_unique_id}}</b></span></h3>
+            <p>Payment Status : {{sale.payment_status}}</p>
+            <p>Payment Terms  : {{sale.payment_period}}</p>
+            <p>Sale Status    : {{sale.status}}</p>
+
+            <h2>Bill To:</h2>
+            {% if sale.customer %}
+                <p>{{ sale.customer.name|default:"--"}} {{ sale.customer.phone|default:"--"}}</p>
+            {% else %}
+                <p>No Cutomer Information</p>
+            {% endif %}
+
+
+            <h2>Invoice Items:</h2>
+
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Price</th>
+                        <th>Quantity</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for result in sale.saleitem_set.all %}
+                            <tr>
+                                <td>{{result.store_product.product.name}}</td>
+                                <td>{{result.unit_cost}}</td>
+                                <td>{{result.quantity}}</td>
+                                <td>{{result.total_cost}}</td>
+                            </tr>
+                            {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="invoice-total">
+                <b>SHS {{ sale.total_cost }}</b>
+            </div>
+        </div>
+
+        <div class="invoice-footer">
+            <p>Thank you for your support!</p>
+        </div>
+    </div>
+</body>
+</html>

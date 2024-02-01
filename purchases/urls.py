@@ -10,6 +10,6 @@ urlpatterns = [
         views.store_purchase_orders_list, name="purchase-orders-list"),
     path('store/<int:store_id>/purchase_orders/new/',
         views.store_purchase_orders_new, name="purchase-orders-new"),
-    path('store/<int:store_id>/purchase_orders/edit/<int:order_request_id>/',
+    path('store/<int:store_id>/purchase_orders/edit/<int:purchase_order_id>/',
         views.store_purchase_orders_edit, name="purchase-orders-edit"),
 ]

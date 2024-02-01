@@ -29,8 +29,9 @@ class SaleForm(forms.ModelForm):
         fields = [
             'pos_center',
             'payment_option',
-            'payment_details',
-            'sale_remarks',
+            'payment_period',
+            'payment_status',
+            'remarks',
             ]
         exclude = ['company','store','updated_by','updated_at','created_by','created_at']
 
@@ -67,10 +68,11 @@ class PosSaleForm(forms.ModelForm):
         model = Sale
         fields = [
             'payment_option',
-            'payment_details',
-            'sale_remarks',
-            ]
+            'payment_period',
+            'payment_status',
+            'remarks',]
+        
         exclude = [
             'company','store','pos_center',
             'updated_by','updated_at',
-            'created_by','created_at']
+            'created_by','created_at',]

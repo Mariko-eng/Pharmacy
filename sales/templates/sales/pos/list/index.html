@@ -20,12 +20,12 @@
 
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Store Sales</h5>
+    <h5 class="card-title">Sales</h5>
     
     <!-- Default Tabs -->
     <ul class="nav nav-tabs" id="myTab" role="tablist">
       <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">Order Requests</button>
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">List</button>
       </li>
     </ul>
     <div class="tab-content pt-2" id="myTabContent">
@@ -36,6 +36,7 @@
               <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
                 <thead>
                   <tr>
+                    <th scope="col">Sale No</th>
                     <th scope="col">Date</th>
                     <th scope="col">POS</th>
                     <th scope="col">No of items</th>
@@ -48,6 +49,7 @@
                 <tbody>
                   {% for result in sales %}
                   <tr>
+                    <td>{{result.sale_unique_id}}</td>
                     <td>{{result.created_at}}</td>
                     <td>{{result.pos_center}}</td>
                     <td>{{result.items_count}}</td>

@@ -63,3 +63,54 @@ class MyQueryset(QuerySet):
         
         return self.filter(is_deleted = is_deleted)
     
+class CompanyStoreQuerySet(QuerySet):
+    def for_company(self, company):
+        return self.filter(company = company)
+    
+class ProductQuerySet(QuerySet):
+    def for_company(self, company):
+        return self.filter(company = company)
+    
+    def for_store(self, store):
+        return self.filter(store = store)
+    
+class SaleQuerySet(QuerySet):
+    def for_company(self, company):
+        return self.filter(company = company)
+    
+    def for_store(self, store):
+        return self.filter(store = store)
+    
+    def for_pos(self, pos):
+        return self.filter(pos = pos)
+    
+class ProductManager(Manager):
+    
+    def get_queryset(self):
+        return ProductQuerySet(self.model, using=self._db)
+
+    def for_company(self, company):
+        return self.get_queryset().for_company(company)
+    
+    def for_store(self, store):
+        return self.get_queryset().for_store(store)
+
+class SaleManager(Manager):
+    
+    def get_queryset(self):
+        return SaleQuerySet(self.model, using=self._db)
+
+    def for_company(self, company):
+        return self.get_queryset().for_company(company)
+    
+    def for_store(self, store):
+        return self.get_queryset().for_store(store)
+    
+    def for_pos(self, pos):
+        return self.get_queryset().for_pos(pos)
+    
+    
+    
+
+
+    

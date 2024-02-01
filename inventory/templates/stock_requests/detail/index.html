@@ -1,0 +1,90 @@
+{% extends 'base/store/index.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">
+    <h1>Store : {{ store.name }}!</h1>
+    
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="#">Home</a></li>
+            <li class="breadcrumb-item active"><a>Stock Requests</a></li>
+        </ol>
+    </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Stock Requests</h5>
+        
+        <hr />   
+        <!-- Content -->
+        <div class="row">
+            <div class="col-5">
+                <h5>Summary</h5>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Unique NO</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{stock_request.uniqueId}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Request Date</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{stock_request.request_date}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Delivery Date</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{stock_request.delivery_date}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Status</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{stock_request.status}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">No of Items</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{stock_request.items_count}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-5 label">Total Cost</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{stock_request.total_cost}}</div>
+                </div>
+            </div>
+            <div class="col-7">
+                <h5>Items List</h5>
+                <div class="table-responsive small">
+                    <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th scope="col">Item</th>
+                                <th scope="col">Qauntity</th>
+                                <th scope="col">Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in stock_request.stockrequestitem_set.all %}
+                            <tr>
+                                <td>{{result.store_product.product.name}}</td>
+                                <td>{{result.quantity}}</td>
+                                <td>{{result.reason}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+
+<script>
+    
+</script>
+
+{% endblock %}
+

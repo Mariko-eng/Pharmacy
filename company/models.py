@@ -33,16 +33,16 @@ class Company(Base):
     def __str__(self):
         return self.name
 
-class Store(models.Model):
+class Store(Base):
     STORE_TYPES = [('RETAIL', 'RETAIL'),('WHOLESALE', 'WHOLESALE'),]
     STATUS_TYPES = [('OPEN', 'OPEN'),('CLOSED', 'CLOSED'),]
 
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
+    store_type = models.CharField(max_length=255,choices=STORE_TYPES)
+    status_type = models.CharField(max_length=255,choices=STATUS_TYPES)
     name = models.CharField(max_length = 225)
     phone = models.CharField(max_length = 225)
     email = models.EmailField(blank=True, null=True)
-    store_type = models.CharField(max_length=255,choices=STORE_TYPES)
-    status = models.CharField(max_length=255,choices=STATUS_TYPES)
     location_district = models.CharField(max_length = 225, blank=True, null=True)
     location_village = models.CharField(max_length = 225, blank=True, null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
@@ -73,17 +73,6 @@ class Supplier(Base):
     def __str__(self):
         return self.name
     
-# class Provider(Base):
-#     PROVIDER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
-    
-#     company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
-#     provider_type = models.CharField(max_length=10,choices=PROVIDER_TYPES,default="SUPPLIER")
-#     supplier_entity = models.ForeignKey(SupplierEntity,on_delete=models.SET_NULL,null=True)
-#     supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
-#     updated_by = models.CharField(max_length=225,null=True,blank=True)
-#     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="providers_createdby")
-
-
 class Customer(Base):
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=255,blank=True, null=True)

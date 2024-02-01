@@ -131,15 +131,16 @@ class StockRequestForm(forms.ModelForm):
     
     class Meta:
         model = StockRequest
-        fields = [
-            'request_date',
-            'request_notes',]
-        exclude = ['company','store','updated_by','updated_at','created_by','created_at']
+        fields = [ 'request_date', 'delivery_date', 'request_notes',]
+        exclude = ['company','store', 'updated_by', 'updated_at','created_by','created_at']
 
 class StockRequestItemForm(forms.ModelForm):
+
+    quantity = forms.DecimalField()
     class Meta:
         model = StockRequestItem
         fields = [
-            'store_product','quantity',
+            'store_product','quantity','reason',
         ]
-        exclude = ['company','store','stock_request','updated_by','updated_at','created_by','created_at']
+        exclude = ['company','store','stock_request','available_quantity',
+                   'updated_by','updated_at','created_by','created_at']

@@ -175,3 +175,13 @@ class CompanyGroupPermission(models.Model):
 
     class Meta:
         unique_together = ('company_group', 'permission')
+
+
+class EmailLog(models.Model):
+    subject = models.CharField(max_length=255)
+    recipient = models.EmailField()
+    status = models.CharField(max_length=20)
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.subject} to {self.recipient} ({self.status})"

@@ -131,77 +131,95 @@
             </div>
             
             <hr/ class="mt-4">
-            <h5 class="card-title">Enter Received Items</h5>
+            <h5 class="card-title">Add Received Stock Items</h5>
             
             {{ formset.management_form }}
             {% for formset_item in formset.forms %}
             <div class="form-row my-2">
                 <div class="row">
-                    <div class="col-md-2">Product</div>
+                    
                     <div class="col-md-4">
-                        {% if formset_item.errors.store_product %}
-                        {% render_field formset_item.store_product|add_class:"form-control is-invalid"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.store_product.0 }}
+                        <div class="col-md-12 mt-2 mb-2">Product</div>
+                        <div class="col-md-12">
+                            {% if formset_item.errors.store_product %}
+                            {% render_field formset_item.store_product|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.store_product.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.store_product|add_class:"form-control"%}
+                            {% endif %}
                         </div>
-                        {% else %}
-                        {% render_field formset_item.store_product|add_class:"form-control"%}
-                        {% endif %}
                     </div>
-                    <div class="col-md-2">Batch No</div>
+                    
                     <div class="col-md-4">
-                        {% if formset_item.errors.batch_no %}
-                        {% render_field formset_item.batch_no|add_class:"form-control is-invalid"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.batch_no.0 }}
+                        <div class="col-md-12 mt-2 mb-2">Batch No</div>
+                        <div class="col-md-12">
+                            {% if formset_item.errors.batch_no %}
+                            {% render_field formset_item.batch_no|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.batch_no.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.batch_no|add_class:"form-control"%}
+                            {% endif %}
                         </div>
-                        {% else %}
-                        {% render_field formset_item.batch_no|add_class:"form-control"%}
-                        {% endif %}
                     </div>
-                    <div class="col-md-2">Qty</div>
+                    
                     <div class="col-md-4">
-                        {% if formset_item.errors.qty_received %}
-                        {% render_field formset_item.qty_received|add_class:"form-control is-invalid"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.qty_received.0 }}
+                        <div class="col-md-12 mt-2 mb-2">Quantity</div>
+                        <div class="col-md-12">
+                            {% if formset_item.errors.qty_received %}
+                            {% render_field formset_item.qty_received|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.qty_received.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.qty_received|add_class:"form-control"%}
+                            {% endif %}
                         </div>
-                        {% else %}
-                        {% render_field formset_item.qty_received|add_class:"form-control"%}
-                        {% endif %}
                     </div>
-                    <div class="col-md-2">Total Cost</div>
+                    
                     <div class="col-md-4">
-                        {% if formset_item.errors.total_cost %}
-                        {% render_field formset_item.total_cost|add_class:"form-control is-invalid"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.total_cost.0 }}
+                        <div class="col-md-12 mt-2 mb-2">Total Cost</div>
+                        <div class="col-md-12">
+                            {% if formset_item.errors.total_cost %}
+                            {% render_field formset_item.total_cost|add_class:"form-control is-invalid"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.total_cost.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.total_cost|add_class:"form-control"%}
+                            {% endif %}
                         </div>
-                        {% else %}
-                        {% render_field formset_item.total_cost|add_class:"form-control"%}
-                        {% endif %}
                     </div>
-                    <div class="col-md-2">Mfg Date</div>
+                    
                     <div class="col-md-4">
-                        {% if formset_item.errors.manufactured_date %}
-                        {% render_field formset_item.manufactured_date|add_class:"form-control is-invalid" type="date"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.manufactured_date.0 }}
+                        <div class="col-md-12 mt-2 mb-2">Mfg Date</div>
+                        <div class="col-md-12">
+                            {% if formset_item.errors.manufactured_date %}
+                            {% render_field formset_item.manufactured_date|add_class:"form-control is-invalid" type="date"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.manufactured_date.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.manufactured_date|add_class:"form-control" type="date"%}
+                            {% endif %}
                         </div>
-                        {% else %}
-                        {% render_field formset_item.manufactured_date|add_class:"form-control" type="date"%}
-                        {% endif %}
                     </div>
-                    <div class="col-md-2">Exp Date</div>
+                    
                     <div class="col-md-4">
-                        {% if formset_item.errors.expiry_date %}
-                        {% render_field formset_item.expiry_date|add_class:"form-control is-invalid" type="date"%}
-                        <div class="invalid-feedback">
-                            {{ formset_item.errors.expiry_date.0 }}
+                        <div class="col-md-12 mt-2 mb-2">Exp Date</div>
+                        <div class="col-md-12">
+                            {% if formset_item.errors.expiry_date %}
+                            {% render_field formset_item.expiry_date|add_class:"form-control is-invalid" type="date"%}
+                            <div class="invalid-feedback">
+                                {{ formset_item.errors.expiry_date.0 }}
+                            </div>
+                            {% else %}
+                            {% render_field formset_item.expiry_date|add_class:"form-control" type="date"%}
+                            {% endif %}
                         </div>
-                        {% else %}
-                        {% render_field formset_item.expiry_date|add_class:"form-control" type="date"%}
-                        {% endif %}
                     </div>
                 </div>
                 
@@ -321,7 +339,7 @@
         </form>
     </div>
 </div>
- 
+
 <script type='text/javascript'>
     
     function updateElementIndex(el, prefix, ndx) {
@@ -331,20 +349,20 @@
         if (el.id) el.id = el.id.replace(id_regex, replacement);
         if (el.name) el.name = el.name.replace(id_regex, replacement);
     }
-
+    
     var selectProductId = 2;
     
     function addForm(selector, prefix) {
         var newElement = $(selector).clone(true);
         var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
-
-
+        
+        
         newElement.find(':input:not([type=button]):not([type=submit]):not([type=reset])').each(function() {
             var name = $(this).attr('name').replace('-' + (total-1) + '-', '-' + total + '-');
             var id = 'id_' + name;
             $(this).attr({'name': name, 'id': id}).val('').removeAttr('checked');
         });
-
+        
         newElement.find('label').each(function() {
             var forValue = $(this).attr('for');
             if (forValue) {

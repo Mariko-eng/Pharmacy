@@ -51,6 +51,7 @@
                     <th scope="col">Actual QTY</th>
                     <th scope="col">Min Order Qty</th>
                     <th scope="col">Created At</th>
+                    <th scope="col">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -73,6 +74,13 @@
                     <td>{{result.actual_qty}}</td>
                     <td>{{result.reorder_min_qty}}</td>
                     <td>{{result.created_at}}</td>
+                    <td>
+                      <div class="d-flex">
+                        <a href="{% url 'inventory:store-products-detail' store_id=store.id store_product_id=result.id %}" 
+                        class="mx-1 text-primary">View</a>
+                        <a href="#" class="mx-1 text-danger">Edit</a>
+                      </div>
+                    </td>
                   </tr>
                   {% endfor %}
                 </tbody>
