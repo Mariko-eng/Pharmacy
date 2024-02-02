@@ -42,6 +42,17 @@
                             
                             <form id="userForm" class="row g-3" method="post" novalidate>
                                 {% csrf_token %}
+                                <div class="col-12">
+                                    <label for="activation_codeactivation_code" class="form-label">Company Activation Code</label>
+                                    {% if form.errors.activation_code %}
+                                    {% render_field form.activation_code|add_class:"form-control is-invalid"|attr:"id:activation_code" %}
+                                    {% else %}
+                                    {% render_field form.activation_code|add_class:"form-control"|attr:"id:activation_code" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.activation_code.0  }}
+                                    </div>
+                                </div>
 
                                 <div class="col-6">
                                     <label for="first_name" class="form-label">First Name</label>

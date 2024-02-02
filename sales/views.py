@@ -1,8 +1,8 @@
-import json
 from django.shortcuts import render, redirect
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from .forms import RequiredFormSet
 from .forms import SaleForm,PosSaleForm
@@ -13,6 +13,7 @@ from .models import Sale
 from .models import SaleItem
 
 
+@login_required(login_url='/login')
 def company_sales_list(request, company_id):
     company = Company.objects.get(pk=company_id)
 
@@ -25,6 +26,7 @@ def company_sales_list(request, company_id):
     return render(request, 'sales/company/list/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_sales_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -38,6 +40,8 @@ def store_sales_list(request, store_id):
 
     return render(request, 'sales/store/list/index.html', context=context) 
 
+
+@login_required(login_url='/login')
 def store_sales_detail(request, store_id, sale_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -51,6 +55,8 @@ def store_sales_detail(request, store_id, sale_id):
 
     return render(request, 'sales/store/detail/index.html', context=context) 
 
+
+@login_required(login_url='/login')
 def store_sales_invoice(request, store_id, sale_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -78,7 +84,7 @@ def store_sales_invoice(request, store_id, sale_id):
     return JsonResponse(sale_data)
 
 
-
+@login_required(login_url='/login')
 def store_sales_new(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -130,8 +136,8 @@ def store_sales_new(request, store_id):
                 )
 
                 pos_data =form_data.cleaned_data.get("pos_center")
-                pos = PosCenter.objects.get(id = pos_data.id)
-                sale.pos_center = pos
+                pos_center = PosCenter.objects.get(id = pos_data.id)
+                sale.pos_center = pos_center
                 sale.company = company
                 sale.store = store
                 sale.created_by = request.user
@@ -149,6 +155,7 @@ def store_sales_new(request, store_id):
                     item.sale = sale
                     item.company = company
                     item.store = store
+                    item.pos_center = pos_center
                     item.created_by = request.user
                     item.save() 
  
@@ -167,6 +174,7 @@ def store_sales_new(request, store_id):
     return render(request, 'sales/store/new/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_sales_edit(request, store_id, sale_id):
     store = get_object_or_404(Store, pk=store_id)
     company = store.company
@@ -215,12 +223,12 @@ def store_sales_edit(request, store_id, sale_id):
             context['formset'] = formset_data
             return render(request, 'sales/edit/index.html', context=context)
 
-    
     context['form'] = form
     context['formset'] = formset
     return render(request, 'sales/store/edit/index.html', context=context)
 
 
+@login_required(login_url='/login')
 def pos_sales_list(request, pos_id):
     pos = get_object_or_404(PosCenter, pk=pos_id)
     store = pos.store
@@ -232,14 +240,15 @@ def pos_sales_list(request, pos_id):
     return render(request, 'sales/pos/list/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def pos_sales_new(request, pos_id):
-    pos = get_object_or_404(PosCenter, pk=pos_id)
-    store = pos.store
+    pos_center = get_object_or_404(PosCenter, pk=pos_id)
+    store = pos_center.store
     company = store.company
 
     store_products = StoreProduct.objects.filter(store = store)
 
-    context = { "company": company, "store": store, "pos": pos, "store_products": store_products }
+    context = { "company": company, "store": store, "pos": pos_center, "store_products": store_products }
  
     form = PosSaleForm()
     
@@ -285,7 +294,7 @@ def pos_sales_new(request, pos_id):
 
                 sale.company = company
                 sale.store = store
-                sale.pos_center = pos
+                sale.pos_center = pos_center
                 sale.created_by = request.user
                 sale.save()
 
@@ -301,6 +310,7 @@ def pos_sales_new(request, pos_id):
                     item.sale = sale
                     item.company = company
                     item.store = store
+                    item.pos_center = pos_center
                     item.created_by = request.user
                     item.save() 
  

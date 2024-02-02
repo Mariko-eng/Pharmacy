@@ -1,12 +1,11 @@
 from django.shortcuts import render, redirect
-from django.forms import ValidationError
-from django.views import View
-from django.views.generic import ListView,CreateView
-from django.http import JsonResponse
-from .forms import RequiredFormSet
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.forms import ValidationError
+from django.http import JsonResponse
+from .forms import RequiredFormSet
 from .forms import ProductCategoryForm, ProductVariantForm
 from .forms import ProductUnitsForm, SupplierForm
 from .forms import StoreProductForm, ReceivedStockForm,ReceivedStockItemForm
@@ -17,7 +16,7 @@ from .models import StockRequest, StockRequestItem
 from .mixins import CompanyMixin, CompanyFormMixin
 from company.models import Company, Store, Supplier
 
-
+@login_required(login_url='/login')
 def product_categories_list(request,store_id = None, company_id = None):
     form = ProductCategoryForm()
     context = {
@@ -55,6 +54,7 @@ def product_categories_list(request,store_id = None, company_id = None):
     return render(request, 'categories/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def product_variants_list(request,store_id = None, company_id = None):
     form = ProductVariantForm()
 
@@ -91,6 +91,7 @@ def product_variants_list(request,store_id = None, company_id = None):
     return render(request, 'settings/variants/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def product_units_list(request,store_id = None, company_id = None):
     form = ProductUnitsForm()
 
@@ -127,6 +128,7 @@ def product_units_list(request,store_id = None, company_id = None):
     return render(request, 'settings/units/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def suppliers_list(request, store_id = None, company_id = None):
     form = SupplierForm()
 
@@ -163,6 +165,7 @@ def suppliers_list(request, store_id = None, company_id = None):
     return render(request, 'suppliers/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def company_products_list(request, company_id):
     company = Company.objects.get(pk = company_id)
     products = Product.objects.filter(company =company)
@@ -172,10 +175,12 @@ def company_products_list(request, company_id):
 
     return render(request, 'products/list/index.html', context=context) 
 
+
+@login_required(login_url='/login')
 def store_products_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
-    products = StoreProduct.objects.get(store=store)
+    products = StoreProduct.objects.filter(store=store)
 
     context = { 
         "company": company,
@@ -185,6 +190,8 @@ def store_products_list(request, store_id):
 
     return render(request, 'products/list/index.html', context=context) 
 
+
+@login_required(login_url='/login')
 def store_products_detail(request, store_id, store_product_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -195,6 +202,7 @@ def store_products_detail(request, store_id, store_product_id):
     return render(request, 'products/detail/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_products_new(request, store_id):
     form = StoreProductForm()
 
@@ -251,6 +259,7 @@ def store_products_new(request, store_id):
     return render(request, 'products/new/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def company_received_stock_list(request, company_id):
     company = Company.objects.get(pk=company_id)
 
@@ -263,6 +272,7 @@ def company_received_stock_list(request, company_id):
     return render(request, 'received_stock/list/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_received_stock_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -277,6 +287,7 @@ def store_received_stock_list(request, store_id):
     return render(request, 'received_stock/list/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_received_stock_detail(request, store_id, received_stock_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -287,6 +298,7 @@ def store_received_stock_detail(request, store_id, received_stock_id):
     return render(request, 'received_stock/detail/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_received_stock_new(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -365,6 +377,7 @@ def store_received_stock_new(request, store_id):
     return render(request, 'received_stock/new/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_received_stock_edit(request, store_id, received_stock_id):
     store = get_object_or_404(Store, pk=store_id)
     company = store.company
@@ -430,6 +443,7 @@ def store_received_stock_edit(request, store_id, received_stock_id):
     return render(request, 'received_stock/edit/index.html', context=context)
 
 
+@login_required(login_url='/login')
 def company_stock_requests_list(request, company_id):
     company = Company.objects.get(pk=company_id)
 
@@ -439,6 +453,7 @@ def company_stock_requests_list(request, company_id):
     return render(request, 'stock_requests/list/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_stock_requests_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -453,6 +468,7 @@ def store_stock_requests_list(request, store_id):
     return render(request, 'stock_requests/list/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_stock_requests_detail(request, store_id, stock_request_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -464,6 +480,7 @@ def store_stock_requests_detail(request, store_id, stock_request_id):
     return render(request, 'stock_requests/detail/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_stock_requests_new(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -518,6 +535,7 @@ def store_stock_requests_new(request, store_id):
     return render(request, 'stock_requests/new/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_stock_requests_edit(request, store_id, stock_request_id):
     store = get_object_or_404(Store, pk=store_id)
     company = store.company

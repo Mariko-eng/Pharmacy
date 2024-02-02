@@ -47,13 +47,13 @@
                 <td>{{result.status}}</td>
                 <td>
                  {% if result.status == "CREATED" %}
-                  <div></div>
+                  <div></div> 
                 {% elif result.status == "PENDING" %}
-                    <a href="#" class="text-white btn btn-primary btn-outlined py-0"><i class="bi bi-check"></i></a>
-                    <a href="#" class="text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle"></i></a>
+                    <a href="{% url 'company:company-application-edit-status' app_id=result.id new_status='APPROVED' %}" class="text-white btn btn-primary btn-outlined py-0"><i class="bi bi-check"></i>Approve</a>
+                    <a href="{% url 'company:company-application-edit-status' app_id=result.id new_status='DECLINED' %}" class="text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle">Decline</i></a>
                 {% elif result.status == "APPROVED" %}
-                    <a href="#" class="text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle"></i></a>
-                    <a href="#" class="text-white btn btn-success btn-outlined py-0"><i class="bi bi-envelope"></i></a>
+                    <a href="{% url 'company:company-application-edit-status' app_id=result.id new_status='CANCELLED' %}" class="text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle"></i>Cancel</a>
+                    <a href="{% url 'company:company-application-edit-status' app_id=result.id new_status='APPROVED' %}" class="text-white btn btn-success btn-outlined py-0"><i class="bi bi-envelope">Resend</i></a>
                 {% else %}
                     <div></div>
                 {% endif %} 

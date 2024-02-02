@@ -10,9 +10,9 @@ def create_user_profile(sender, instance, created, **kwargs):
     if created and instance.is_superuser:
         # Check if a UserProfile already exists for the user
         if not UserProfile.objects.filter(user=instance).exists():
-            UserProfile.objects.create(user=instance, user_role=instance.account_type)
+            UserProfile.objects.create(user=instance)
 
-
+ 
 # Signal receiver function to generate a unique 6-digit number
 @receiver(pre_save, sender = User)
 def generate_unique_username(sender, instance, **kwargs):

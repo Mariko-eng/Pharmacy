@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from .forms import RequiredFormSet
 from .forms import PurchaseOrderRequestForm
@@ -11,6 +12,7 @@ from .models import PurchaseOrderRequest
 from .models import PurchaseOrderRequestItem
 
 
+@login_required(login_url='/login')
 def store_purchase_orders_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -25,6 +27,7 @@ def store_purchase_orders_list(request, store_id):
     return render(request, 'purchase_orders/list/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_purchase_orders_new(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -92,6 +95,7 @@ def store_purchase_orders_new(request, store_id):
     return render(request, 'purchase_orders/new/index.html', context=context) 
 
 
+@login_required(login_url='/login')
 def store_purchase_orders_edit(request, store_id, purchase_order_id):
     store = get_object_or_404(Store, pk=store_id)
     company = store.company

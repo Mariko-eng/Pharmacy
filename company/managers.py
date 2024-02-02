@@ -81,8 +81,18 @@ class SaleQuerySet(QuerySet):
     def for_store(self, store):
         return self.filter(store = store)
     
-    def for_pos(self, pos):
-        return self.filter(pos = pos)
+    def for_pos_center(self, pos_center):
+        return self.filter(pos_center = pos_center)
+    
+class SaleItemQuerySet(QuerySet):
+    def for_company(self, company):
+        return self.filter(company = company)
+    
+    def for_store(self, store):
+        return self.filter(store = store)
+    
+    def for_pos_center(self, pos_center):
+        return self.filter(pos_center = pos_center)
     
 class ProductManager(Manager):
     
@@ -106,8 +116,22 @@ class SaleManager(Manager):
     def for_store(self, store):
         return self.get_queryset().for_store(store)
     
-    def for_pos(self, pos):
-        return self.get_queryset().for_pos(pos)
+    def for_pos_center(self, pos_center):
+        return self.get_queryset().for_pos_center(pos_center)
+    
+class SaleItemManager(Manager):
+    
+    def get_queryset(self):
+        return SaleItemQuerySet(self.model, using=self._db)
+
+    def for_company(self, company):
+        return self.get_queryset().for_company(company)
+    
+    def for_store(self, store):
+        return self.get_queryset().for_store(store)
+    
+    def for_pos_center(self, pos_center):
+        return self.get_queryset().for_pos_center(pos_center)
     
     
     

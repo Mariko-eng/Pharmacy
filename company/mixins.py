@@ -2,7 +2,7 @@ from django.db import models
 from simple_history.models import HistoricalRecords
 from .managers import CompanyDataManager, MyQueryset
 from .managers import CompanyStoreQuerySet
-from .managers import ProductManager, SaleManager
+from .managers import ProductManager, SaleManager, SaleItemManager
 
 class Base(models.Model):
     is_active = models.BooleanField(default=True)
@@ -18,6 +18,7 @@ class Base(models.Model):
 
     product_objects = ProductManager()
     sale_objects = SaleManager()
+    sale_item_objects = SaleItemManager()
 
     company_store_objects = CompanyStoreQuerySet.as_manager()
 

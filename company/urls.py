@@ -9,11 +9,11 @@ urlpatterns = [
 
     path('company/application/add/', views.company_application_add_view, name="company-application-add"),
     path('company/account/activate/', views.company_account_activate_view, name="company-account-activate"),
-    path('company/admin-user/register/<int:company_id>/', views.company_admin_user_register_view, name="company-admin-user-register"),
+    path('company/<int:company_id>/admin-user/register/', views.company_admin_user_register_view, name="company-admin-user-register"),
 
     path('company/application/list/', views.company_application_list_view, name="company-application-list"),
     path('company/application/<int:app_id>/', views.company_application_detail_view, name="company-application-detail"),
-    path('company/application/<int:app_id>/edit/', views.company_application_edit_view, name="company-application-edit"),
+    path('company/application/<int:app_id>/edit/', views.company_application_edit_view, name="company-application-edit"), 
     path('company/application/<int:app_id>/edit-status/<str:new_status>/', views.company_application_edit_status, name='company-application-edit-status'),
     path('company/application/<int:app_id>/delete/', views.company_application_delete_view, name="company-application-delete"),
     

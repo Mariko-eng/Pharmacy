@@ -59,9 +59,9 @@ def company_application_add_view(request):
 
     return render(request, 'company/application/new/index.html', context=context)
 
-
+ 
 def company_application_edit_status(request, app_id, new_status):
-    valid_statuses = ['PENDING', 'APPROVED' , 'CREATED' ,'DECLINED', 'CANCELLED']
+    valid_statuses = [ 'PENDING', 'APPROVED' , 'CREATED' ,'DECLINED', 'CANCELLED' ]
 
     if new_status not in valid_statuses:
         messages.error(request, 'Invalid status provided.')
@@ -110,8 +110,14 @@ def company_account_activate_view(request):
                     return render(request, 'company/activation/index.html', context=context)
                 
                 if companyApplication.status == "CREATED":
-                    messages.info(request, "Company account already activated!")                    
-                    return redirect('company:company-admin-user-register', company_id = company.id)
+                    messages.info(request, "Company account already activated!")    
+                    company_exists = Company.objects.filter(activation_code=activation_code).exists()
+                    if company_exists:
+                        company = Company.objects.filter(activation_code=activation_code).first()
+                        return redirect('company:company-admin-user-register', company_id = company.id)
+                    else:
+                        companyApplication.status = "APPROVED"
+                        companyApplication.save()
                 
                 if companyApplication.status == "APPROVED":
                     company, created = Company.objects.get_or_create(
@@ -149,11 +155,23 @@ def company_admin_user_register_view(request, company_id):
         form_data = CompanyAdminRegisterForm(request.POST)
 
         if form_data.is_valid():
+            activation_code = form_data.cleaned_data.get('activation_code', None)
             first_name = form_data.cleaned_data.get('first_name')
             last_name = form_data.cleaned_data.get('last_name')
             phone = form_data.cleaned_data.get('phone')
             email = form_data.cleaned_data.get('email')
             password2 = form_data.cleaned_data.get('password2')
+
+            if activation_code:
+                company_exists = Company.objects.filter(activation_code=activation_code).exists()
+                if company_exists:
+                    company = Company.objects.filter(activation_code=activation_code).first()
+                else:
+                    form_data.errors['activation_code'] = ['Wrong Activation Code!']
+                    context['form'] = form_data
+                    # print(form_data.errors)
+                    messages.error(request,"Failed to create company admin account!")
+                    return render(request, 'company/application/admin_account/new.html', context=context)
 
             user = User(
                 username = email,
@@ -178,7 +196,7 @@ def company_admin_user_register_view(request, company_id):
             return redirect('user:home')
         else:
             context['form'] = form_data
-            print(form_data.errors)
+            # print(form_data.errors)
             messages.error(request,"Failed to create company admin account!")
             
     return render(request, 'company/application/admin_account/new.html', context=context)

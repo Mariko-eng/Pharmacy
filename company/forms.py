@@ -33,8 +33,9 @@ class CompanyAccountActivationForm(forms.Form):
         if not CompanyApplication.objects.filter(email = email).exists():
             raise forms.ValidationError("Company Email does not exists!")
         return email
-    
+     
 class CompanyAdminRegisterForm(forms.Form):
+    activation_code = forms.CharField(max_length=30)
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     phone = forms.CharField(max_length=30)

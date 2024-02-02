@@ -64,14 +64,14 @@
 <body>
 
  <!-- ======= Header ======= -->
- {% include "includes/header/index.html" %}
+ {% include "includes/header/pos/index.html" %}
   <!-- End Header -->
 
   <!-- ======= Sidebar ======= -->
-  {% include "includes/sidebar/pos/index.html" %}
+  {% comment %} {% include "includes/sidebar/pos/index.html" %} {% endcomment %}
   <!-- End Sidebar-->
 
-  <main id="main" class="main">
+  <main id="main-pos" class="container" style="margin-top: 60px; padding: 20px 30px; transition: all 0.3s;">
 
     {% block pagetitle%} 
     <div class="pagetitle">

@@ -21,89 +21,79 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title"> New Sale Form</h5>
+        <h5 class="card-title">Add New Sale</h5>
         
         <input type="hidden" id="posId" name="posId" value="{{pos.id}}">
         
-        <form id ="myForm" class="row g-3 needs-validation" method="post" novalidate >
-            
-            {% csrf_token %}
-            
-            <div class="row">
-                <div class="col-12">                      
-                    <div class="mt-2 row">
-                        <div class="col-sm-3">
-                            Search Product/s
-                        </div>
-                        <div class="col-sm-9">
-                            <select id = "selectedProduct" class="col-sm-12 form-select js-select-products" name="state">
-                                <option value=""></option>
-                                {% for store_product in store_products %}
-                                <option 
-                                value="{{ store_product.id }}"
-                                data-price="{{ store_product.unit_price }}"
-                                >{{store_product.product.name}}</option>
-                                {% endfor %} 
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <hr class="mt-2 mb-1"/>
-                    
-                    <h5 class="card-title py-1">Cart Items</h5>
-                    
+        <div class ="row">
+            <div class= "col-4">
+                <div class= "col-12">
+                    <h4>
+                        Search for Item/s
+                    </h4>
                     <hr class="mt-1"/>
-                    
-                    
-                    {% comment %} <div class="d-flex flex-row justify-content-end d-block add-formset-item">
-                        <a class = "add-form text-primary" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Add Item</span></a>
-                    </div> {% endcomment %}
-                    
-                    
-                    <div id="empty-form" style="display:none;">
-                        <div class="empty-form-row my-2">
-                            <div class="row">
-                                {% comment %} <div class="col-md-2">Product</div> {% endcomment %}
-                                <div class="col-md-4">
-                                    {% if empty_form.errors.store_product %}
-                                    {% render_field empty_form.store_product|add_class:"form-control is-invalid"|attr:"disabled"%}
-                                    <div class="invalid-feedback">
-                                        {{ empty_form.errors.store_product.0 }}
+                    <select id = "selectedProduct" class="col-sm-12 form-select js-select-products" name="state">
+                        <option value=""></option>
+                        {% for store_product in store_products %}
+                        <option 
+                        value="{{ store_product.id }}"
+                        data-price="{{ store_product.unit_price }}"
+                        >{{store_product.product.name}}</option>
+                        {% endfor %} 
+                    </select>
+                </div>
+            </div>
+            <div class= "col-8">
+                <form id ="myForm" class="row g-3 needs-validation" method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="col-12">                      
+                        <h5 class="card-title py-1">Cart Items</h5>
+                        <hr class="mt-1"/>
+                        
+                        <div id="empty-form" style="display:none;">
+                            <div class="empty-form-row my-2">
+                                <div class="row">
+                                    {% comment %} <div class="col-md-2">Product</div> {% endcomment %}
+                                    <div class="col-md-4">
+                                        {% if empty_form.errors.store_product %}
+                                        {% render_field empty_form.store_product|add_class:"form-control is-invalid"|attr:"disabled"%}
+                                        <div class="invalid-feedback">
+                                            {{ empty_form.errors.store_product.0 }}
+                                        </div>
+                                        {% else %}
+                                        {% render_field empty_form.store_product|add_class:"form-control"|attr:"disabled"%}
+                                        {% endif %}
                                     </div>
-                                    {% else %}
-                                    {% render_field empty_form.store_product|add_class:"form-control"|attr:"disabled"%}
-                                    {% endif %}
-                                </div>
-                                <div class="col-md-2">
-                                    <input type="number" class="form-control" name="test_items-0-price" disabled />
-                                </div>
-                                {% comment %} <div class="col-md-2">Qty</div> {% endcomment %}
-                                <div class="col-md-3">
-                                    {% if empty_form.errors.quantity %}
-                                    {% render_field empty_form.quantity|add_class:"form-control is-invalid"%}
-                                    <div class="invalid-feedback">
-                                        {{ empty_form.errors.quantity.0 }}
+                                    <div class="col-md-2">
+                                        <input type="number" class="form-control" name="test_items-0-price" disabled />
                                     </div>
-                                    {% else %}
-                                    {% render_field empty_form.quantity|add_class:"form-control"%}
-                                    {% endif %}
+                                    {% comment %} <div class="col-md-2">Qty</div> {% endcomment %}
+                                    <div class="col-md-3">
+                                        {% if empty_form.errors.quantity %}
+                                        {% render_field empty_form.quantity|add_class:"form-control is-invalid"%}
+                                        <div class="invalid-feedback">
+                                            {{ empty_form.errors.quantity.0 }}
+                                        </div>
+                                        {% else %}
+                                        {% render_field empty_form.quantity|add_class:"form-control"%}
+                                        {% endif %}
+                                    </div>
+                                    <div class="col-md-2">
+                                        <input type="number" class="form-control" name="test_items-0-sub_total" disabled />
+                                    </div>
+                                    <div class="col-md-1">
+                                        <span class="remove-form text-danger text-center" style = "width: 50px; height:30px; display: inline-block; text-align: center;"><i class="bi bi-trash"></i></span>
+                                    </div>
                                 </div>
-                                <div class="col-md-2">
-                                    <input type="number" class="form-control" name="test_items-0-sub_total" disabled />
-                                </div>
-                                <div class="col-md-1">
-                                    <span class="remove-form text-danger text-center" style = "width: 50px; height:30px; display: inline-block; text-align: center;"><i class="bi bi-trash"></i></span>
-                                </div>
+                                
+                                {% comment %} <div class="d-flex flex-row justify-content-end d-block remove-formset-item">
+                                    <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-trash"></i><span></span></a>
+                                </div> {% endcomment %}
+                                
+                                <hr class="text-primary" />
                             </div>
-                            
-                            {% comment %} <div class="d-flex flex-row justify-content-end d-block remove-formset-item">
-                                <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-trash"></i><span></span></a>
-                            </div> {% endcomment %}
-                            
-                            <hr class="text-primary" />
                         </div>
-                    </div>
-                    
+
                     {{ formset.management_form }}
                     <div id = "cart-container">
                         <div class= "form-container bg-light" style="min-height: 200px;" >
@@ -131,9 +121,8 @@
                             </div>
                         </div>
                     </div>
-                </div>  
-                
-                <div class="d-flex"> 
+
+                                    <div class="d-flex"> 
                     <div id="customerDetails" class="mx-1 text-primary">
                         + Add Customer Details
                     </div>
@@ -141,7 +130,6 @@
                 
                 
                 <div id ="customer-container" class="d-none">
-                    
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="row mb-3">
@@ -219,8 +207,8 @@
                 </div>
                 
                 <hr/>
-                
-                <div class="row">
+
+                                <div class="row">
                     <div class="col-sm-6">
                         <div class="row mb-3">
                             <div class="col-sm-12">
@@ -281,7 +269,16 @@
                 <div class="col-12 d-flex justify-content-center mt-5">
                     <button id="submitButton" disabled class="btn btn-primary" type="submit" style="width: 300px;">Add New Sale</button>
                 </div>
-            </form>
+
+
+
+
+                        
+                    </div>
+                </form>
+            </div>
+        </div>
+
         </div>
     </div>
     
@@ -293,6 +290,7 @@
             Sale Added successfully!
         </div>
     </div>
+    
     
     <script type='text/javascript'>
         

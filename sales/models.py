@@ -136,6 +136,7 @@ class SaleItem(Base):
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
+    pos_center = models.ForeignKey(PosCenter, on_delete=models.CASCADE)
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE)
     store_product = models.ForeignKey(StoreProduct, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=12, decimal_places=3)
@@ -154,7 +155,7 @@ class SaleItem(Base):
     
 
     @classmethod
-    def get_sales_count(cls, start_date, end_date, store=None, company=None, pos=None):
+    def get_sales_count(cls, start_date, end_date, store=None, company=None, pos_center=None):
         # Ensure that start_date and end_date are datetime objects
         start_datetime = datetime.combine(start_date, datetime.min.time())
         end_datetime = datetime.combine(end_date, datetime.max.time())
@@ -165,25 +166,25 @@ class SaleItem(Base):
 
         total = 0
 
-        if pos is not None:
-            result = cls.sale_objects.for_pos(pos).filter(created_at__range=[start_date_aware, end_date_aware]).count()
+        if pos_center is not None:
+            result = cls.sale_item_objects.for_pos_center(pos_center).filter(created_at__range=[start_date_aware, end_date_aware]).count()
             if result is not None:
                 total = result
             return total
 
         if store is not None:
-            result = cls.sale_objects.for_store(store).filter(created_at__range=[start_date_aware, end_date_aware]).count()
+            result = cls.sale_item_objects.for_store(store).filter(created_at__range=[start_date_aware, end_date_aware]).count()
             if result is not None:
                 total = result
             return total
         
         if company is not None:
-            result = cls.sale_objects.for_company(company).filter(created_at__range=[start_date_aware, end_date_aware]).count()
+            result = cls.sale_item_objects.for_company(company).filter(created_at__range=[start_date_aware, end_date_aware]).count()
             if result is not None:
                 total = result
             return total
         
-        result = cls.sale_objects.filter(created_at__range=[start_date_aware, end_date_aware]).count()
+        result = cls.sale_item_objects.filter(created_at__range=[start_date_aware, end_date_aware]).count()
         if result is not None:
             total = result
 
@@ -191,7 +192,7 @@ class SaleItem(Base):
 
 
     @classmethod
-    def get_revenue(cls, start_date, end_date, store=None, company=None, pos=None):
+    def get_revenue(cls, start_date, end_date, store=None, company=None, pos_center=None):
         # Ensure that start_date and end_date are datetime objects
         start_datetime = datetime.combine(start_date, datetime.min.time())
         end_datetime = datetime.combine(end_date, datetime.max.time())
@@ -202,36 +203,36 @@ class SaleItem(Base):
             
         total = 0
 
-        if pos is not None:
-            result = cls.sale_objects.for_pos(pos).filter(created_at__range=[start_date_aware, end_date_aware]).aggregate(Sum('total_cost'))['total_cost__sum']
+        if pos_center is not None:
+            result = cls.sale_item_objects.for_pos_center(pos_center).filter(created_at__range=[start_date_aware, end_date_aware]).aggregate(Sum('total_cost'))['total_cost__sum']
             if result is not None:
                 total = result
             return total
 
         if store is not None:
-            result = cls.sale_objects.for_store(store).filter(created_at__range=[start_date_aware, end_date_aware]).aggregate(Sum('total_cost'))['total_cost__sum']
+            result = cls.sale_item_objects.for_store(store).filter(created_at__range=[start_date_aware, end_date_aware]).aggregate(Sum('total_cost'))['total_cost__sum']
             if result is not None:
                 total = result
             return total
         
         if company is not None:
-            result = cls.sale_objects.for_company(company).filter(created_at__range=[start_date_aware, end_date_aware]).aggregate(Sum('total_cost'))['total_cost__sum']
+            result = cls.sale_item_objects.for_company(company).filter(created_at__range=[start_date_aware, end_date_aware]).aggregate(Sum('total_cost'))['total_cost__sum']
             if result is not None:
                 total = result
             return total
         
-        result = cls.sale_objects.filter(created_at__range=[start_date_aware, end_date_aware]).aggregate(Sum('total_cost'))['total_cost__sum']
+        result = cls.sale_item_objects.filter(created_at__range=[start_date_aware, end_date_aware]).aggregate(Sum('total_cost'))['total_cost__sum']
         if result is not None:
             total = result
 
         return total
     
     @classmethod
-    def get_recent_sales(cls, store=None, company=None, pos=None):
-        queryset = cls.sale_objects.order_by('-created_at')
+    def get_recent_sales(cls, store=None, company=None, pos_center=None):
+        queryset = cls.sale_item_objects.order_by('-created_at')
 
-        if pos is not None:
-            queryset = queryset.for_pos(pos)[:5]
+        if pos_center is not None:
+            queryset = queryset.for_pos_center(pos_center)[:5]
             return queryset
 
         if store is not None:
@@ -245,7 +246,7 @@ class SaleItem(Base):
         return queryset[:5]
     
     @classmethod
-    def get_top_sales(cls, start_date, end_date, store=None, company=None, pos=None):
+    def get_top_sales(cls, start_date, end_date, store=None, company=None, pos_center=None):
         # Ensure that start_date and end_date are datetime objects
         start_datetime = datetime.combine(start_date, datetime.min.time())
         end_datetime = datetime.combine(end_date, datetime.max.time())
@@ -254,11 +255,11 @@ class SaleItem(Base):
         start_date_aware = timezone.make_aware(start_datetime, timezone.get_current_timezone())
         end_date_aware = timezone.make_aware(end_datetime, timezone.get_current_timezone())
 
-        queryset = cls.sale_objects.filter(created_at__range=[start_date_aware, end_date_aware])
+        queryset = cls.sale_item_objects.filter(created_at__range=[start_date_aware, end_date_aware])
         queryset = queryset.order_by('-total_cost')
 
-        if pos is not None:
-            queryset = queryset.for_pos(pos)[:5]
+        if pos_center is not None:
+            queryset = queryset.for_pos_center(pos_center)[:5]
             return queryset
 
         if store is not None:
@@ -273,25 +274,25 @@ class SaleItem(Base):
 
 
     @classmethod
-    def get_sales_and_revenue(cls, store=None, company=None, pos=None):
+    def get_sales_and_revenue(cls, store=None, company=None, pos_center=None):
         today = datetime.now()
-        today_sales = cls.get_sales_count(today, today, store= store, company=company, pos=pos)
-        today_revenue = cls.get_revenue(today, today, store= store, company=company, pos=pos)
+        today_sales = cls.get_sales_count(today, today, store= store, company=company, pos_center=pos_center)
+        today_revenue = cls.get_revenue(today, today, store= store, company=company, pos_center=pos_center)
 
         first_day_of_this_month = datetime.now().replace(day=1).date()
         last_day_of_this_month = (datetime.now() + timedelta(days=32)).replace(day=1).date() - timedelta(days=1)
-        this_month_sales = cls.get_sales_count(first_day_of_this_month, last_day_of_this_month, store= store, company=company, pos=pos)
-        this_month_revenue= cls.get_revenue(first_day_of_this_month, last_day_of_this_month,store= store, company=company, pos=pos)
+        this_month_sales = cls.get_sales_count(first_day_of_this_month, last_day_of_this_month, store= store, company=company, pos_center=pos_center)
+        this_month_revenue= cls.get_revenue(first_day_of_this_month, last_day_of_this_month,store= store, company=company, pos_center=pos_center)
 
         first_day_of_last_month = (today.replace(day=1) - timedelta(days=1)).replace(day=1).date()
         last_day_of_last_month = today.replace(day=1).date() - timedelta(days=1)
-        last_month_sales = cls.get_sales_count(first_day_of_last_month, last_day_of_last_month, store= store, company=company, pos=pos)
-        last_month_revenue = cls.get_revenue(first_day_of_last_month, last_day_of_last_month, store= store, company=company, pos=pos)
+        last_month_sales = cls.get_sales_count(first_day_of_last_month, last_day_of_last_month, store= store, company=company, pos_center=pos_center)
+        last_month_revenue = cls.get_revenue(first_day_of_last_month, last_day_of_last_month, store= store, company=company, pos_center=pos_center)
     
         first_day_of_year = datetime.now().replace(month=1, day=1).date()
         last_day_of_year = datetime.now().date()
-        this_year_sales = cls.get_sales_count(first_day_of_year, last_day_of_year, store= store, company=company, pos=pos)
-        this_year_revenue = cls.get_revenue(first_day_of_year, last_day_of_year, store= store, company=company, pos=pos)
+        this_year_sales = cls.get_sales_count(first_day_of_year, last_day_of_year, store= store, company=company, pos_center=pos_center)
+        this_year_revenue = cls.get_revenue(first_day_of_year, last_day_of_year, store= store, company=company, pos_center=pos_center)
 
         return {
             "today_sales" : today_sales,
@@ -306,30 +307,30 @@ class SaleItem(Base):
 
 
     @classmethod
-    def get_sales_data(cls, store=None, company=None, pos=None):
-        recent_sales = cls.get_recent_sales(store= store, company=company, pos=pos)
+    def get_sales_data(cls, store=None, company=None, pos_center=None):
+        recent_sales = cls.get_recent_sales(store= store, company=company, pos_center=pos_center)
 
-        today_top_sales = cls.get_top_sales(datetime.now(), datetime.now(), store= store, company=company, pos=pos)
+        today_top_sales = cls.get_top_sales(datetime.now(), datetime.now(), store= store, company=company, pos_center=pos_center)
 
         start_of_this_week = datetime.now() - timedelta(days=datetime.now().weekday())
         end_of_this_week = start_of_this_week + timedelta(days=6)
-        this_week_top_sales= cls.get_top_sales(start_of_this_week, end_of_this_week, store=store, company=company, pos=pos)
+        this_week_top_sales= cls.get_top_sales(start_of_this_week, end_of_this_week, store=store, company=company, pos_center=pos_center)
 
         start_of_last_week = datetime.now() - timedelta(days=(datetime.now().weekday() + 7))
         end_of_last_week = start_of_last_week + timedelta(days=6)
-        last_week_top_sales = cls.get_top_sales(start_of_this_week, end_of_last_week, store=store, company=company, pos=pos)
+        last_week_top_sales = cls.get_top_sales(start_of_this_week, end_of_last_week, store=store, company=company, pos_center=pos_center)
 
         first_day_of_this_month = datetime.now().replace(day=1).date()
         last_day_of_this_month = (datetime.now() + timedelta(days=32)).replace(day=1).date() - timedelta(days=1)
-        this_month_top_sales = cls.get_top_sales(first_day_of_this_month, last_day_of_this_month, store=store, company=company, pos=pos)
+        this_month_top_sales = cls.get_top_sales(first_day_of_this_month, last_day_of_this_month, store=store, company=company, pos_center=pos_center)
 
         first_day_of_last_month = (datetime.now().replace(day=1) - timedelta(days=1)).replace(day=1).date()
         last_day_of_last_month = datetime.now().replace(day=1).date() - timedelta(days=1)
-        last_month_top_sales = cls.get_top_sales(first_day_of_last_month, last_day_of_last_month, store=store, company=company, pos=pos)
+        last_month_top_sales = cls.get_top_sales(first_day_of_last_month, last_day_of_last_month, store=store, company=company, pos_center=pos_center)
 
         first_day_of_year = datetime.now().replace(month=1, day=1).date()
         last_day_of_year = datetime.now().date()
-        this_year_top_sales = cls.get_top_sales(first_day_of_year, last_day_of_year, store=store, company=company, pos=pos)
+        this_year_top_sales = cls.get_top_sales(first_day_of_year, last_day_of_year, store=store, company=company, pos_center=pos_center)
 
         return {
             "recent_sales" : recent_sales,

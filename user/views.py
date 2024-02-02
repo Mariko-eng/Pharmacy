@@ -44,8 +44,9 @@ def index(request):
                 request.session['company_id'] = request.user.company.id
                 request.session['company_name'] = request.user.company.name
 
-            if next_url:
-                return redirect(next_url)  # Redirect to the URL specified in 'next' parameter
+            # if next_url:
+            #     return redirect(next_url)  
+            # Redirect to the URL specified in 'next' parameter
         
             return redirect('user:home')
         else:
@@ -153,8 +154,8 @@ def pos_dashboard(request, pos_id = None):
         pos = request.user.userprofile.pos_center
 
         # Get sales and revenue
-    data1 = SaleItem.get_sales_and_revenue(pos=pos)
-    data2 = SaleItem.get_sales_data(pos=pos)
+    data1 = SaleItem.get_sales_and_revenue(pos_center=pos)
+    data2 = SaleItem.get_sales_data(pos_center=pos)
 
     # print("data1")
     # print(data1)
