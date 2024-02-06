@@ -107,7 +107,7 @@
                 
                 $.ajax({
                     type: 'POST',
-                    url: '{% url "user:users-and-roles-list" %}',
+                    url: '{% url "user:users-list" %}',
                     data: data,
                     success: function (data) {
                         //console.log(data)

@@ -38,11 +38,15 @@ urlpatterns = [
         views.company_products_list, name="company-products-list"),
     # Store Products
     path('home/store/<int:store_id>/inventory/products/list/',
-        views.store_products_list, name="store-products-list"),
-    path('home/store/<int:store_id>/inventory/products/detail/<int:store_product_id>/',
-        views.store_products_detail, name="store-products-detail"),
+        views.stock_items_list, name="store-products-list"),
+    path('home/store/<int:store_id>/inventory/products/detail/<int:stock_item_id>/',
+        views.stock_items_detail, name="store-products-detail"),
+    path('home/store/<int:store_id>/inventory/products/edit/<int:stock_item_id>/',
+        views.stock_items_edit, name="store-products-edit"),
     path('home/store/<int:store_id>/inventory/products/new/',
-        views.store_products_new, name="store-products-new"),
+         views.stock_items_new, name="store-products-new"),
+    path('home/store/<int:store_id>/inventory/products/delete/<int:stock_item_id>/',
+        views.stock_items_delete, name="store-products-delete"),
 
 
     ## Company Recieved Stock 
@@ -57,6 +61,8 @@ urlpatterns = [
         views.store_received_stock_new, name="store-received-stock-new"),
     path('home/store/<int:store_id>/inventory/received_stock/edit/<int:received_stock_id>/',
         views.store_received_stock_edit, name="store-received-stock-edit"),
+    path('home/store/<int:store_id>/inventory/received_stock/approve/<int:received_stock_id>/',
+        views.store_received_stock_approve, name="store-received-stock-approve"),
 
     #Company Recieved Stock     
     path('home/company/<int:company_id>/inventory/stock-requests/list/',
@@ -65,10 +71,10 @@ urlpatterns = [
     #Store Recieved Stock     
     path('home/store/<int:store_id>/inventory/stock-requests/list/',
         views.store_stock_requests_list, name="store-stock-requests-list"),
-    path('home/store/<int:store_id>/inventory/stock-requests/detail/<int:stock_request_id>/',
-        views.store_stock_requests_detail, name="store-stock-requests-detail"),
     path('home/store/<int:store_id>/inventory/stock-requests/new/',
         views.store_stock_requests_new, name="store-stock-requests-new"),
+    path('home/store/<int:store_id>/inventory/stock-requests/detail/<int:stock_request_id>/',
+        views.store_stock_requests_detail, name="store-stock-requests-detail"),
     path('home/store/<int:store_id>/inventory/stock-requests/edit/<int:stock_request_id>/',
         views.store_stock_requests_edit, name="store-stock-requests-edit"),
 

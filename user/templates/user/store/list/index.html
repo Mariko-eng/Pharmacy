@@ -45,22 +45,26 @@
                         <thead>
                             <tr>
                                 <th scope="col">#</th>
-                                <th scope="col">Role</th>
+                                <th scope="col">Account Type</th>
+                                <th scope="col">Roles</th>
                                 <th scope="col">Name</th>
                                 <th scope="col">Email</th>
                                 <th scope="col">Contact</th>
                                 <th scope="col">Store</th>
+                                <th scope="col">POS</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for user in users %}
                             <tr>
                                 <td>{{user.created_at}}</td>
+                                <td>{{user.account_type}}</td>
                                 <td>{% for group in user.groups.all %}<p>{{group.name}}</p>{% endfor %}</td>
                                 <td>{{user.name}}</td>
                                 <td>{{user.email}}</td>
                                 <td>{{user.phone}}</td>
                                 <td>{{user.userprofile.store}}</td>
+                                <td>{{user.userprofile.pos_center}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

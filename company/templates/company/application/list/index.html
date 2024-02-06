@@ -6,7 +6,7 @@
   <nav>
     <ol class="breadcrumb">
       <li class="breadcrumb-item"><a href="{% url 'user:home' %}">Home</a></li>
-      <li class="breadcrumb-item"><a href="#">Companies</a></li>
+      <li class="breadcrumb-item"><a href="#">Company</a></li>
       <li class="breadcrumb-item active"><a>Applications<i class="text-blue" style="font-size: 1em;"></i></a></li>
     </ol>
   </nav>
@@ -46,18 +46,18 @@
                 <td>{{result.location}}</td>
                 <td>{{result.status}}</td>
                 <td>
-                 {% if result.status == "CREATED" %}
+                  {% if result.status == "CREATED" %}
                   <div></div> 
-                {% elif result.status == "PENDING" %}
-                    <a href="{% url 'company:company-application-edit-status' app_id=result.id new_status='APPROVED' %}" class="text-white btn btn-primary btn-outlined py-0"><i class="bi bi-check"></i>Approve</a>
-                    <a href="{% url 'company:company-application-edit-status' app_id=result.id new_status='DECLINED' %}" class="text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle">Decline</i></a>
-                {% elif result.status == "APPROVED" %}
-                    <a href="{% url 'company:company-application-edit-status' app_id=result.id new_status='CANCELLED' %}" class="text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle"></i>Cancel</a>
-                    <a href="{% url 'company:company-application-edit-status' app_id=result.id new_status='APPROVED' %}" class="text-white btn btn-success btn-outlined py-0"><i class="bi bi-envelope">Resend</i></a>
-                {% else %}
-                    <div></div>
-                {% endif %} 
-            </td>
+                  {% elif result.status == "PENDING" %}
+                  <button data-app-id="{{ result.id }}" class="approveBtn text-white btn btn-primary btn-outlined py-0"><i class="bi bi-check"></i>Approve</button>
+                  <button data-app-id="{{ result.id }}" class="declineBtn text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle">Decline</i></button>
+                  {% elif result.status == "APPROVED" %}
+                  <button data-app-id="{{ result.id }}" class="declineBtn text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle"></i>Cancel</button>
+                  <button data-app-id="{{ result.id }}" class="text-white btn btn-success btn-outlined py-0"><i class="bi bi-envelope">Resend</i></button>
+                  {% else %}
+                  <div></div>
+                  {% endif %} 
+                </td>
               </tr>
               {% endfor %}
             </tbody>
@@ -69,6 +69,74 @@
 </section>
 
 <script type='text/javascript'>
+  
+  $(document).ready(function () {
+    
+    $('.approveBtn').on('click', function () {      
+      var btn = $(this);  // Store reference to the button
+      btn.addClass("disabled")
+      
+      var appId = $(this).data('app-id');
+      
+      var new_status = 'APPROVED';
+      
+      console.log("clicked")
+            
+      // Perform Ajax call to approve application
+      $.ajax({
+        url: '{% url "company:company-application-edit-status" app_id=0 new_status=0 %}'.replace('0', appId).replace('0', new_status),
+        type: 'GET',
+        success: function (response) {
+          // Handle success
+          window.location.reload()
+        },
+        error: function (error) {
+          // Handle error
+        },
+        complete: function () {
+          btn.removeClass("disabled");
+        }
+      });
+      
+    })
+    
+    $('.declineBtn').click(function () {
+      var btn = $(this);  // Store reference to the button
+      
+      btn.addClass("disabled")
+      
+      var appId = $(this).data('app-id');
+      
+      var new_status = 'APPROVED';
+      
+      // Perform Ajax call to approve application
+      $.ajax({
+        url: '{% url "company:company-application-edit-status" app_id=0 new_status=0 %}'.replace('0', appId).replace('0', new_status),
+        type: 'GET',
+        success: function (response) {
+          // Handle success
+          window.location.reload()
+        },
+        error: function (error) {
+          // Handle error
+        },
+        complete: function () {
+          // Remove the "disabled" class after the request is complete
+          btn.removeClass("disabled");
+        }
+      });
+    })
+    
+    $('.deleteBtn').click(function () {
+      var btn = $(this);  // Store reference to the button
+      
+      btn.addClass("disabled")
+      
+      var applicationId = $(this).data('app-id');
+      
+    })
+    
+  })
   
   
 </script>

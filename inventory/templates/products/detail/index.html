@@ -19,69 +19,52 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Products</h5>
+        <h5 class="card-title">Product Details</h5>
         
         <hr />   
-        <!-- Content -->
+        <!-- Content --> 
         <div class="row">
             <div class="col-5">
-                <h5>Sale Information</h5>
-                <div class="row">
-                    <div class="col-lg-4 col-md-5 label">Invoice NO</div>
-                    <div class="col-lg-8 col-md-7 text-primary">{{sale.sale_unique_id}}</div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4 col-md-5 label">POS</div>
-                    <div class="col-lg-8 col-md-7 text-primary">{{sale.pos_center}}</div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4 col-md-5 label">Date</div>
-                    <div class="col-lg-8 col-md-7 text-primary">{{sale.created_at}}</div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4 col-md-5 label">Pay Terms</div>
-                    <div class="col-lg-8 col-md-7 text-primary">{{sale.payment_period}}</div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4 col-md-5 label">Pay Option</div>
-                    <div class="col-lg-8 col-md-7 text-primary">{{sale.payment_option}}</div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4 col-md-5 label">Status</div>
-                    <div class="col-lg-8 col-md-7 text-primary">{{sale.payment_status}}</div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4 col-md-5 label">No of Items</div>
-                    <div class="col-lg-8 col-md-7 text-primary">{{sale.items_count}}</div>
-                </div>
-                <div class="row">
-                    <div class="col-lg-4 col-md-5 label">Total Cost</div>
-                    <div class="col-lg-8 col-md-7 text-primary">{{sale.total_cost}}</div>
-                </div>
+                {% if product.item_photo %}
+                <img src="{{ product.item_photo.url }}" alt="Photo" class="rounded-circle" width="140">
+                {% endif %}
             </div>
+
             <div class="col-7">
-                <h5>Sale Items</h5>
-                <div class="table-responsive small">
-                    <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
-                        <thead>
-                            <tr>
-                                <th scope="col">Item</th>
-                                <th scope="col">Unit Cost</th>
-                                <th scope="col">Qauntity</th>
-                                <th scope="col">Total Cost</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for result in sale.saleitem_set.all %}
-                            <tr>
-                                <td>{{result.store_product.product.name}}</td>
-                                <td>{{result.unit_cost}}</td>
-                                <td>{{result.quantity}}</td>
-                                <td>{{result.total_cost}}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+                <h5>Product Information</h5>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 label">Name Of Product</div>
+                    <div class="col-lg-8 col-md-8 text-primary">{{ product.name }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 label">Description</div>
+                    <div class="col-lg-5 col-md-8 text-primary">{{product.description}}</div>
+                </div>
+
+               <div class="row">
+                    <div class="col-lg-4 col-md-4 label">Category</div>
+                    <div class="col-lg-8 col-md-8 text-primary">{{ product.category }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 label">Variant</div>
+                    <div class="col-lg-5 col-md-8 text-primary">{{product.variant}}</div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 label">Units</div>
+                    <div class="col-lg-8 col-md-8 text-primary">{{ product.units }}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 label">Price</div>
+                    <div class="col-lg-5 col-md-8 text-primary">{{product.unit_price}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 label">Available Qty</div>
+                    <div class="col-lg-5 col-md-8 text-primary">{{product.available_qty}}</div>
+                </div>
+                <div class="row">
+                    <div class="col-lg-4 col-md-4 label">Actual Qty</div>
+                    <div class="col-lg-5 col-md-8 text-primary">{{product.actual_qty}}</div>
                 </div>
             </div>
         </div>

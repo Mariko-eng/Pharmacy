@@ -30,10 +30,9 @@ class SaleForm(forms.ModelForm):
             'pos_center',
             'payment_option',
             'payment_period',
-            'payment_status',
             'remarks',
             ]
-        exclude = ['company','store','updated_by','updated_at','created_by','created_at']
+        exclude = ['company','store','payment_status','updated_by','updated_at','created_by','created_at']
 
 
     def __init__(self, *args, user=None, store=None, **kwargs):
@@ -53,7 +52,7 @@ class SaleItemForm(forms.ModelForm):
     class Meta:
         model = SaleItem
         fields = [
-            'store_product','quantity'
+            'stock_item','quantity'
         ]
         exclude = ['company','store','sale','unit_cost','total_cost','updated_by','updated_at','created_by','created_at']
 
@@ -69,10 +68,10 @@ class PosSaleForm(forms.ModelForm):
         fields = [
             'payment_option',
             'payment_period',
-            'payment_status',
             'remarks',]
         
         exclude = [
-            'company','store','pos_center',
+            'company','store',
+            'pos_center','payment_status',
             'updated_by','updated_at',
             'created_by','created_at',]

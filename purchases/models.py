@@ -1,10 +1,10 @@
 from uuid import uuid4
 from django.db import models
 from django.utils import timezone
-from company.models import Company, Supplier
+from company.models import Company, SupplierEntity
 from company.models import Store
 from company.mixins import Base
-from inventory.models import StoreProduct
+from inventory.models import StockItem
 
 class PurchaseOrderRequest(Base):
     SUPPLIER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
@@ -26,7 +26,7 @@ class PurchaseOrderRequest(Base):
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     supplier_type = models.CharField(max_length=10,choices=SUPPLIER_TYPES,default="SUPPLIER")
-    supplier_entity = models.ForeignKey(Supplier,on_delete=models.SET_NULL,null=True)
+    supplier_entity = models.ForeignKey(SupplierEntity,on_delete=models.SET_NULL,null=True)
     supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True, related_name="purchase_order_requests")
     order_date = models.DateField(default=timezone.now)
     delivery_date = models.DateField(null=True) # Expected  Delivery Date
@@ -74,7 +74,7 @@ class PurchaseOrderRequestItem(Base):
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     order_request = models.ForeignKey(PurchaseOrderRequest, on_delete=models.CASCADE)
-    store_product = models.ForeignKey(StoreProduct,on_delete=models.CASCADE)
+    stock_item = models.ForeignKey(StockItem,on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=12, decimal_places=3)
     total_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     updated_by = models.CharField(max_length=225,null=True,blank=True)

@@ -141,13 +141,13 @@
                     <div class="col-md-4">
                         <div class="col-md-12 mt-2 mb-2">Product</div>
                         <div class="col-md-12">
-                            {% if formset_item.errors.store_product %}
-                            {% render_field formset_item.store_product|add_class:"form-control is-invalid"%}
+                            {% if formset_item.errors.stock_item %}
+                            {% render_field formset_item.stock_item|add_class:"form-control is-invalid"%}
                             <div class="invalid-feedback">
-                                {{ formset_item.errors.store_product.0 }}
+                                {{ formset_item.errors.stock_item.0 }}
                             </div>
                             {% else %}
-                            {% render_field formset_item.store_product|add_class:"form-control"%}
+                            {% render_field formset_item.stock_item|add_class:"form-control"%}
                             {% endif %}
                         </div>
                     </div>
@@ -169,13 +169,13 @@
                     <div class="col-md-4">
                         <div class="col-md-12 mt-2 mb-2">Quantity</div>
                         <div class="col-md-12">
-                            {% if formset_item.errors.qty_received %}
-                            {% render_field formset_item.qty_received|add_class:"form-control is-invalid"%}
+                            {% if formset_item.errors.quantity %}
+                            {% render_field formset_item.quantity|add_class:"form-control is-invalid"%}
                             <div class="invalid-feedback">
-                                {{ formset_item.errors.qty_received.0 }}
+                                {{ formset_item.errors.quantity.0 }}
                             </div>
                             {% else %}
-                            {% render_field formset_item.qty_received|add_class:"form-control"%}
+                            {% render_field formset_item.quantity|add_class:"form-control"%}
                             {% endif %}
                         </div>
                     </div>
@@ -234,104 +234,7 @@
                 <hr class="text-primary" />
             </div>
             {% endfor %}
-            
-            {% comment %} <div class="row">
-                <div class="col-md-2">
-                    <p class="text-center text-small">Product</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Batch No</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Qty Received</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Total Cost(SHS)</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Mfg Date</p>
-                </div>
-                <div class="col-md-2">
-                    <p class="text-center text-small">Exp Date</p>
-                </div>
-            </div> {% endcomment %}
-            
-            {% comment %} {{ formset.management_form }}
-            {% for form in formset.forms %}
-            <div class="row form-row my-1">
-                <div class="col-md-2">
-                    {% if form.errors.store_product %}
-                    {% render_field form.store_product|add_class:"form-control is-invalid"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.store_product.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.store_product|add_class:"form-control"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.batch_no %}
-                    {% render_field form.batch_no|add_class:"form-control is-invalid"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.batch_no.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.batch_no|add_class:"form-control"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.qty_received %}
-                    {% render_field form.qty_received|add_class:"form-control is-invalid"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.qty_received.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.qty_received|add_class:"form-control"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.total_cost %}
-                    {% render_field form.total_cost|add_class:"form-control is-invalid"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.total_cost.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.total_cost|add_class:"form-control"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.manufactured_date %}
-                    {% render_field form.manufactured_date|add_class:"form-control is-invalid" type="date"%}
-                    <div class="invalid-feedback">
-                        {{ form.errors.manufactured_date.0 }}
-                    </div>
-                    {% else %}
-                    {% render_field form.manufactured_date|add_class:"form-control" type="date"%}
-                    {% endif %}
-                </div>
-                <div class="col-md-2">
-                    {% if form.errors.expiry_date %}
-                    <div class="input-group">
-                        {% render_field form.expiry_date|add_class:"form-control is-invalid" type="date"%}
-                        <div class="input-group-append">
-                            <span class="btn btn-success add-form-row p-0 text-center" style="width: 20px; height:20px;">+</span>
-                        </div>
-                    </div>
-                    <div class="invalid-feedback">
-                        {{ form.errors.expiry_date.0 }}
-                    </div>
-                    {% else %}
-                    <div class="input-group">
-                        {% render_field form.expiry_date|add_class:"form-control" type="date"%}
-                        <div class="input-group-append">
-                            <span class="btn btn-success add-form-row p-0 text-center" style="width: 20px; height:20px;">+</span>
-                        </div>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-            {% endfor %} {% endcomment %}
-            
+                        
             
             <div class="col-12 d-flex justify-content-center mt-5">
                 <button class="btn btn-primary" type="submit" style="width: 300px;">Add New Stock</button>

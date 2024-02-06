@@ -76,9 +76,9 @@
                         <tbody>
                             {% for result in received_stock.receivedstockitem_set.all %}
                             <tr>
-                                <td>{{result.store_product.product.name}}</td>
+                                <td>{{result.stock_item.name}}</td>
                                 <td>{{result.batch_no}}</td>
-                                <td>{{result.qty_received}}</td>
+                                <td>{{result.quantity}}</td>
                                 <td>{{result.manufactured_date}}</td>
                                 <td>{{result.expiry_date}}</td>
                                 <td>{{result.total_cost}}</td>

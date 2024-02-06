@@ -84,337 +84,320 @@
                                         {% for item in groups_static %}
                                         <tr>
                                             <td>{{item.name}}</td>
-                                            <td><a href="{% url 'user:role-permissions-list' item.id %}"><i class="bi bi-pencil"></i>Edit Permissions</a></td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                                            <td><a href="{% url 'user:users-roles-permissions-list' role_id=item.id %}">
+                                                <i class="bi bi-pencil"></i>Edit Permissions</a></td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                        <div>
-                            <h6 class="card-title">Generic Roles</h6>
-                            <div class="table-responsive small">
-                                <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
-                                    <thead>
-                                        <tr>
-                                            <th scope="col">Name</th>
-                                            <th scope="col">Action 1</th>
-                                            <th scope="col">Action 2</th>
-                                            <th scope="col">Action 3</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in groups_dynamic %}
-                                        <tr>
-                                            <td>{{user.name}}</td>
-                                            <td>Edit Role</td>
-                                            <td>Edit Permissions</td>
-                                            <td>Delete Role</td>
-                                        </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
+                            <div>
+                                <h6 class="card-title">Generic Roles</h6>
+                                <div class="table-responsive small">
+                                    <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Action 1</th>
+                                                <th scope="col">Action 2</th>
+                                                <th scope="col">Action 3</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for item in groups_dynamic %}
+                                            <tr>
+                                                <td>{{user.name}}</td>
+                                                <td>Edit Role</td>
+                                                <td>Edit Permissions</td>
+                                                <td>Delete Role</td>
+                                            </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div><!-- End Default Tabs -->
+                </div><!-- End Default Tabs -->
+            </div>
         </div>
-    </div>
-    
-    {% comment %} <div class="modal fade" id="selectUserTypeModal" tabindex="-1">
-        <div class="modal-dialog modal-dialog-scrollable">
-            <form id = "selectUserTypeForm" class="row g-3 needs-validation" method="post" novalidate >
+        
+        {% comment %} <div class="modal fade" id="selectUserTypeModal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-scrollable">
+                <form id = "selectUserTypeForm" class="row g-3 needs-validation" method="post" novalidate >
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title text-center">Which user do you want to Add?</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <br/>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="user_type" value="superUser" id="user_type1">
+                                <label class="form-check-label" for="user_type1">
+                                    Super User
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="user_type" value="companyAdmin" id="user_type1">
+                                <label class="form-check-label" for="user_type1">
+                                    Company Admin
+                                </label>
+                            </div>
+                            <div id ="user_type_error" class="d-none text-danger">Please select a user type.</div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Continue</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div> 
+        {% endcomment %}
+        
+        <div class="modal fade" id="createSuperUserModal" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title text-center">Which user do you want to Add?</h5>
+                        <h5 class="modal-title text-center">User Registration Form</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <br/>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="user_type" value="superUser" id="user_type1">
-                            <label class="form-check-label" for="user_type1">
-                                Super User
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="user_type" value="companyAdmin" id="user_type1">
-                            <label class="form-check-label" for="user_type1">
-                                Company Admin
-                            </label>
-                        </div>
-                        <div id ="user_type_error" class="d-none text-danger">Please select a user type.</div>
-                    </div>
+                    {% comment %} <div class="modal-body row g-3 needs-validation">
+                        <form id = "form" method="post" novalidate >
+                            {% csrf_token %}
+                            <div class="row mb-3">
+                                <label for="name" class="col-sm-2 col-form-label">First Name</label>
+                                <div class="col-sm-10">
+                                    {% render_field form.first_name|add_class:"form-control"|attr:"id:first_name" %}
+                                    <div id = "firstNameError" class="invalid-feedback">
+                                        Provide a valid first name
+                                    </div>
+                                </div>
+                            </div> 
+                            <div class="row mb-3">
+                                <label for="name" class="col-sm-2 col-form-label">Last Name</label>
+                                <div class="col-sm-10">
+                                    {% render_field form.last_name|add_class:"form-control"|attr:"id:last_name" %}
+                                    <div id = "lastNameError" class="invalid-feedback">
+                                        Provide a valid last name
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="name" class="col-sm-2 col-form-label">Email</label>
+                                <div class="col-sm-10">
+                                    {% render_field form.email|add_class:"form-control"|attr:"id:email" %}
+                                    <div id = "emailError" class="invalid-feedback">
+                                        Provide a valid email
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="name" class="col-sm-2 col-form-label">Phone Number</label>
+                                <div class="col-sm-10">
+                                    {% render_field form.phone|add_class:"form-control"|attr:"id:phone" %}
+                                    <div id = "phoneNumberError" class="invalid-feedback">
+                                        Provide a valid phone number
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="is_superuser" class="col-sm-2 col-form-label">Is super user?</label>
+                                <div class="col-sm-10">
+                                    {% render_field form.is_superuser attrs="class:form-check-input id:is_superuser" type="checkbox" %}
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label for="is_staff" class="col-sm-2 col-form-label">Is staff user?</label>
+                                <div class="col-sm-10">
+                                    {% render_field form.is_staff attrs="class:form-check-input id:is_staff" type="radio" %}
+                                </div>
+                            </div>
+                        </form>
+                    </div>  {% endcomment %}
+                    
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Continue</button>
+                        <button type="button" id ="formSubmitBtn" class="btn btn-primary">Save</button>
                     </div>
-                </div>
-            </form>
-        </div>
-    </div> {% endcomment %}
-    
-    <div class="modal fade" id="createSuperUserModal" tabindex="-1">
-        <div class="modal-dialog modal-lg modal-dialog-scrollable">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title text-center">User Registration Form</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body row g-3 needs-validation">
-                    <form id = "superUserForm" method="post" novalidate >
-                        {% csrf_token %}
-                        <input type="hidden" name="form_prefix" value="{{ superUserForm.prefix }}">
-                        <div class="row mb-3">
-                            <label for="name" class="col-sm-2 col-form-label">First Name</label>
-                            <div class="col-sm-10">
-                                {% render_field superUserForm.first_name|add_class:"form-control"|attr:"id:first_name" %}
-                                <div id = "firstNameError" class="invalid-feedback">
-                                    Provide a valid first name
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="name" class="col-sm-2 col-form-label">Last Name</label>
-                            <div class="col-sm-10">
-                                {% render_field superUserForm.last_name|add_class:"form-control"|attr:"id:last_name" %}
-                                <div id = "lastNameError" class="invalid-feedback">
-                                    Provide a valid last name
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="name" class="col-sm-2 col-form-label">Email</label>
-                            <div class="col-sm-10">
-                                {% render_field superUserForm.email|add_class:"form-control"|attr:"id:email" %}
-                                <div id = "emailError" class="invalid-feedback">
-                                    Provide a valid email
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="name" class="col-sm-2 col-form-label">Phone Number</label>
-                            <div class="col-sm-10">
-                                {% render_field superUserForm.phone|add_class:"form-control"|attr:"id:phone" %}
-                                <div id = "phoneNumberError" class="invalid-feedback">
-                                    Provide a valid phone number
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="is_superuser" class="col-sm-2 col-form-label">Is super user?</label>
-                            <div class="col-sm-10">
-                                {% render_field superUserForm.is_superuser attrs="class:form-check-input id:is_superuser" type="checkbox" %}
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="is_staff" class="col-sm-2 col-form-label">Is staff user?</label>
-                            <div class="col-sm-10">
-                                {% render_field superUserForm.is_staff attrs="class:form-check-input id:is_staff" type="radio" %}
-                            </div>
-                        </div>
-
-                        {% comment %} <div class="row mb-3">
-                            <label for="role" class="col-sm-2 col-form-label">Role</label>
-                            <div class="col-sm-10">
-                                {% render_field superUserForm.role|add_class:"form-select"|attr:"id:role" %}
-                                <div id = "roleError" class="invalid-feedback">
-                                    Please select a role
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row mb-3">
-                            <label for="company" class="col-sm-2 col-form-label">Company</label>
-                            <div class="col-sm-10">
-                                {% render_field superUserForm.company|add_class:"form-select"|attr:"id:company" %}
-                                <div id = "companyError" class="invalid-feedback">
-                                    Please select a company
-                                </div>
-                            </div>
-                        </div> {% endcomment %}
-                    </form>
-                </div> 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" id ="superUserFormSubmitBtn" class="btn btn-primary">Save</button>
                 </div>
             </div>
         </div>
-    </div>
-    
-    
-    <!-- End Modal Dialog Scrollable--> 
-    
-    <script type='text/javascript'>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Get the active tab from localStorage or default to the first tab
-            const activeTab = localStorage.getItem('activeTab') || 'users-tab';
-            
-            // Set the active tab based on the stored value
-            const activeTabButton = document.getElementById(activeTab);
-            if (activeTabButton) {
-                activeTabButton.click();
-            }
-            
-            // Add an event listener to store the active tab when a tab is clicked
-            const tabButtons = document.querySelectorAll('.nav-tabs button');
-            tabButtons.forEach(function (button) {
-                button.addEventListener('click', function () {
-                    const tabId = this.id;
-                    localStorage.setItem('activeTab', tabId);
-                });
-            });
-        });
-
-
-        $(document).ready(function() {
-
-        /**
-
-            $("#selectUserTypeForm").submit(function(e){
-                e.preventDefault();
+        
+        
+        <!-- End Modal Dialog Scrollable--> 
+        
+        <script type='text/javascript'>
+            document.addEventListener('DOMContentLoaded', function () {
+                // Get the active tab from localStorage or default to the first tab
+                const activeTab = localStorage.getItem('activeTab') || 'users-tab';
                 
-                const selectedUserType = document.querySelector('input[name="user_type"]:checked');
-                
-                if (selectedUserType) {
-                    $('#user_type_error').removeClass('d-block');
-                    $('#user_type_error').addClass('d-none');
-                    const value = selectedUserType.value;
-                    // console.log(value);
-                    $('#selectUserTypeModal').modal('hide');
-                    if(value === "superUser"){
-                        $('#createSuperUserModal').modal('show');
-                    }else{
-                        $('#createAdminUserModal').modal('show');
-                    }
-                } else {
-                    $('#user_type_error').removeClass('d-none');
-                    $('#user_type_error').addClass('d-block');
+                // Set the active tab based on the stored value
+                const activeTabButton = document.getElementById(activeTab);
+                if (activeTabButton) {
+                    activeTabButton.click();
                 }
                 
-            })
-            
-            var roleSelect = $('#role');
-            var companySelect = $('#company');
-            
-            // Function to toggle the disabled state of the company select based on the role
-            function toggleCompanyField() {
-                var isCompanyOwner = roleSelect.val() === 'Company Owner';
-                companySelect.prop('disabled', !isCompanyOwner);
-
-                 // If not a manager, reset the company select
-                if (!isCompanyOwner) {
-                companySelect.val('').trigger('change');
-            }
-            }
-            
-            // Initial setup
-            toggleCompanyField();
-            
-            // Attach an event handler to the role select to update the company select
-            roleSelect.on('change', function () {
-                toggleCompanyField();
+                // Add an event listener to store the active tab when a tab is clicked
+                const tabButtons = document.querySelectorAll('.nav-tabs button');
+                tabButtons.forEach(function (button) {
+                    button.addEventListener('click', function () {
+                        const tabId = this.id;
+                        localStorage.setItem('activeTab', tabId);
+                    });
+                });
             });
-
-            **/
-
-            $("#superUserFormSubmitBtn").click(function () {
-                const data = $('#superUserForm').serialize() // Contains Form Data And CSRF Token As Well
-                // console.log(data)
+            
+            
+            $(document).ready(function() {
                 
-                $.ajax({
-                    type: 'POST',
-                    url: '{% url "user:users-and-roles-list" %}',
-                    data: data,
-                    success: function (data) { 
-                        //console.log(data)
-                        if (data.success) {
-                            // Close the modal on success
-                            $('#first_name').removeClass('is-invalid');
-                            $('#first_name').addClass('is-valid');
-
-                            $('#last_name').removeClass('is-invalid');
-                            $('#last_name').addClass('is-valid');
-
-                            $('#email').removeClass('is-invalid');
-                            $('#email').addClass('is-valid');
-
-                            $('#phone').removeClass('is-invalid');
-                            $('#phone').addClass('is-valid');
-
-                            $('#role').removeClass('is-invalid');
-                            $('#role').addClass('is-valid');
-
-                            $('#company').removeClass('is-invalid');
-                            $('#company').addClass('is-valid');
-
-                            $('#createSuperUserModal').modal('hide');
-                            window.location.reload()
-                            // Optionally, you can redirect or perform other actions after a successful submission
-                        } else {
-                            console.log(data.errors)
-                            
-                            if(data.errors.first_name){
-                                $('#first_name').removeClass('is-valid');
-                                $('#first_name').addClass('is-invalid');
-                                $('#firstNameError').text(data.errors.first_name[0])
-                            }else{
+                /**
+                
+                $("#selectUserTypeForm").submit(function(e){
+                    e.preventDefault();
+                    
+                    const selectedUserType = document.querySelector('input[name="user_type"]:checked');
+                    
+                    if (selectedUserType) {
+                        $('#user_type_error').removeClass('d-block');
+                        $('#user_type_error').addClass('d-none');
+                        const value = selectedUserType.value;
+                        // console.log(value);
+                        $('#selectUserTypeModal').modal('hide');
+                        if(value === "superUser"){
+                            $('#createSuperUserModal').modal('show');
+                        }else{
+                            $('#createAdminUserModal').modal('show');
+                        }
+                    } else {
+                        $('#user_type_error').removeClass('d-none');
+                        $('#user_type_error').addClass('d-block');
+                    }
+                    
+                })
+                
+                var roleSelect = $('#role');
+                var companySelect = $('#company');
+                
+                // Function to toggle the disabled state of the company select based on the role
+                function toggleCompanyField() {
+                    var isCompanyOwner = roleSelect.val() === 'Company Owner';
+                    companySelect.prop('disabled', !isCompanyOwner);
+                    
+                    // If not a manager, reset the company select
+                    if (!isCompanyOwner) {
+                        companySelect.val('').trigger('change');
+                    }
+                }
+                
+                // Initial setup
+                toggleCompanyField();
+                
+                // Attach an event handler to the role select to update the company select
+                roleSelect.on('change', function () {
+                    toggleCompanyField();
+                });
+                
+                **/
+                
+                $("#formSubmitBtn").click(function () {
+                    const data = $('#form').serialize() // Contains Form Data And CSRF Token As Well
+                    // console.log(data)
+                    
+                    $.ajax({
+                        type: 'POST',
+                        url: '{% url "user:users-list" %}',
+                        data: data,
+                        success: function (data) { 
+                            //console.log(data)
+                            if (data.success) {
+                                // Close the modal on success
                                 $('#first_name').removeClass('is-invalid');
                                 $('#first_name').addClass('is-valid');
-                            }
-                            
-                            if(data.errors.last_name){
-                                $('#last_name').removeClass('is-valid');
-                                $('#last_name').addClass('is-invalid');
-                                $('#lastNameError').text(data.errors.last_name[0])
-                            }else{
+                                
                                 $('#last_name').removeClass('is-invalid');
                                 $('#last_name').addClass('is-valid');
-                            }
-                            
-                            if(data.errors.email){
-                                $('#email').removeClass('is-valid');
-                                $('#email').addClass('is-invalid');
-                                $('#emailError').text(data.errors.email[0])
-                            }else{
+                                
                                 $('#email').removeClass('is-invalid');
                                 $('#email').addClass('is-valid');
-                            }
-                            
-                            if(data.errors.phone){
-                                $('#phone').removeClass('is-valid');
-                                $('#phone').addClass('is-invalid');
-                                $('#phoneNumberError').text(data.errors.email[0])
-                            }else{
+                                
                                 $('#phone').removeClass('is-invalid');
                                 $('#phone').addClass('is-valid');
-                            }
-                            
-                            if(data.errors.role){
-                                $('#role').removeClass('is-valid');
-                                $('#role').addClass('is-invalid');
-                                $('#roleError').text(data.errors.role[0])
-                            }else{
+                                
                                 $('#role').removeClass('is-invalid');
                                 $('#role').addClass('is-valid');
-                            }
-                            
-                            if(data.errors.company){
-                                $('#company').removeClass('is-valid');
-                                $('#company').addClass('is-invalid');
-                                $('#companyError').text(data.errors.company[0])
-                            }else{
+                                
                                 $('#company').removeClass('is-invalid');
                                 $('#company').addClass('is-valid');
+                                
+                                $('#createSuperUserModal').modal('hide');
+                                window.location.reload()
+                                // Optionally, you can redirect or perform other actions after a successful submission
+                            } else {
+                                console.log(data.errors)
+                                
+                                if(data.errors.first_name){
+                                    $('#first_name').removeClass('is-valid');
+                                    $('#first_name').addClass('is-invalid');
+                                    $('#firstNameError').text(data.errors.first_name[0])
+                                }else{
+                                    $('#first_name').removeClass('is-invalid');
+                                    $('#first_name').addClass('is-valid');
+                                }
+                                
+                                if(data.errors.last_name){
+                                    $('#last_name').removeClass('is-valid');
+                                    $('#last_name').addClass('is-invalid');
+                                    $('#lastNameError').text(data.errors.last_name[0])
+                                }else{
+                                    $('#last_name').removeClass('is-invalid');
+                                    $('#last_name').addClass('is-valid');
+                                }
+                                
+                                if(data.errors.email){
+                                    $('#email').removeClass('is-valid');
+                                    $('#email').addClass('is-invalid');
+                                    $('#emailError').text(data.errors.email[0])
+                                }else{
+                                    $('#email').removeClass('is-invalid');
+                                    $('#email').addClass('is-valid');
+                                }
+                                
+                                if(data.errors.phone){
+                                    $('#phone').removeClass('is-valid');
+                                    $('#phone').addClass('is-invalid');
+                                    $('#phoneNumberError').text(data.errors.email[0])
+                                }else{
+                                    $('#phone').removeClass('is-invalid');
+                                    $('#phone').addClass('is-valid');
+                                }
+                                
+                                if(data.errors.role){
+                                    $('#role').removeClass('is-valid');
+                                    $('#role').addClass('is-invalid');
+                                    $('#roleError').text(data.errors.role[0])
+                                }else{
+                                    $('#role').removeClass('is-invalid');
+                                    $('#role').addClass('is-valid');
+                                }
+                                
+                                if(data.errors.company){
+                                    $('#company').removeClass('is-valid');
+                                    $('#company').addClass('is-invalid');
+                                    $('#companyError').text(data.errors.company[0])
+                                }else{
+                                    $('#company').removeClass('is-invalid');
+                                    $('#company').addClass('is-valid');
+                                }
+                                
                             }
-                            
                         }
-                    }
+                    })
                 })
+                
             })
-                        
-        })
-    </script>
-    
-    {% endblock %}
+        </script>
+        
+        {% endblock %}

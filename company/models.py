@@ -61,8 +61,8 @@ class PosCenter(Base):
         return f"{self.name} - {self.store.name}"
 
 
-class Supplier(Base):
-    company = models.ForeignKey(Company, on_delete=models.SET_NULL, null=True)
+class SupplierEntity(Base):
+    store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=225)
     email = models.EmailField(null=True, blank=True)
@@ -73,7 +73,8 @@ class Supplier(Base):
     def __str__(self):
         return self.name
     
-class Customer(Base):
+class Client(Base):
+    store = models.ForeignKey(Store,on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=255)
     phone = models.CharField(max_length=255,blank=True, null=True)
     email = models.EmailField(blank=True, null=True)

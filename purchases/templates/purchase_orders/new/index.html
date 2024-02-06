@@ -130,13 +130,13 @@
                     <div class="col-md-4">
                         <div class="col-md-12 mt-2 mb-2">Product</div>
                         <div class="col-md-12">
-                            {% if formset_item.errors.store_product %}
-                            {% render_field formset_item.store_product|add_class:"form-control is-invalid"%}
+                            {% if formset_item.errors.stock_item %}
+                            {% render_field formset_item.stock_item|add_class:"form-control is-invalid"%}
                             <div class="invalid-feedback">
-                                {{ formset_item.errors.store_product.0 }}
+                                {{ formset_item.errors.stock_item.0 }}
                             </div>
                             {% else %}
-                            {% render_field formset_item.store_product|add_class:"form-control"%}
+                            {% render_field formset_item.stock_item|add_class:"form-control"%}
                             {% endif %}
                         </div>
                     </div>

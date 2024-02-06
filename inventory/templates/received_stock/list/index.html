@@ -45,30 +45,31 @@
                   <th scope="col">N0</th>
                   <th scope="col">Supplier</th>
                   <th scope="col">Items</th>
-                  <th scope="col">Delivered By Name</th>
-                  <th scope="col">Delivered By Contact</th>
-                  <th scope="col">Received Date</th>
                   <th scope="col">Status</th>
                   <th scope="col">Created At</th>
                   <th scope="col">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {% for result in items %}
+                {% for result in results %}
                 <tr>
                   <td>{{result.recv_stock_unique_id}}</td>
                   <td>{{result.provider_details.name}}</td>
                   <td>{{result.items_count}}</td>
-                  <td>{{result.delivered_by_name}}</td>
-                  <td>{{result.delivered_by_phone}}</td>
-                  <td>{{result.received_date}}</td>
-                  <td>{{result.status}}</td>
-                  <td>{{result.created_at}}</td>
+                  <td>
+                    {{result.status}}
+                  </td>
+                  <td>{{result.created_at|date:"Y-m-d H:i:A"}}</td>
                   <td>
                     <div class="d-flex">
-                      <a href="{% url 'inventory:store-received-stock-detail' store_id=store.id received_stock_id=result.id %}" 
-                      class="mx-1 text-primary">View</a>
-                      <a href={% url 'inventory:store-received-stock-edit' store_id=store.id received_stock_id=result.id %} class="mx-1 text-danger">Edit</a>
+                      <a href="{% url 'inventory:store-received-stock-detail' store_id=store.id received_stock_id=result.id %}" class="mx-1 text-primary">View</a>
+                      {% if result.status != "APPROVED" %}
+                      <a href="{% url 'inventory:store-received-stock-edit' store_id=store.id received_stock_id=result.id %}" class="mx-1 text-danger">Edit</a>
+                      {% endif %}
+                      {% if result.status == "PENDING" %}
+                      <a href="{% url 'inventory:store-received-stock-approve' store_id=store.id received_stock_id=result.id %}" class="mx-1 text-success">Approve</a>
+                      {% endif %}
+                      <a href="#" class="mx-1 text-danger">Cancel</a>
                     </div>
                   </td>
                 </tr>

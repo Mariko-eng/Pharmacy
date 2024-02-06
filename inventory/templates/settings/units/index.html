@@ -40,14 +40,16 @@
           <thead>
             <tr>
               <th scope="col">Name</th>
-              <th scope="col">Action</th>
+              <th scope="col">Edit</th>
+              <th scope="col">Delete</th>
             </tr>
           </thead>
           <tbody>
-            {% for result in units %}
+            {% for result in results %}
              <tr>
               <td>{{result.name}}</td>
-              <td>Edit</td>
+              <td><i class="bi bi-pencil-square text-warning"></i></td>
+              <td><i class="bi bi-trash text-danger"></i></td>
             </tr>
             {% endfor %}
           </tbody>

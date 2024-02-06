@@ -4,13 +4,18 @@
 
 {% block pagetitle%}
 <div class="pagetitle">
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="{% url 'user:home' %}">Home</a></li>
-            <li class="breadcrumb-item"><a href="#">Companies</a></li>
-            <li class="breadcrumb-item"><a href="#">List</a></li>
-        </ol>
-    </nav>
+    <div class="d-flex justify-content-between">
+        <nav>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'user:home' %}">Home</a></li>
+                <li class="breadcrumb-item"><a href="#">Companies</a></li>
+                <li class="breadcrumb-item"><a href="#">List</a></li>
+            </ol>
+        </nav>
+        <div>
+            <a class="nav-link" href="{% url 'company:company-application-list'%}">Applications</a>
+        </div>
+    </div>
 </div>
 <!-- End Page Title --> 
 {% endblock %}

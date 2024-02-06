@@ -7,8 +7,8 @@ from django.http import JsonResponse
 from .forms import RequiredFormSet
 from .forms import SaleForm,PosSaleForm
 from .forms import SaleItemForm
-from company.models import Company, Store, Customer, PosCenter
-from inventory.models import StoreProduct
+from company.models import Company, Store, PosCenter, Client
+from inventory.models import StockItem
 from .models import Sale
 from .models import SaleItem
 
@@ -56,7 +56,7 @@ def store_sales_detail(request, store_id, sale_id):
     return render(request, 'sales/store/detail/index.html', context=context) 
 
 
-@login_required(login_url='/login')
+# @login_required(login_url='/login')
 def store_sales_invoice(request, store_id, sale_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
@@ -66,13 +66,13 @@ def store_sales_invoice(request, store_id, sale_id):
     context = { 
         "company": company,
         "store": store,
-        "title": "Sale Invoice" ,
+        "title": "Sale Invoice",
         "sale": sale
-        }
+        } 
 
+    print("Before Generating....")
     sale = sale.generate_invoice( context = context)
-
-    print(sale.customer)
+    print("After Generating....")
     
     # Prepare the sale data to be returned as JSON
     sale_data = {
@@ -88,9 +88,9 @@ def store_sales_invoice(request, store_id, sale_id):
 def store_sales_new(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
-    store_products = StoreProduct.objects.filter(store = store)
+    products = StockItem.objects.filter(store = store)
 
-    context = { "company": company, "store": store, "store_products": store_products }
+    context = { "company": company, "store": store, "products": products }
  
     form = SaleForm(user=request.user, store= store)
     
@@ -114,32 +114,25 @@ def store_sales_new(request, store_id):
                 customer_address = form_data.cleaned_data.get("customer_address", None)
 
                 customer = None
-
-                if customer_name is not None or customer_name != "":
-                    if customer_phone is not None or customer_phone != "":
-                        if  Customer.objects.filter(
-                                name = customer_name, email = customer_email,
-                                phone = customer_phone, address = customer_address).exists():
-                            customer = Customer.objects.filter(
-                                name = customer_name, email = customer_email,
-                                phone = customer_phone, address = customer_address).first()
-                        else:
-                            customer = Customer.objects.create(
-                                name = customer_name, email = customer_email,
-                                phone = customer_phone, address = customer_address)
-            
+                if customer_name is not None and customer_name != "":
+                    if customer_phone is not None and customer_phone != "":
+                        customer, _ = Client.objects.get_or_create(
+                            name=customer_name, email=customer_email,
+                            phone=customer_phone, address=customer_address,
+                            store=store )
+                
                 sale = Sale(
                     customer = customer,
                     payment_option = form_data.cleaned_data.get("payment_option"),
                     payment_period = form_data.cleaned_data.get("payment_period"),
-                    remarks = form_data.cleaned_data.get("remarks"),
-                )
+                    remarks = form_data.cleaned_data.get("remarks"))
 
                 pos_data =form_data.cleaned_data.get("pos_center")
                 pos_center = PosCenter.objects.get(id = pos_data.id)
+
                 sale.pos_center = pos_center
                 sale.company = company
-                sale.store = store
+                sale.store = store 
                 sale.created_by = request.user
                 sale.save()
 
@@ -150,22 +143,27 @@ def store_sales_new(request, store_id):
 
                 for formset_data_item in formset_data:
                     item = formset_data_item.save(commit=False)
-                    item.total_cost = item.store_product.unit_price * item.quantity
-                    item.unit_cost = item.store_product.unit_price
                     item.sale = sale
+
+                    item.total_cost = item.stock_item.unit_price * item.quantity
+                    item.unit_cost = item.stock_item.unit_price
                     item.company = company
                     item.store = store
                     item.pos_center = pos_center
                     item.created_by = request.user
                     item.save() 
- 
-                    quantity = formset_data_item.cleaned_data.get("quantity")
-                    store_product = item.store_product
-                    store_product.available_qty -=  quantity
-                    store_product.save()
+                 
+                    stock_item = item.stock_item
+                    new_available_qty = stock_item.available_qty - item.quantity
+                    new_actual_qty = stock_item.actual_qty - item.quantity
+                    stock_item.available_qty = new_available_qty
+                    stock_item.actual_qty = new_actual_qty
 
+                    stock_item.save() 
                 return JsonResponse({'success': True})
             else:
+                print(form_data.errors)
+                print(formset_data.errors)
                 return JsonResponse({'failure': False})
     
     context['form'] = form  
@@ -246,9 +244,9 @@ def pos_sales_new(request, pos_id):
     store = pos_center.store
     company = store.company
 
-    store_products = StoreProduct.objects.filter(store = store)
+    products = StockItem.objects.filter(store = store)
 
-    context = { "company": company, "store": store, "pos": pos_center, "store_products": store_products }
+    context = { "company": company, "store": store, "pos": pos_center, "products": products }
  
     form = PosSaleForm()
     
@@ -263,37 +261,30 @@ def pos_sales_new(request, pos_id):
         if request.method == "POST":
             form_data = PosSaleForm(request.POST)
             formset_data = SaleItemFormset(request.POST, prefix='items')
-
+            
             if form_data.is_valid() and formset_data.is_valid():
                 customer_name = form_data.cleaned_data.get("customer_name", None)
                 customer_email = form_data.cleaned_data.get("customer_email", None)
                 customer_phone = form_data.cleaned_data.get("customer_phone", None)
                 customer_address = form_data.cleaned_data.get("customer_address", None)
-
-                customer = None
-
-                if customer_name is not None or customer_name != "":
-                    if customer_phone is not None or customer_phone != "":
-                        if  Customer.objects.filter(
-                                name = customer_name, email = customer_email,
-                                phone = customer_phone, address = customer_address).exists():
-                            customer = Customer.objects.filter(
-                                name = customer_name, email = customer_email,
-                                phone = customer_phone, address = customer_address).first()
-                        else:
-                            customer = Customer.objects.create(
-                                name = customer_name, email = customer_email,
-                                phone = customer_phone, address = customer_address)
             
+                customer = None
+                if customer_name is not None and customer_name != "":
+                    if customer_phone is not None and customer_phone != "":
+                        customer, _ = Client.objects.get_or_create(
+                            name=customer_name, email=customer_email,
+                            phone=customer_phone, address=customer_address,
+                            store=store
+                        )
+                
                 sale = Sale(
                     customer = customer,
                     payment_option = form_data.cleaned_data.get("payment_option"),
                     payment_period = form_data.cleaned_data.get("payment_period"),
-                    remarks = form_data.cleaned_data.get("remarks"),
-                )
-
+                    remarks = form_data.cleaned_data.get("remarks"))
+                
                 sale.company = company
-                sale.store = store
+                sale.store = store 
                 sale.pos_center = pos_center
                 sale.created_by = request.user
                 sale.save()
@@ -305,20 +296,23 @@ def pos_sales_new(request, pos_id):
 
                 for formset_data_item in formset_data:
                     item = formset_data_item.save(commit=False)
-                    item.total_cost = item.store_product.unit_price * item.quantity
-                    item.unit_cost = item.store_product.unit_price
                     item.sale = sale
+
+                    item.total_cost = item.stock_item.unit_price * item.quantity
+                    item.unit_cost = item.stock_item.unit_price
                     item.company = company
                     item.store = store
                     item.pos_center = pos_center
                     item.created_by = request.user
                     item.save() 
- 
-                    quantity = formset_data_item.cleaned_data.get("quantity")
-                    store_product = item.store_product
-                    store_product.available_qty -=  quantity
-                    store_product.save()
+                 
+                    stock_item = item.stock_item
+                    new_available_qty = stock_item.available_qty - item.quantity
+                    new_actual_qty = stock_item.actual_qty - item.quantity
+                    stock_item.available_qty = new_available_qty
+                    stock_item.actual_qty = new_actual_qty
 
+                    stock_item.save()
                 return JsonResponse({'success': True})
             else:
                 return JsonResponse({'failure': False})

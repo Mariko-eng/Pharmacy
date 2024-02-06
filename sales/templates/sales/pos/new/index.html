@@ -3,17 +3,9 @@
 
 {% block pagetitle%}
 <div class="pagetitle">
-    <h1>Store : {{ store.name }}!</h1>
-    <h1>POS : {{ pos.name }}!</h1>
-    
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item"><a>Sales</a></li>
-            <li class="breadcrumb-item active"><a>New</a></li>
-        </ol>
-    </nav>
-</div><!-- End Page Title --> 
+    <h1>{{ pos.name|upper }} : {{ store.name }},</h1>
+</div>
+<!-- End Page Title --> 
 {% endblock %} 
 
 
@@ -34,14 +26,16 @@
                     <hr class="mt-1"/>
                     <select id = "selectedProduct" class="col-sm-12 form-select js-select-products" name="state">
                         <option value=""></option>
-                        {% for store_product in store_products %}
+                        {% for product in products %}
                         <option 
-                        value="{{ store_product.id }}"
-                        data-price="{{ store_product.unit_price }}"
-                        >{{store_product.product.name}}</option>
-                        {% endfor %} 
+                        value="{{ product.id }}"
+                        data-price="{{ product.unit_price }}"
+                        data-qty="{{ product.actual_qty }}"
+                        >{{product}} - {{product.actual_qty}}
+                    </option>
+                        {% endfor %}  
                     </select>
-                </div>
+                </div> 
             </div>
             <div class= "col-8">
                 <form id ="myForm" class="row g-3 needs-validation" method="post" novalidate>
@@ -55,13 +49,13 @@
                                 <div class="row">
                                     {% comment %} <div class="col-md-2">Product</div> {% endcomment %}
                                     <div class="col-md-4">
-                                        {% if empty_form.errors.store_product %}
-                                        {% render_field empty_form.store_product|add_class:"form-control is-invalid"|attr:"disabled"%}
+                                        {% if empty_form.errors.stock_item %}
+                                        {% render_field empty_form.stock_item|add_class:"form-control is-invalid"|attr:"disabled"%}
                                         <div class="invalid-feedback">
-                                            {{ empty_form.errors.store_product.0 }}
+                                            {{ empty_form.errors.stock_item.0 }}
                                         </div>
                                         {% else %}
-                                        {% render_field empty_form.store_product|add_class:"form-control"|attr:"disabled"%}
+                                        {% render_field empty_form.stock_item|add_class:"form-control"|attr:"disabled"%}
                                         {% endif %}
                                     </div>
                                     <div class="col-md-2">
@@ -93,238 +87,286 @@
                                 <hr class="text-primary" />
                             </div>
                         </div>
-
-                    {{ formset.management_form }}
-                    <div id = "cart-container">
-                        <div class= "form-container bg-light" style="min-height: 200px;" >
-                            <div id="emptyCart" class="d-none flex-column align-items-center justify-content-center" style="min-height: 200px;">
-                                <p>Cart Is Empty</p>
+                        
+                        {{ formset.management_form }}
+                        <div id = "cart-container">
+                            <div class= "form-container bg-light" style="min-height: 200px;" >
+                                <div id="emptyCart" class="d-none flex-column align-items-center justify-content-center" style="min-height: 200px;">
+                                    <p>Cart Is Empty</p>
+                                </div>
+                                {% comment %} <div id="cartItems" class="row"> {% endcomment %}
+                                    <div id="cartItems" class="d-none">
+                                        <div class="col-4 text-center">Product</div>
+                                        <div class="col-2 text-center">Price</div>
+                                        <div class="col-3 text-center">Qty</div>
+                                        <div class="col-2 text-center">Sub Total</div>
+                                        <div class="col-1 text-center"></div>
+                                    </div>
+                                    
+                                    {% comment %} <div  class="form-row my-2"></div> {% endcomment %}
+                                </div>   
+                            </div> 
+                            
+                            <div id="cartTotal" class="d-none">
+                                <div class="bg-light d-flex justify-content-center mx-5">
+                                    <div>Total : </div>
+                                    <b id="cartTotalCost" class="mx-1"> SHS 0</b>
+                                    <input type="hidden" id="totalCartAmount" name="totalCartAmount" value=""/>
+                                </div>
                             </div>
-                            {% comment %} <div id="cartItems" class="row"> {% endcomment %}
-                                <div id="cartItems" class="d-none">
-                                    <div class="col-4 text-center">Product</div>
-                                    <div class="col-2 text-center">Price</div>
-                                    <div class="col-3 text-center">Qty</div>
-                                    <div class="col-2 text-center">Sub Total</div>
-                                    <div class="col-1 text-center"></div>
+                        </div>
+                        
+                        <div class="d-flex"> 
+                            <div id="customerDetails" class="mx-1 text-primary">
+                                + Add Customer Details
+                            </div>
+                        </div>
+                        
+                        
+                        <div id ="customer-container" class="d-none">
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <label for="customer_name" class="col-sm-12 col-form-label">Customer Name</label>
+                                            <div class="col-sm-12">
+                                                {% if form.errors.customer_name %}
+                                                {% render_field form.customer_name|add_class:"form-control is-invalid"|attr:"id:customer_name" %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.errors.customer_name.0 }}
+                                                </div>
+                                                {% else %}
+                                                {% render_field form.customer_name|add_class:"form-control"|attr:"id:customer_name" %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div> 
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="row mb-3">                        
+                                        <div class="col-sm-12">
+                                            <label for="customer_phone" class="col-sm-12 col-form-label">Customer Phone</label>
+                                            <div class="col-sm-12">
+                                                {% if form.errors.customer_phone %}
+                                                {% render_field form.customer_phone|add_class:"form-control is-invalid"|attr:"id:customer_phone" %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.errors.customer_phone.0 }}
+                                                </div>
+                                                {% else %}
+                                                {% render_field form.customer_phone|add_class:"form-control"|attr:"id:customer_phone" %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div> 
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <label for="customer_email" class="col-sm-12 col-form-label">Customer Email</label>
+                                            <div class="col-sm-12">
+                                                {% if form.errors.customer_email %}
+                                                {% render_field form.customer_email|add_class:"form-control is-invalid"|attr:"id:customer_email" %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.errors.customer_email.0 }}
+                                                </div>
+                                                {% else %}
+                                                {% render_field form.customer_email|add_class:"form-control"|attr:"id:customer_email" %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div> 
                                 </div>
                                 
-                                {% comment %} <div  class="form-row my-2"></div> {% endcomment %}
-                            </div>   
-                        </div> 
-                        
-                        <div id="cartTotal" class="d-none">
-                            <div class="bg-light d-flex justify-content-center mx-5">
-                                <div>Total : </div>
-                                <b id="cartTotalCost" class="mx-1"> SHS 0</b>
-                                <input type="hidden" id="totalCartAmount" name="totalCartAmount" value=""/>
+                                <div class="col-sm-6">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <label for="customer_address" class="col-sm-12 col-form-label">Customer Address</label>
+                                            <div class="col-sm-12">
+                                                {% if form.errors.customer_address %}
+                                                {% render_field form.customer_address|add_class:"form-control is-invalid"|attr:"id:customer_address" %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.errors.customer_address.0 }}
+                                                </div>
+                                                {% else %}
+                                                {% render_field form.customer_address|add_class:"form-control"|attr:"id:customer_address" %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div> 
+                                </div>
                             </div>
-                        </div>
-                    </div>
-
-                                    <div class="d-flex"> 
-                    <div id="customerDetails" class="mx-1 text-primary">
-                        + Add Customer Details
-                    </div>
-                </div>
-                
-                
-                <div id ="customer-container" class="d-none">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="row mb-3">
-                                <div class="col-sm-12">
-                                    <label for="customer_name" class="col-sm-12 col-form-label">Customer Name</label>
-                                    <div class="col-sm-12">
-                                        {% if form.errors.customer_name %}
-                                        {% render_field form.customer_name|add_class:"form-control is-invalid"|attr:"id:customer_name" %}
-                                        <div class="invalid-feedback">
-                                            {{ form.errors.customer_name.0 }}
-                                        </div>
-                                        {% else %}
-                                        {% render_field form.customer_name|add_class:"form-control"|attr:"id:customer_name" %}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div> 
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="row mb-3">                        
-                                <div class="col-sm-12">
-                                    <label for="customer_phone" class="col-sm-12 col-form-label">Customer Phone</label>
-                                    <div class="col-sm-12">
-                                        {% if form.errors.customer_phone %}
-                                        {% render_field form.customer_phone|add_class:"form-control is-invalid"|attr:"id:customer_phone" %}
-                                        <div class="invalid-feedback">
-                                            {{ form.errors.customer_phone.0 }}
-                                        </div>
-                                        {% else %}
-                                        {% render_field form.customer_phone|add_class:"form-control"|attr:"id:customer_phone" %}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div> 
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="row mb-3">
-                                <div class="col-sm-12">
-                                    <label for="customer_email" class="col-sm-12 col-form-label">Customer Email</label>
-                                    <div class="col-sm-12">
-                                        {% if form.errors.customer_email %}
-                                        {% render_field form.customer_email|add_class:"form-control is-invalid"|attr:"id:customer_email" %}
-                                        <div class="invalid-feedback">
-                                            {{ form.errors.customer_email.0 }}
-                                        </div>
-                                        {% else %}
-                                        {% render_field form.customer_email|add_class:"form-control"|attr:"id:customer_email" %}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div> 
                         </div>
                         
-                        <div class="col-sm-6">
-                            <div class="row mb-3">
-                                <div class="col-sm-12">
-                                    <label for="customer_address" class="col-sm-12 col-form-label">Customer Address</label>
-                                    <div class="col-sm-12">
-                                        {% if form.errors.customer_address %}
-                                        {% render_field form.customer_address|add_class:"form-control is-invalid"|attr:"id:customer_address" %}
-                                        <div class="invalid-feedback">
-                                            {{ form.errors.customer_address.0 }}
-                                        </div>
-                                        {% else %}
-                                        {% render_field form.customer_address|add_class:"form-control"|attr:"id:customer_address" %}
-                                        {% endif %}
-                                    </div>
-                                </div>
-                            </div> 
-                        </div>
-                    </div>
-                </div>
-                
-                <hr/>
-
-                                <div class="row">
-                    <div class="col-sm-6">
-                        <div class="row mb-3">
-                            <div class="col-sm-12">
-                                <label for="payment_option" class="col-sm-12 col-form-label">Payment Option</label>
-                                <div class="col-sm-12">
-                                    {% if form.errors.payment_option %}
-                                    {% render_field form.payment_option|add_class:"form-control is-invalid"|attr:"id:payment_option" %}
-                                    <div class="invalid-feedback">
-                                        {{ form.errors.payment_option.0 }}
-                                    </div>
-                                    {% else %}
-                                    {% render_field form.payment_option|add_class:"form-control"|attr:"id:payment_option" %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div> 
-                    </div>
-                    
-                    <div class="col-sm-6">
-                        <div class="row mb-3">
-                            <div class="col-sm-12">
-                                <label for="payment_period" class="col-sm-12 col-form-label">Payment Period?</label>
-                                <div class="col-sm-12">
-                                    {% if form.errors.payment_period %}
-                                    {% render_field form.payment_period|add_class:"form-select is-invalid"|attr:"id:payment_period" %}
-                                    <div class="invalid-feedback">
-                                        {{ form.errors.payment_period.0 }}
-                                    </div>
-                                    {% else %}
-                                    {% render_field form.payment_period|add_class:"form-select"|attr:"id:payment_period" %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div> 
-                    </div>
-                </div>
-                
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="row mb-3">
-                            <div class="col-sm-12">
-                                <label for="remarks" class="col-sm-12 col-form-label">Comments / Remarks</label>
-                                <div class="col-sm-12">
-                                    {% if form.errors.remarks %}
-                                    {% render_field form.remarks|add_class:"form-control is-invalid"|attr:"id:remarks" rows="2" %}
-                                    <div class="invalid-feedback">
-                                        {{ form.errors.remarks.0 }}
-                                    </div>
-                                    {% else %}
-                                    {% render_field form.remarks|add_class:"form-control"|attr:"id:remarks" rows="3" %}
-                                    {% endif %}
-                                </div>
-                            </div>
-                        </div>  
-                    </div>
-                </div>
-                
-                <div class="col-12 d-flex justify-content-center mt-5">
-                    <button id="submitButton" disabled class="btn btn-primary" type="submit" style="width: 300px;">Add New Sale</button>
-                </div>
-
-
-
-
+                        <hr class="mt-1"/>
                         
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12">
+                                        <label for="payment_option" class="col-sm-12 col-form-label">Payment Option</label>
+                                        <div class="col-sm-12">
+                                            {% if form.errors.payment_option %}
+                                            {% render_field form.payment_option|add_class:"form-control is-invalid"|attr:"id:payment_option" %}
+                                            <div class="invalid-feedback">
+                                                {{ form.errors.payment_option.0 }}
+                                            </div>
+                                            {% else %}
+                                            {% render_field form.payment_option|add_class:"form-control"|attr:"id:payment_option" %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                            
+                            <div class="col-sm-6">
+                                <div class="row mb-3">
+                                    <div class="col-sm-12">
+                                        <label for="payment_period" class="col-sm-12 col-form-label">Payment Period?</label>
+                                        <div class="col-sm-12">
+                                            {% if form.errors.payment_period %}
+                                            {% render_field form.payment_period|add_class:"form-select is-invalid"|attr:"id:payment_period" %}
+                                            <div class="invalid-feedback">
+                                                {{ form.errors.payment_period.0 }}
+                                            </div>
+                                            {% else %}
+                                            {% render_field form.payment_period|add_class:"form-select"|attr:"id:payment_period" %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex"> 
+                            <div id="comments" class="mx-1 text-primary">
+                                + Add Comments / Remarks
+                            </div>
+                        </div>
+                        
+                        <div id ="comments-container" class="d-none">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <div class="row mb-3">
+                                        <div class="col-sm-12">
+                                            <label for="remarks" class="col-sm-12 col-form-label">Comments / Remarks</label>
+                                            <div class="col-sm-12">
+                                                {% if form.errors.remarks %}
+                                                {% render_field form.remarks|add_class:"form-control is-invalid"|attr:"id:remarks" rows="2" %}
+                                                <div class="invalid-feedback">
+                                                    {{ form.errors.remarks.0 }}
+                                                </div>
+                                                {% else %}
+                                                {% render_field form.remarks|add_class:"form-control"|attr:"id:remarks" rows="3" %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>  
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <hr class="mt-1"/>
+                        
+                        <div class="col-12 d-flex justify-content-center mt-5">
+                            <button id="submitButton" disabled class="btn btn-primary" type="submit" style="width: 300px;">Add New Sale</button>
+                        </div>     
                     </div>
                 </form>
             </div>
         </div>
+        
+    </div>
+</div>
 
-        </div>
+<div class="toast" style="position: absolute; top: 50px; right: 20px;">
+    <div id = "toast-header" class="toast-header">
+        <strong class="mr-auto">Notification</strong>
     </div>
-    
-    <div class="toast" style="position: absolute; top: 50px; right: 20px;">
-        <div class="toast-header">
-            <strong class="mr-auto">Notification</strong>
-        </div>
-        <div class="toast-body">
-            Sale Added successfully!
-        </div>
+    <div id = "toast-body" class="toast-body">
+        Sale Added successfully!
     </div>
+</div>
+
+
+<script type='text/javascript'>
+    
+    $(document).ready(function() {
+        $('.js-select-products').select2();
+        $('#id_' + 'items' + '-TOTAL_FORMS').val(0).trigger('change');
+        
+        $('.js-select-products').on('select2:select', function (e) {
+            // Reset the selected items
+            $(this).val([]).trigger('change');
+        });
+    })
     
     
-    <script type='text/javascript'>
+    $('#selectedProduct').on('change', function() {
+        // Get the selected value
+        var selectedValue = $(this).val();
         
-        $(document).ready(function() {
-            $('.js-select-products').select2();
-            $('#id_' + 'items' + '-TOTAL_FORMS').val(0).trigger('change')
-        })
-        
-        $('#selectedProduct').on('change', function() {
-            // Get the selected value
-            var selectedValue = $(this).val();
-            
+        if(selectedValue){
             var selectedOption = $(this).find('option:selected');
             
             var price = selectedOption.data('price');
             
-            addForm('.form-row:last', 'items', selectedValue, price);
-            
-        });
+            var qty = selectedOption.data('qty');
+                        
+            if(parseInt(qty) <= 0){
+                console.log("Out of stock", qty)
+                // Show the toast
+                $("#toast-header").addClass("text-danger")
+                $("#toast-body").text("Item Is Out of Stock!");
+                $("#toast-body").addClass("text-danger")
+                $('.toast').toast('show');
+                
+                // Hide the toast after 5 seconds
+                setTimeout(function(){
+                    $('.toast').toast('hide');
+                }, 3000);
+            }else{
+                addForm('.form-row:last', 'items', selectedValue, price);
+            }
+        }
+    });
+    
+    
+    $(document).ready(function() {
+        var formContainer = $('.form-container');
+        // Count the number of child elements with class 'row'
+        var formRowCount = formContainer.find('.form-row').length;
         
+        var tt = $('#id_items-TOTAL_FORMS');        
+        var noOfItems = tt.val();
         
-        $(document).ready(function() {
-            var formContainer = $('.form-container');
-            // Count the number of child elements with class 'row'
+        var emptyCart = $("#emptyCart");
+        var cartItems = $("#cartItems");
+        var cartTotal = $("#cartTotal");
+        
+        if (formRowCount <= 0){
+            emptyCart.removeClass('d-none').addClass('d-flex') // Display
+            cartItems.removeClass('row').addClass('d-none') // Dont Display
+            cartTotal.removeClass('row').addClass('d-none') // Dont Display
+            // $("#submitButton").prop('disabled', true);
+        }else{
+            emptyCart.removeClass('d-flex').addClass('d-none') // Dont Display
+            cartItems.removeClass('d-none').addClass('row') // Display
+            cartTotal.removeClass('d-none').addClass('row') // Display
+            // $("#submitButton").prop('disabled', false);
+        }
+        
+        // Attach a 'change' event listener
+        tt.on('change', function() {
+            var newValue = tt.val();
             var formRowCount = formContainer.find('.form-row').length;
             
-            var tt = $('#id_items-TOTAL_FORMS');        
-            var noOfItems = tt.val();
-            
-            var emptyCart = $("#emptyCart");
-            var cartItems = $("#cartItems");
-            var cartTotal = $("#cartTotal");
+            noOfItems = newValue;
             
             if (formRowCount <= 0){
+                
                 emptyCart.removeClass('d-none').addClass('d-flex') // Display
                 cartItems.removeClass('row').addClass('d-none') // Dont Display
                 cartTotal.removeClass('row').addClass('d-none') // Dont Display
@@ -335,287 +377,279 @@
                 cartTotal.removeClass('d-none').addClass('row') // Display
                 // $("#submitButton").prop('disabled', false);
             }
-            
-            // Attach a 'change' event listener
-            tt.on('change', function() {
-                var newValue = tt.val();
-                var formRowCount = formContainer.find('.form-row').length;
-                
-                noOfItems = newValue;
-                
-                if (formRowCount <= 0){
-                    
-                    emptyCart.removeClass('d-none').addClass('d-flex') // Display
-                    cartItems.removeClass('row').addClass('d-none') // Dont Display
-                    cartTotal.removeClass('row').addClass('d-none') // Dont Display
-                    // $("#submitButton").prop('disabled', true);
-                }else{
-                    emptyCart.removeClass('d-flex').addClass('d-none') // Dont Display
-                    cartItems.removeClass('d-none').addClass('row') // Display
-                    cartTotal.removeClass('d-none').addClass('row') // Display
-                    // $("#submitButton").prop('disabled', false);
-                }
-            });
-            
         });
         
-        function addForm(selector, prefix, selectProductId, selectProductPrice) {
-            var formContainer = $('.form-container');
-            // Count the number of child elements with class 'row'
-            var formRowCount = formContainer.find('.form-row').length;
+    });
+    
+    function addForm(selector, prefix, selectProductId, selectProductPrice) {
+        var formContainer = $('.form-container');
+        // Count the number of child elements with class 'row'
+        var formRowCount = formContainer.find('.form-row').length;
+        
+        var emptyFormElement = $('.empty-form-row').clone(true);
+        
+        var newElement = emptyFormElement;
+        
+        var initailFormIndex = 0;
+        
+        newElement.removeClass('empty-form-row').addClass('form-row');
+        // newElement.removeClass('empty-form-row');
+        
+        var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
+        
+        newElement.find('select').each(function(){
+            var name = $(this).attr('name').replace('test_items', 'items').replace('-' + (initailFormIndex) + '-', '-' + (Number(total)+1) + '-');
             
-            var emptyFormElement = $('.empty-form-row').clone(true);
+            $(this).val(selectProductId);
             
-            var newElement = emptyFormElement;
+            var id = 'id_' + name;
             
-            var initailFormIndex = 0;
+            $(this).attr({'name': name, 'id': id}).val('');
             
-            newElement.removeClass('empty-form-row').addClass('form-row');
-            // newElement.removeClass('empty-form-row');
+            var selectedOption = $(this).find('option:selected');
+            var notSelectedOptions = $(this).find('option:not(selected)');
             
-            var total = $('#id_' + prefix + '-TOTAL_FORMS').val();
-            
-            newElement.find('select').each(function(){
-                var name = $(this).attr('name').replace('test_items', 'items').replace('-' + (initailFormIndex) + '-', '-' + (Number(total)+1) + '-');
-                
-                $(this).val(selectProductId);
-                
-                var id = 'id_' + name;
-                
-                $(this).attr({'name': name, 'id': id}).val('');
-                
-                var selectedOption = $(this).find('option:selected');
-                var notSelectedOptions = $(this).find('option:not(selected)');
-                
-                notSelectedOptions.each(function(e){
-                    if (selectProductId == $(this).val()) {
-                        $(this).prop('selected', true);
-                    }
-                    
-                })
-            }) 
-            
-            newElement.find('input').each(function() {
-                var forValue = $(this).attr('name');
-                if (forValue) {
-                    forValue = forValue.replace('test_items', 'items').replace('-' + (initailFormIndex) + '-', '-' + (Number(total)+1) + '-');;
-                    var id = 'id_' + forValue;
-                    $(this).attr({'id': id});
-                    $(this).attr({'name': forValue});
-                    $(this).attr({'for': forValue});
-                    
-                    if (forValue.includes("price")) {
-                        $(this).val(selectProductPrice);
-                    }
-                    
-                    if (forValue.includes("quantity")) {
-                        $(this).val(1);
-                        $(this).attr('min', 1)
-                    }
-                    if (forValue.includes("sub_total")) {
-                        $(this).val(1 * selectProductPrice);
-                    }
+            notSelectedOptions.each(function(e){
+                if (selectProductId == $(this).val()) {
+                    $(this).prop('selected', true);
                 }
                 
-            });
-            
-            // $(selector).append(newElement);
-            $('.form-container').append(newElement);
-            
-            total++;  
-            $('#id_' + prefix + '-TOTAL_FORMS').val(total).trigger('change')
-            
-            // Calculate and update the total cost
-            updateTotalCost();
-        }
+            })
+        }) 
         
-        function updateElementIndex(el, prefix, ndx) {
-            var id_regex = new RegExp('(' + prefix + '-\\d+)');
-            var replacement = prefix + '-' + ndx;
-            if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
-            if (el.id) el.id = el.id.replace(id_regex, replacement);
-            if (el.name) el.name = el.name.replace(id_regex, replacement);
-        }
-        
-        function deleteForm(prefix, btn) {
-            var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
-            // console.log(total)
-            if (total > 0){
-                btn.closest('.form-row').remove();
-                var forms = $('.form-row');
-                // $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
-                $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length).trigger('change')
-                for (var i=0, formCount=forms.length; i<formCount; i++) {
-                    $(forms.get(i)).find(':input').each(function() {
-                        updateElementIndex(this, prefix, i);
-                    });
+        newElement.find('input').each(function() {
+            var forValue = $(this).attr('name');
+            if (forValue) {
+                forValue = forValue.replace('test_items', 'items').replace('-' + (initailFormIndex) + '-', '-' + (Number(total)+1) + '-');;
+                var id = 'id_' + forValue;
+                $(this).attr({'id': id});
+                $(this).attr({'name': forValue});
+                $(this).attr({'for': forValue});
+                
+                if (forValue.includes("price")) {
+                    $(this).val(selectProductPrice);
+                }
+                
+                if (forValue.includes("quantity")) {
+                    $(this).val(1);
+                    $(this).attr('min', 1)
+                }
+                if (forValue.includes("sub_total")) {
+                    $(this).val(1 * selectProductPrice);
                 }
             }
-            return false;
-        }
-        
-        
-        $(document).on('click', '.remove-form', function(e){
-            e.preventDefault();
-            deleteForm('items', $(this));
-            return false;
+            
         });
         
-        $('#selectedProduct').on('change', function() {
-            // Select all input fields of type number with name containing "quantity"
-            var quantityInputs = $('input[type="number"][name*="quantity"]:not([name*="test"])');
-            
-            // Add event listener to each input field
-            
-            quantityInputs.each(function(){
-                $(this).on('input', function() {
-                    var quantityId= $(this).attr('id');
-                    var priceId = quantityId.replace('quantity', 'price')
-                    var subTotalId = quantityId.replace('quantity', 'sub_total')
-                    
-                    var  priceField = $(`#${priceId}`)
-                    
+        // $(selector).append(newElement);
+        $('.form-container').append(newElement);
+        
+        total++;  
+        $('#id_' + prefix + '-TOTAL_FORMS').val(total).trigger('change')
+        
+        // Calculate and update the total cost
+        updateTotalCost();
+    }
+    
+    function updateElementIndex(el, prefix, ndx) {
+        var id_regex = new RegExp('(' + prefix + '-\\d+)');
+        var replacement = prefix + '-' + ndx;
+        if ($(el).attr("for")) $(el).attr("for", $(el).attr("for").replace(id_regex, replacement));
+        if (el.id) el.id = el.id.replace(id_regex, replacement);
+        if (el.name) el.name = el.name.replace(id_regex, replacement);
+    }
+    
+    function deleteForm(prefix, btn) {
+        var total = parseInt($('#id_' + prefix + '-TOTAL_FORMS').val());
+        // console.log(total)
+        if (total > 0){
+            btn.closest('.form-row').remove();
+            var forms = $('.form-row');
+            // $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length);
+            $('#id_' + prefix + '-TOTAL_FORMS').val(forms.length).trigger('change')
+            for (var i=0, formCount=forms.length; i<formCount; i++) {
+                $(forms.get(i)).find(':input').each(function() {
+                    updateElementIndex(this, prefix, i);
+                });
+            }
+        }
+        return false;
+    }
+    
+    
+    $(document).on('click', '.remove-form', function(e){
+        e.preventDefault();
+        deleteForm('items', $(this));
+        return false;
+    });
+    
+    $('#selectedProduct').on('change', function() {
+        // Select all input fields of type number with name containing "quantity"
+        var quantityInputs = $('input[type="number"][name*="quantity"]:not([name*="test"])');
+        
+        // Add event listener to each input field
+        
+        quantityInputs.each(function(){
+            $(this).on('input', function() {
+                var quantityId= $(this).attr('id');
+                var priceId = quantityId.replace('quantity', 'price')
+                var subTotalId = quantityId.replace('quantity', 'sub_total')
+                
+                var  priceField = $(`#${priceId}`)
+                
+                if($(this).val()){
                     $(`#${subTotalId}`).val(priceField.val() * parseInt($(this).val())).trigger('change');
-                    
-                    // Calculate and update the total cost
-                    updateTotalCost();
-                    
-                })
+                }else{
+                    $(`#${subTotalId}`).val(priceField.val() * parseInt(0)).trigger('change');
+                }
+                // Calculate and update the total cost
+                updateTotalCost();   
             })
-            
-        });
-        
-        
-        function updateTotalCost() {
-            // Sum up all the values of subTotal fields
-            var totalCost = 0;
-            $('input[name*="sub_total"]').each(function() {
-                totalCost += parseFloat($(this).val()) || 0;
-            });
-            
-            // Update the content of #cartTotalCost
-            $('#cartTotalCost').text('SHS ' + totalCost.toFixed(2));
-            $(`#totalCartAmount`).val(totalCost.toFixed(2)).trigger('change');
-        }
-        
-        $('#customerDetails').on('click', function(){
-            $('#customer-container').toggleClass('d-none d-block');
         })
         
+    });
+    
+    
+    function updateTotalCost() {
+        // Sum up all the values of subTotal fields
+        var totalCost = 0;
+        $('input[name*="sub_total"]').each(function() {
+            totalCost += parseFloat($(this).val()) || 0;
+        });
         
-        $(document).ready(function() {
-            $('#totalCartAmount').on('change', function() {
-                var textValue = $('#totalCartAmount').val();
-                if (textValue){
-                    if (parseInt(textValue) === 0){
-                        $("#submitButton").prop('disabled', true);
-                    }else{
-                        $("#submitButton").prop('disabled', false);
-                    }  
-                }else{
+        // Update the content of #cartTotalCost
+        $('#cartTotalCost').text('SHS ' + totalCost.toFixed(2));
+        $(`#totalCartAmount`).val(totalCost.toFixed(2)).trigger('change');
+    }
+    
+    $('#customerDetails').on('click', function(){
+        $('#customer-container').toggleClass('d-none d-block');
+    })
+    
+    $('#comments').on('click', function(){
+        $('#comments-container').toggleClass('d-none d-block');
+    })
+    
+    
+    $(document).ready(function() {
+        $('#totalCartAmount').on('change', function() {
+            var textValue = $('#totalCartAmount').val();
+            if (textValue){
+                if (parseInt(textValue) === 0){
                     $("#submitButton").prop('disabled', true);
-                } 
+                }else{
+                    $("#submitButton").prop('disabled', false);
+                }  
+            }else{
+                $("#submitButton").prop('disabled', true);
+            } 
+        });
+        
+    });
+    
+    $(document).ready(function() {
+        $('#myForm').submit(function(event) {
+            // Prevent the default form submission
+            event.preventDefault();
+            
+            // Your custom logic or validation can go here
+            
+            // For demonstration purposes, you can log a message
+            console.log('Form submission prevented');
+            
+            var formValuesArray = [];
+            
+            $('.form-row').each(function() {
+                var formValues = {};
+                $(this).find(':input').each(function() {
+                    formValues[$(this).attr('name')] = $(this).val();
+                });
+                formValuesArray.push(formValues);
             });
             
-        });
-        
-        $(document).ready(function() {
-            $('#myForm').submit(function(event) {
-                // Prevent the default form submission
-                event.preventDefault();
-                
-                // Your custom logic or validation can go here
-                
-                // For demonstration purposes, you can log a message
-                console.log('Form submission prevented');
-                
-                var formValuesArray = [];
-                
-                $('.form-row').each(function() {
-                    var formValues = {};
-                    $(this).find(':input').each(function() {
-                        formValues[$(this).attr('name')] = $(this).val();
+            // console.log(formValuesArray)
+            
+            var customer_name = $('#customer_name').val();
+            var customer_phone = $('#customer_phone').val();
+            var customer_email = $('#customer_email').val();
+            var customer_address = $('#customer_address').val();
+            var payment_option = $('#payment_option').val();
+            var payment_period = $('#payment_period').val();
+            var remarks = $('#remarks').val();
+            
+            
+            var formData = {
+                "items-TOTAL_FORMS": parseInt($('input[name="items-TOTAL_FORMS"]').val()) + 0,  // Total number of forms in the formset
+                "items-INITIAL_FORMS": $('input[name="items-INITIAL_FORMS"]').val(),  // Number of initial forms
+                "items-MIN_NUM_FORMS": $('input[name="items-MIN_NUM_FORMS"]').val(),  // Minimum number of forms in the formset
+                "items-MAX_NUM_FORMS": $('input[name="items-MAX_NUM_FORMS"]').val(),
+                "customer_name": customer_name,
+                "customer_phone": customer_phone,
+                "customer_email": customer_email,
+                "customer_address": customer_address,
+                "payment_option": payment_option,
+                "payment_period": payment_period,
+                "remarks": remarks,
+                ...formValuesArray.reduce((acc, item, index) => {
+                    Object.keys(item).forEach((key) => {
+                        // console.log("index" ,index)
+                        var newKey = key.replace('-' + (index + 1) + '-', '-' + (index) + '-');
+                        // console.log(newKey)
+                        acc[`${newKey}`] = item[key];
                     });
-                    formValuesArray.push(formValues);
-                });
-                
-                // console.log(formValuesArray)
-                
-                var customer_name = $('#customer_name').val();
-                var customer_phone = $('#customer_phone').val();
-                var customer_email = $('#customer_email').val();
-                var customer_address = $('#customer_address').val();
-                var payment_option = $('#payment_option').val();
-                var remarks = $('#remarks').val();
-                
-                
-                var formData = {
-                    "items-TOTAL_FORMS": parseInt($('input[name="items-TOTAL_FORMS"]').val()) + 0,  // Total number of forms in the formset
-                    "items-INITIAL_FORMS": $('input[name="items-INITIAL_FORMS"]').val(),  // Number of initial forms
-                    "items-MIN_NUM_FORMS": $('input[name="items-MIN_NUM_FORMS"]').val(),  // Minimum number of forms in the formset
-                    "items-MAX_NUM_FORMS": $('input[name="items-MAX_NUM_FORMS"]').val(),
-                    "customer_name": customer_name,
-                    "customer_phone": customer_phone,
-                    "customer_email": customer_email,
-                    "customer_address": customer_address,
-                    "payment_option": payment_option,
-                    "payment_period": payment_period,
-                    "remarks": remarks,
-                    ...formValuesArray.reduce((acc, item, index) => {
-                        Object.keys(item).forEach((key) => {
-                            // console.log("index" ,index)
-                            var newKey = key.replace('-' + (index + 1) + '-', '-' + (index) + '-');
-                            // console.log(newKey)
-                            acc[`${newKey}`] = item[key];
-                        });
-                        return acc;
-                    }, {})
-                };
-                
-                const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
-                
-                const id = $('#posId').val();
-                
-                $.ajax({
-                    type: 'POST',
-                    headers: {
-                        'X-CSRFToken': csrfToken,
-                    },
-                    url: '{% url "sales:pos-sales-new" pos_id=0 %}'.replace('0', id), 
-                    data: formData,
-                    success: function (data){
-                        if (data.success) {
-                            console.log(data)
-                            
-                            // Show the toast
-                            $('.toast').toast('show');
-                            
-                            // Hide the toast after 5 seconds
-                            setTimeout(function(){
-                                $('.toast').toast('hide');
-                            }, 3000);
-                            
-                            window.location.reload()
-                            
-                            // Remove all elements with class .form
-                            $('.form-row').remove();
-                            $('#cartItems').remove()
-                            $('.js-select-products').val('')
-                            $('#emptyCart').removeClass('d-none').addClass('d-flex') // Display
-                            $('#cartTotalCost').text('SHS ' + 0);
-                            //$('#cartTotal').remove();
-                        }else{
-                            console.log("Error")
-                        }
+                    return acc;
+                }, {})
+            };
+            
+            const csrfToken = $('input[name="csrfmiddlewaretoken"]').val();
+            
+            const id = $('#posId').val();
+            
+            $.ajax({
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': csrfToken,
+                },
+                url: '{% url "sales:pos-sales-new" pos_id=0 %}'.replace('0', id),  
+                data: formData,
+                success: function (data){
+                    if (data.success) {
+                        console.log(data)
                         
-                    },
-                })
-                
-                
-            });
+                        // Show the toast
+                        $("#toast-header").addClass("text-success")
+                        $("#toast-body").text("Added Sucessfully!");
+                        $("#toast-body").addClass("text-success")
+                        $('.toast').toast('show');
+                        
+                        // Hide the toast after 5 seconds
+                        setTimeout(function(){
+                            $('.toast').toast('hide');
+                        }, 3000);
+                        
+                        // window.location.reload()
+                        
+                        // Remove all elements with class .form
+                        $('input[name="items-TOTAL_FORMS"]').val('0').trigger('change');
+                        $(`#totalCartAmount`).val(0).trigger('change');
+                        $('#payment_option').val('Cash').trigger('change')
+                        $('#payment_period').val('Instant').trigger('change')
+                        $('.form-row').remove();
+                        $('#cartItems').remove();
+                        $('#emptyCart').removeClass('d-none').addClass('d-flex'); // Display
+                        $('#cartTotalCost').text('SHS ' + 0);
+                        $('#cartTotal').removeClass('row').addClass('d-none') // Dont Display
+                        
+                    }else{
+                        console.log("Error")
+                    }
+                },
+            })
+            
+            
         });
-    </script> 
-    
-    {% endblock %}
-    
-    
+    });
+</script> 
+
+{% endblock %}
+

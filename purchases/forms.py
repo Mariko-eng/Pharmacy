@@ -1,7 +1,7 @@
 from django import forms
 from .models import PurchaseOrderRequest
 from .models import PurchaseOrderRequestItem 
-from company.models import Supplier, Store
+from company.models import SupplierEntity, Store
 # from django.forms import inlineformset_factory
 from django.forms import BaseFormSet
 
@@ -43,7 +43,7 @@ class PurchaseOrderRequestForm(forms.ModelForm):
         super(PurchaseOrderRequestForm, self).__init__(*args, **kwargs)
 
         if company:
-            self.fields['supplier_entity'].queryset = Supplier.objects.filter(company=company)
+            self.fields['supplier_entity'].queryset = SupplierEntity.objects.filter(company=company)
             self.fields['supplier_store'].queryset = Store.objects.filter(company=company)
 
                     # Check if an instance is passed and set the initial value for supplier_entity
@@ -60,6 +60,6 @@ class PurchaseOrderRequestItemForm(forms.ModelForm):
     class Meta:
         model = PurchaseOrderRequestItem
         fields = [
-            'store_product','quantity','total_cost',
+            'stock_item','quantity','total_cost',
         ]
         exclude = ['company','store','order_request','updated_by','updated_at','created_by','created_at']

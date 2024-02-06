@@ -320,7 +320,7 @@ pos_perms = [
     ("list_pos_sales","List POS sales"),
     ("view_pos_sales","View POS sales"),
     ("add_pos_sales","Add POS sales"),
-    ("edit_pos_sales","Edit POS sales"),
+    ("edit_pos_sales","Edit POS sales"), 
     ("cancel_pos_sales","Cancel POS sales"),
     ("delete_pos_sales","Delete POS sales"),
     ("remove_pos_sales","Remove POS sales"),
@@ -359,6 +359,7 @@ FINANCE_MANAGER_PERMS = []
 CASHIER_PERMS = [
     choice[0] for choice in pos_perms if choice[0] not in [
         "access_to_all_points_of_sale"]]
+
 
 class DefaultPermissions:
     perms = {

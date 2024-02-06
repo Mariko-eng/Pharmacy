@@ -218,7 +218,7 @@
                   {% for item in reports.recent_sales %}
                     <tr>
                       <th scope="row"><a href="#">{{ item.created_at}}</a></th>
-                      <td>{{ item.store_product.product.name }}</td>
+                      <td>{{ item.stock_item.product.name }}</td>
                       <td>{{ item.quantity }}</td>
                       <td><a href="#" class="text-primary">SHS {{ item.unit_cost }}</a></td>
                       <td><a href="#" class="text-primary">SHS {{ item.total_cost }}</a></td>
@@ -265,8 +265,8 @@
                 <tbody>             
                   {% for item in reports.this_year_top_sales %}
                     <tr>
-                    <th scope="row"><a href="#"><img src="{{ item.store_product.item_photo.url  }}" alt=""></a></th>
-                      <td class="text-primary fw-bold">{{ item.store_product }}</td>
+                    <th scope="row"><a href="#"><img src="{{ item.stock_item.item_photo.url  }}" alt=""></a></th>
+                      <td class="text-primary fw-bold">{{ item.stock_item }}</td>
                       <td>{{ item.unit_cost }}</td>
                       <td class="fw-bold">{{ item.quantity }}</td>
                       <td>SHS {{ item.total_cost }}</td>

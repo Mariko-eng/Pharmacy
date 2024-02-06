@@ -9,8 +9,8 @@ from django.utils import timezone
 from django.template.defaultfilters import slugify
 from company.mixins import Base
 from company.models import Company, Store
-from company.models import PosCenter, Customer
-from inventory.models import StoreProduct
+from company.models import PosCenter, Client
+from inventory.models import StockItem
 from .tasks import generatePDf
 
 class Sale(Base):
@@ -41,7 +41,7 @@ class Sale(Base):
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     pos_center = models.ForeignKey(PosCenter, on_delete=models.CASCADE)
-    customer = models.ForeignKey(Customer,on_delete=models.SET_NULL,null=True)
+    customer = models.ForeignKey(Client,on_delete=models.SET_NULL,null=True)
     payment_option = models.CharField(max_length=25, choices=PAYMENT_oPTIONS, default='Cash')
     payment_period = models.CharField(max_length=25, choices=PAYMENT_PERIODS, default='Instant')
     payment_status = models.CharField(max_length=25, choices=PAYMENT_STATUS, default='PAID')
@@ -138,7 +138,7 @@ class SaleItem(Base):
     # Data
     pos_center = models.ForeignKey(PosCenter, on_delete=models.CASCADE)
     sale = models.ForeignKey(Sale, on_delete=models.CASCADE)
-    store_product = models.ForeignKey(StoreProduct, on_delete=models.CASCADE)
+    stock_item = models.ForeignKey(StockItem, on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=12, decimal_places=3)
     unit_cost = models.DecimalField(max_digits=10, decimal_places=2)
     total_cost = models.DecimalField(max_digits=10, decimal_places=2)
@@ -147,7 +147,7 @@ class SaleItem(Base):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="sale_items_createdby")
 
     def __str__(self):
-        return f"{self.store_product.product.name} - {self.quantity} units sold"
+        return f"{self.stock_item.name} - {self.quantity} units sold"
     
     @property
     def sub_total(self):

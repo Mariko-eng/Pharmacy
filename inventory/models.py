@@ -1,24 +1,24 @@
-from django.template.defaultfilters import slugify
-from django.utils import timezone
 from uuid import uuid4
 from django.db import models
 from company.models import Company
 from company.models import Store
-from company.models import PosCenter
-from company.models import Supplier
+from company.models import SupplierEntity
 from company.mixins import Base
+from django.template.defaultfilters import slugify
 
 class ProductCategory(Base):
-    company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
+    company = models.ForeignKey(Company,on_delete=models.CASCADE)
+    store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.name
+        return self.name 
     class Meta:
         unique_together = ('name', 'company')
     
 class ProductVariant(Base):
-    company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
+    company = models.ForeignKey(Company,on_delete=models.CASCADE)
+    store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
 
     def __str__(self):
@@ -27,7 +27,8 @@ class ProductVariant(Base):
         unique_together = ('name', 'company')
 
 class ProductUnits(Base): # Units Of Measure
-    company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
+    company = models.ForeignKey(Company,on_delete=models.CASCADE)
+    store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
 
     def __str__(self):
@@ -35,34 +36,37 @@ class ProductUnits(Base): # Units Of Measure
     class Meta:
         unique_together = ('name', 'company')
 
-class Product(Base):
+class StockItem(Base):
     #Owner
-    company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
+    company = models.ForeignKey(Company,on_delete=models.CASCADE)
+    store = models.ForeignKey(Store,on_delete=models.CASCADE)
     # Data    
     unique_no = models.CharField(max_length=255,unique=True)
     name = models.CharField(max_length=255)
-    # description = models.TextField(blank=True, null=True)
+    description = models.TextField(blank=True, null=True)
     category = models.ForeignKey(ProductCategory,on_delete=models.SET_NULL, null=True)
     variant = models.ForeignKey(ProductVariant,on_delete=models.SET_NULL, null=True)
     units = models.ForeignKey(ProductUnits,on_delete=models.SET_NULL, null=True)
-    # unit_price = models.DecimalField(max_digits=12, decimal_places=3)
-    # available_qty = models.DecimalField(max_digits=12, decimal_places=3, default=0)
-    # reorder_min_qty = models.DecimalField(max_digits=12, decimal_places=3,default=0)
-    # item_photo = models.ImageField(upload_to="products", null=True)
-    # is_consummable = models.BooleanField(default=False)
-    # is_for_sale = models.BooleanField(default=True)
-
+    item_photo = models.ImageField(upload_to="products", null=True)    
+    unit_price = models.DecimalField(max_digits=12, decimal_places=3, default=0)
+    reorder_min_qty = models.DecimalField(max_digits=12, decimal_places=3, default=0)
+    available_qty = models.DecimalField(max_digits=12, decimal_places=3, default=0)
+    actual_qty = models.DecimalField(max_digits=12, decimal_places=3, default=0)
+    is_for_sale = models.BooleanField(default=True)
+    is_consummable = models.BooleanField(default=False)
     #Utility fields
     uniqueId = models.CharField(null=True, blank=True, max_length=100)
     slug = models.SlugField(max_length=500, unique=True, blank=True, null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="products_createdby")
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="stock_items_createdby")
+
+    class Meta:
+        ordering = ("-created_at",)
 
     def __str__(self):
-        return self.name
-    
-    class Meta:
-        unique_together = ('name', 'company')
+        if self.variant is None:
+            return f"{self.name} - {self.units}"
+        return f"{self.name} - {self.variant} - {self.units}"
 
     def save(self, *args, **kwargs):
         if self.uniqueId is None:
@@ -71,42 +75,8 @@ class Product(Base):
 
         self.slug = slugify('{} {}'.format(self.name, self.uniqueId))
 
-        super(Product, self).save(*args, **kwargs)
+        super(StockItem, self).save(*args, **kwargs)
 
-class StoreProduct(Base):
-    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
-    product = models.ForeignKey(Product,on_delete=models.SET_NULL,null=True)
-    # Data
-    description = models.TextField(blank=True, null=True)
-    item_photo = models.ImageField(upload_to="products", null=True)    
-    unit_price = models.DecimalField(max_digits=12, decimal_places=3, default=0)
-    reorder_min_qty = models.DecimalField(max_digits=12, decimal_places=3, default=0)
-    available_qty = models.DecimalField(max_digits=12, decimal_places=3, default=0)
-    actual_qty = models.DecimalField(max_digits=12, decimal_places=3, default=0)
-    is_for_sale = models.BooleanField(default=True)
-    is_consummable = models.BooleanField(default=False)
-
-    #Utility fields
-    uniqueId = models.CharField(null=True, blank=True, max_length=100)
-    slug = models.SlugField(max_length=500, unique=True, blank=True, null=True)
-    updated_by = models.CharField(max_length=225,null=True,blank=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="store_products_createdby")
-
-    class Meta:
-        ordering = ("-created_at",)
-
-    def __str__(self):
-        return f"{self.product.name} - {self.product.variant} - {self.product.category}"
-
-    def save(self, *args, **kwargs):
-        if self.uniqueId is None:
-            self.uniqueId = str(uuid4()).split('-')[4]
-            self.slug = slugify('{} {}'.format(self.product.name, self.uniqueId))
-
-        self.slug = slugify('{} {}'.format(self.product.name, self.uniqueId))
-
-        super(StoreProduct, self).save(*args, **kwargs)
-    
 class ReceivedStock(Base):
     SUPPLIER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
     STATUS_TYPES = [('PENDING', 'PENDING'),('APPROVED', 'APPROVED'),('CANCELLED', 'CANCELLED'),]
@@ -117,7 +87,7 @@ class ReceivedStock(Base):
     # Data
     
     supplier_type = models.CharField(max_length=10,choices=SUPPLIER_TYPES,default="SUPPLIER")
-    supplier_entity = models.ForeignKey(Supplier,on_delete=models.SET_NULL,null=True)
+    supplier_entity = models.ForeignKey(SupplierEntity,on_delete=models.SET_NULL,null=True)
     supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True, related_name="received_stock")
     delivered_by_name = models.CharField(max_length=255)
     delivered_by_phone = models.CharField(max_length=255)
@@ -168,15 +138,16 @@ class ReceivedStock(Base):
         else:
             return "Nan"
  
+ 
 class ReceivedStockItem(Base):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     received_stock = models.ForeignKey(ReceivedStock,on_delete=models.CASCADE)
-    store_product = models.ForeignKey(StoreProduct,on_delete=models.CASCADE)
+    stock_item = models.ForeignKey(StockItem,on_delete=models.CASCADE)
     batch_no = models.CharField(max_length=255)
-    qty_received = models.DecimalField(max_digits=12, decimal_places=3)
+    quantity = models.DecimalField(max_digits=12, decimal_places=3)
     unit_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     total_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     manufactured_date = models.DateField(null=True)
@@ -188,7 +159,7 @@ class ReceivedStockItem(Base):
         ordering = ("-created_at",)
 
     def __str__(self):
-        return self.store_product.product.name
+        return f"{self.batch_no} - {self.stock_item.name}"
 
 class StockRequest(Base):
     STATUS_CHOICES = [
@@ -232,7 +203,7 @@ class StockRequest(Base):
         total = 0
         items = self.stockrequestitem_set.all()
         for item in items:
-            total = total + (item.store_product.unit_price * item.quantity)
+            total = total + (item.stock_item.unit_price * item.quantity)
         return total
     
     def save(self, *args, **kwargs):
@@ -253,7 +224,7 @@ class StockRequestItem(Base):
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
     stock_request = models.ForeignKey(StockRequest, on_delete=models.CASCADE)
-    store_product = models.ForeignKey(StoreProduct,on_delete=models.CASCADE)
+    stock_item = models.ForeignKey(StockItem,on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     available_quantity = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     reason = models.CharField(max_length=225, choices=REASON_CHOICES, default='Low Stock')
@@ -264,7 +235,7 @@ class StockRequestItem(Base):
         ordering = ("-created_at",)
 
     def __str__(self):
-        return self.store_product.product.name
+        return self.stock_item.product.name
     
 
 class OutgoingConsumable(Base):
@@ -272,11 +243,11 @@ class OutgoingConsumable(Base):
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
-    store_product = models.ForeignKey(StoreProduct,on_delete=models.CASCADE)
+    stock_item = models.ForeignKey(StockItem,on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=12,decimal_places=3)
     remarks = models.TextField(null=True,blank=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="outgoing_consumables_createdby")
 
     def __str__(self):
-        return self.store_product.product.name
+        return self.stock_item.name

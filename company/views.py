@@ -39,7 +39,7 @@ def test_mail(request):
 def company_application_add_view(request):
     form = CompanyApplicationRegisterForm()
 
-    context = {"form": form}
+    context = { "form": form }
 
     if request.method == "POST":
         form_data = CompanyApplicationRegisterForm(request.POST, request.FILES)
@@ -54,6 +54,7 @@ def company_application_add_view(request):
             messages.info(request, "Application is submitted successfully!")
             # return redirect('user:home')
         else:
+            print(form_data.errors)
             context = {"form": form_data}
             messages.error(request,"Failed To Submit Application!")
 
@@ -238,7 +239,6 @@ def company_application_delete_view(request, app_id):
     return redirect('company:company-application-list')
     
 
-
 ###################### - Company - ####################
 
 @login_required(login_url='/login')
@@ -362,11 +362,11 @@ def pos_list_view(request, store_id):
         form = PosCenterForm(request.POST)
         if form.is_valid():
             pos_center = form.save(commit=False)
-            if PosCenter.objects.filter(name = pos_center.name.capitalize(), store = store).exists():
+            if PosCenter.objects.filter(name = pos_center.name, store = store).exists():
                 form.errors['name'] = ["Name ALready Exists!"]
                 return JsonResponse({'success': False, 'errors': form.errors})
             
-            pos_center.name = form.cleaned_data['name'].capitalize()
+            pos_center.name = form.cleaned_data['name']
             pos_center.created_by = request.user
             pos_center.store = store
             pos_center.save()

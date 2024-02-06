@@ -49,7 +49,7 @@
                                     {% else %}
                                     {% render_field form.name|add_class:"form-control"|attr:"id:name" %}
                                     {% endif %}
-                                    <div id = "" class="invalid-feedback">
+                                    <div id="nameError" class="invalid-feedback">
                                         {{  form.errors.name.0  }}
                                     </div>
                                 </div>
@@ -61,7 +61,7 @@
                                     {% else %}
                                     {% render_field form.phone|add_class:"form-control"|attr:"id:phone" %}
                                     {% endif %}
-                                    <div id = "" class="invalid-feedback">
+                                    <div id="phoneError" class="invalid-feedback">
                                         {{  form.errors.phone.0  }}
                                     </div>
                                 </div>
@@ -73,7 +73,7 @@
                                     {% else %}
                                     {% render_field form.email|add_class:"form-control"|attr:"id:email" %}
                                     {% endif %}
-                                    <div id = "" class="invalid-feedback">
+                                    <div id="emailError" class="invalid-feedback">
                                         {{  form.errors.email.0  }}
                                     </div>
                                 </div>
@@ -85,7 +85,7 @@
                                     {% else %}
                                     {% render_field form.location|add_class:"form-control"|attr:"id:location" %}
                                     {% endif %}
-                                    <div id = "" class="invalid-feedback">
+                                    <div id = "locationError" class="invalid-feedback">
                                         {{  form.errors.location.0  }}
                                     </div>
                                 </div>
@@ -97,7 +97,7 @@
                                     {% else %}
                                     {% render_field form.logo|add_class:"form-control"|attr:"id:logo" %}
                                     {% endif %}
-                                    <div id = "" class="invalid-feedback">
+                                    <div id="logoError" class="invalid-feedback">
                                         {{  form.errors.logo.0  }}
                                     </div>
                                 </div>

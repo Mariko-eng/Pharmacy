@@ -19,6 +19,14 @@
             <p>Companies</p>
         </div>
         <div class="col-xs-12 col-sm-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
+            <a href="{% url 'user:users-list'%}">
+                <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
+                    <i class="bi bi-person-lock text-white" style="font-size: 2em;"></i>
+                </div> 
+            </a>
+            <p>Users & Access</p>
+        </div> 
+        <div class="col-xs-12 col-sm-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
             <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
                 <i class="bi bi-file-bar-graph text-white" style="font-size: 2em;"></i>
             </div> 
@@ -36,22 +44,6 @@
             </div>      
             <p>Reports</p>
         </div>
-        <div class="col-xs-12 col-sm-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
-            <a href="{% url 'company:company-application-list'%}">
-                <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
-                    <i class="bi bi-house text-white" style="font-size: 2em;"></i>
-                </div>
-            </a>
-            <p>Applications</p>
-        </div>
-        <div class="col-xs-12 col-sm-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
-            <a href="{% url 'user:users-roles-list'%}">
-                <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
-                    <i class="bi bi-person-lock text-white" style="font-size: 2em;"></i>
-                </div> 
-            </a>
-            <p>Users & Access</p>
-        </div> 
     </div>
 </div>
 

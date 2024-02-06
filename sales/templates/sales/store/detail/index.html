@@ -85,7 +85,7 @@
                         <tbody>
                             {% for result in sale.saleitem_set.all %}
                             <tr>
-                                <td>{{result.store_product.product.name}}</td>
+                                <td>{{result.stock_item.name}}</td>
                                 <td>{{result.unit_cost}}</td>
                                 <td>{{result.quantity}}</td>
                                 <td>{{result.total_cost}}</td>
@@ -125,7 +125,6 @@
 <script>
     
     
-    
     $('#invoiceBtn').on('click', function(){
         
         console.log("clicked")
@@ -137,7 +136,7 @@
             url: '{% url "sales:store-sales-invoice" store_id=0 sale_id=0 %}'.replace('0', storeId).replace('0', saleId),
             method: 'GET',
             success: function (data) {
-                // console.log(data)
+                console.log(data)
                 
                 // Assuming the file is a PDF
                 if (data.invoice_url) {

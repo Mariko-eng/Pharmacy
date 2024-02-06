@@ -8,7 +8,8 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active"><a>Products</a></li>
+            <li class="breadcrumb-item"><a>Products</a></li>
+            <li class="breadcrumb-item active"><a>Edit</a></li>
         </ol>
     </nav>
 </div><!-- End Page Title --> 
@@ -19,7 +20,7 @@
 
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">New Product</h5>
+        <h5 class="card-title">Edit Product</h5>
         
         <form class="row g-3 needs-validation" method="post" enctype="multipart/form-data" novalidate >
             {% csrf_token %}
@@ -40,26 +41,38 @@
                 <label for="description" class="col-sm-2 col-form-label">Description</label>
                 <div class="col-sm-10">
                     {% if form.errors.description %}
-                    {% render_field form.description|add_class:"form-control is-invalid"|attr:"rows:3" %}
+                    {% render_field form.description|add_class:"form-control is-invalid"|attr:"rows:5" %}
                     <div class="invalid-feedback">
                         {{ form.errors.description.0 }}
                     </div>
                     {% else %}
-                    {% render_field form.description|add_class:"form-control"|attr:"rows:3" %}
+                    {% render_field form.description|add_class:"form-control"|attr:"rows:5" %}
                     {% endif %}
                 </div>
             </div>
             <div class="row mb-3">
                 <label for="item_photo" class="col-sm-2 col-form-label">Item Photo</label>
                 <div class="col-sm-10">
-                    {% if form.errors.item_photo %}
-                    {% render_field form.item_photo|add_class:"form-control is-invalid" %}
-                    <div class="invalid-feedback">
-                        {{ form.errors.item_photo.0 }}
+                    {% if form.instance.item_photo %}
+                    <div class="d-flex">
+                    <div class="form-group">
+                        <label for="item_photo">Current Photo:</label>
+                        <img src="{{ form.instance.item_photo.url }}" alt="Photo" class="rounded-circle" width="30">
                     </div>
-                    {% else %}
-                    {% render_field form.item_photo|add_class:"form-control" %}
+                    
+                    <div class="form-group">
+                        <input type="checkbox" name="item_photo-clear" id="item_photo-clear_id">
+                        <label class="form-check-label" for="item_photo-clear">Remove Current Photo</label>
+                    </div>
+                    </div>
                     {% endif %}
+
+                    <div class="form-group">
+                        <label for="id_item_photo">Or Update Photo:</label>
+                        <input class="form-control" name="item_photo" type="file" id="formFile">
+                        {{ form.item_photo.errors }}
+                    </div>
+                    
                 </div>
             </div>
             <div class="row mb-3">
@@ -107,7 +120,7 @@
                 </div>
                 
                 <div class="col-sm-6">
-                    <label for="unit_price" class="col-sm-12 col-form-label">Price of Item (SHS)</label>
+                    <label for="unit_price" class="col-sm-12 col-form-label">Unit Price</label>
                     <div class="col-sm-12">
                         {% if form.errors.unit_price %}
                         {% render_field form.unit_price|add_class:"form-control is-invalid" %}
@@ -121,7 +134,7 @@
                 </div>
                 
             </div>
-        
+            
             <div class="row mb-3">
                 <div class="col-sm-4">
                     <label for="reorder_min_qty" class="col-sm-12 col-form-label">Reorder Min Qty</label>
@@ -138,6 +151,7 @@
                 </div>
                 
                 <div class="col-sm-4">
+                    <label for="is_for_sale" class="col-sm-12 col-form-label">Is for sale?</label>
                     <div class="col-sm-12">
                         {% if form.errors.is_for_sale %}
                         {% render_field form.is_for_sale|add_class:"form-check is-invalid" %}
@@ -147,11 +161,11 @@
                         {% else %}
                         {% render_field form.is_for_sale|add_class:"form-check" %}
                         {% endif %}
-                        <label for="is_for_sale" class="col-sm-12 col-form-label">Is for sale?</label>
                     </div>
                 </div>
-
+                
                 <div class="col-sm-4">
+                    <label for="is_consummable" class="col-sm-12 col-form-label">Is consummable?</label>
                     <div class="col-sm-12">
                         {% if form.errors.is_consummable %}
                         {% render_field form.is_consummable|add_class:"form-check is-invalid" %}
@@ -161,15 +175,14 @@
                         {% else %}
                         {% render_field form.is_consummable|add_class:"form-check" %}
                         {% endif %}
-                        <label for="is_consummable" class="col-sm-12 col-form-label">Is consummable?</label>
                     </div>
                 </div>
             </div>
-
+            
             <div class="col-12 d-flex justify-content-center mt-5">
                 <button class="btn btn-primary" type="submit" style="width: 300px;">Submit</button>
             </div>
-
+            
         </form>
     </div>
 </div>

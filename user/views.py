@@ -9,7 +9,9 @@ from django.contrib import messages
 from django.http import JsonResponse,HttpResponseServerError
 from django.contrib.auth.models import Group, Permission
 from user.permissions import DefaultRoles
-from .forms import CompanyRoleFrom,CompanyUserForm
+from .forms import  AppUserForm
+from .forms import CompanyRoleFrom
+from .forms import CompanyUserForm
 from .forms import CompanyAdminUserForm
 from .forms import StoreAdminUserForm
 from .forms import POSAttendantUserForm
@@ -177,17 +179,84 @@ def pos_dashboard(request, pos_id = None):
         raise Http404('Page Not Found!')
 
 
-########################### Users ##################
-
+########################### Users & Roles##################
+# Super
 @login_required(login_url='/login')
 def users_list_view(request):
+    groups_static = []
+    default_groups = DefaultRoles.choices
+    for default_group in default_groups:
+        group, created = Group.objects.get_or_create(name = default_group[0])
+        groups_static.append(group)
+
+    groups_dynamic = Group.objects.exclude(name__in=[group.name for group in groups_static])
     users = User.objects.all()
+    form = AppUserForm()
+
     context = {
-        "users" : users
-    }
+        "users" : users,
+        "groups_static" : groups_static,
+        "groups_dynamic" : groups_dynamic,
+        "form" : form,
+        }
+    
+    if request.method == 'POST':
+        form_data = AppUserForm(request.POST or None)
+        if form_data.is_valid():
+            user = form_data.save(commit=False)
+            user.set_password(str(user.email))
+            user.created_by = request.user
+            user.save()
+            return JsonResponse({'success': True, 'email': form_data.cleaned_data['email']})
+        else:
+            return JsonResponse({'success': False, 'errors': form_data.errors})
+
     return render(request, "user/super/list/index.html", context = context)
 
 
+@login_required(login_url='/login')
+def role_permissions_list(request, role_id):
+    group = Group.objects.get(pk=role_id)
+    group_permissions = group.permissions.all()
+    # Specify the app labels you want to include
+    model_names = ['user', 'company','companymanager','companystaff']
+
+    # Initialize an empty list to store permissions
+    all_permissions = []
+
+    # Loop through each app label and filter permissions
+    for model_name in model_names:
+        permissions_for_app = Permission.objects.filter(
+            content_type__model=model_name
+        )
+        # print(permissions_for_app)
+        all_permissions.extend(permissions_for_app)
+
+    context = {
+        "group": group,
+        "group_permissions": group_permissions,
+        "all_permissions" : all_permissions}
+
+    if request.method == "POST":
+        selected_perms = request.POST.getlist("permissions") 
+        
+        # Get the existing permissions of the group
+        existing_perms = list(group.permissions.values_list('id', flat=True))
+
+        for perm_id in selected_perms:
+            selected_perm = Permission.objects.get(pk = perm_id)
+            group.permissions.add(selected_perm)
+
+        # Remove permissions that are not in the selected list
+        for perm_id in existing_perms:
+            if str(perm_id) not in selected_perms:
+                existing_perm = Permission.objects.get(pk=perm_id)
+                group.permissions.remove(existing_perm)
+        
+    return render(request, "user/super/roles/index.html", context= context)
+
+
+# Company Users
 @login_required(login_url='/login')
 def users_company_list_view(request, company_id):
 
@@ -483,117 +552,8 @@ def users_store_pos_attendant_user_new(request, store_id):
     return render(request, "user/store/new/pos_attendant.html", context=context)
 
 
-    
-
-
-@login_required(login_url='/login')
-def users_company_new_view1(request, company_id):
-
-    company = Company.objects.get(pk = company_id)
-
-    users = User.objects.filter(company=company)
-
-    form = CompanyUserForm(company=company)
-
-    context = {
-        "users" : users,
-        "company": company,
-        "form": form }
-
-    if request.method == "POST":
-        form_data = CompanyUserForm(request.POST, company = company)
-        
-        if form_data.is_valid():
-            roles = form_data.cleaned_data.pop('roles', [])
-            stores = form_data.cleaned_data.pop('stores', [])
-
-            user = User(
-                company = company,
-                first_name = form_data.cleaned_data['first_name'],
-                last_name = form_data.cleaned_data['last_name'],
-                email = form_data.cleaned_data['email'],
-                phone = form_data.cleaned_data['phone'],
-            )
-
-            user.set_password(str(user.email))
-            user.created_by = request.user
-            user.save()
-
-            for item in roles:
-                group, created = Group.objects.get_or_create(name=item)
-                if group:
-                    user.groups.add(group)
-
-            # for stores in stores:
-            #     if not CompanyStaff.objects.filter(company = company,branch = branch,user =  user).exists():
-            #         CompanyStaff.objects.create(
-            #             company = company,
-            #             branch = branch,
-            #             user =  user,
-            #             created_by = request.user)
-
-
-            return redirect('user:company-users-list', company_id=company_id)
-
-        context['form'] = form_data
-
-    return render(request, "user/company/new/index.html", context=context)
-
-
-########################### Roles #######################
-
-@login_required(login_url='/login')
-def users_roles_list_view(request):
-    users = User.objects.all()
-    context = {
-        "users" : users
-    }
-    return render(request, "role/super/list/index.html", context = context)
-
-
-@login_required(login_url='/login')
-def users_role_permissions_list_view(request, role_id):
-    group = Group.objects.get(pk=role_id)
-    group_permissions = group.permissions.all()
-    # Specify the app labels you want to include
-    model_names = ['user', 'company','companymanager','companystaff']
-
-    # Initialize an empty list to store permissions
-    all_permissions = []
-
-    # Loop through each app label and filter permissions
-    for model_name in model_names:
-        permissions_for_app = Permission.objects.filter(
-            content_type__model=model_name
-        )
-        # print(permissions_for_app)
-        all_permissions.extend(permissions_for_app)
-
-    context = {
-        "group": group,
-        "group_permissions": group_permissions,
-        "all_permissions" : all_permissions}
-
-    if request.method == "POST":
-        selected_perms = request.POST.getlist("permissions") 
-        
-        # Get the existing permissions of the group
-        existing_perms = list(group.permissions.values_list('id', flat=True))
-
-        for perm_id in selected_perms:
-            selected_perm = Permission.objects.get(pk = perm_id)
-            group.permissions.add(selected_perm)
-
-        # Remove permissions that are not in the selected list
-        for perm_id in existing_perms:
-            if str(perm_id) not in selected_perms:
-                existing_perm = Permission.objects.get(pk=perm_id)
-                group.permissions.remove(existing_perm)
-        
-    return render(request, "user/super/roles/index.html", context= context)
 
 ########################### Company Roles #######################
-
 @login_required(login_url='/login')
 def users_company_roles_list_view(request, company_id):
     company = Company.objects.get(pk = company_id)
@@ -702,11 +662,4 @@ def users_company_role_permissions_list_view(request, company_id, role_id):
         
     return render(request, "user/super/roles/index.html", context= context)
 
-#################################
-@login_required(login_url='/login')
-def company_list(request):
-    # companies = Company.objects.all()
-    companies = Company.objects1.get_queryset(request.user).all()
-
-    return render(request, "company/list/index.html", context={'companies': companies})
 
