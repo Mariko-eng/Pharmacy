@@ -162,7 +162,6 @@ def pos_product_variants_list_view(request, pos_id):
     return render(request, 'settings/variants/pos/index.html', context=context) 
 
 
-
 @login_required(login_url='/login')
 def store_product_units_list_view(request,store_id = None, company_id = None):
     form = UnitsForm()

@@ -67,8 +67,7 @@ def store_sales_invoice(request, store_id, sale_id):
         "company": company,
         "store": store,
         "title": "Sale Invoice",
-        "sale": sale
-        } 
+        "sale": sale}  
 
     print("Before Generating....")
     sale = sale.generate_invoice( context = context)
@@ -78,7 +77,6 @@ def store_sales_invoice(request, store_id, sale_id):
     sale_data = {
         "sale_id": sale.id,
         "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
-
     }
 
     return JsonResponse(sale_data)
@@ -313,7 +311,25 @@ def pos_sales_new(request, pos_id):
                     stock_item.actual_qty = new_actual_qty
 
                     stock_item.save()
-                return JsonResponse({'success': True})
+
+                invoice_context = { 
+                    "company": company,
+                    "store": store,
+                    "title": "Sale Invoice",
+                    "sale": sale}   
+
+                print("Before Generating Invoice....")
+                sale = sale.generate_invoice( context = invoice_context)
+                print("After Generating Invoice....")
+    
+                # Prepare the sale data to be returned as JSON
+                sale_data = {
+                    "success": True,
+                    "sale_id": sale.id,
+                    "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
+                }
+
+                return JsonResponse(sale_data)
             else:
                 return JsonResponse({'failure': False})
     
