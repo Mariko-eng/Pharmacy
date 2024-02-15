@@ -7,33 +7,38 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseServerError
 from django.contrib.auth.models import Group
+from utils.groups.access_groups import AccessGroups
 from .forms import CompanyApplicationRegisterForm
 from .forms import CompanyAccountActivationForm
 from .forms import CompanyAdminRegisterForm
 from .forms import StoreForm
 from .forms import PosCenterForm
-from user.models import AccessGroups, User, UserProfile
-from user.permissions import DefaultRoles
+from user.models import User, UserProfile
 from .models import CompanyApplication
 from .models import Company, Store, PosCenter
 from .tasks import send_company_approval_email
+from utils.groups.default_roles import DefaultRoles
+from utils.defaults.init_company_groups import init_company_groups
+from utils.defaults.init_store_groups import init_store_groups
 
 ################### - Company Application - ################# 
 
-def test_mail(request):
-    recipient_email = "yigamarkgabriel333@gmail.com"
-    activation_code = "234344"
-    redirect_view_name = 'company:company-account-activate'  # Use the correct view name
+@login_required(login_url='/login')
+def company_application_list_view(request):
+    applications = CompanyApplication.objects.all()
 
-    # Reverse the view name to get the relative path
-    relative_path = reverse(redirect_view_name)
+    context = { "applications" : applications }
+    
+    return render(request, 'company/application/list/index.html', context = context)
 
-    # Build the absolute URL by combining it with the base URL
-    redirect_url = request.build_absolute_uri(relative_path)
 
-    # print(redirect_url)
-    send_company_approval_email(recipient_email, activation_code, redirect_url)
-    return JsonResponse({'status': 'Sent!'})
+@login_required(login_url='/login')
+def company_application_detail_view(request, app_id):
+    data = CompanyApplication.objects.get(pk = app_id)
+
+    context = { "data" : data }
+    
+    return render(request, 'company/application/detail/index.html', context = context)
 
 
 def company_application_add_view(request):
@@ -60,8 +65,35 @@ def company_application_add_view(request):
 
     return render(request, 'company/application/new/index.html', context=context)
 
+
+@login_required(login_url='/login')
+def company_application_edit_view(request, app_id):
+    instance = CompanyApplication.objects.get(pk = app_id)
+
+    form = CompanyApplicationRegisterForm(instance=instance)
+
+    context = { "detail": instance ,"form": form }
+
+    if request.method == "POST":
+        form_data = CompanyApplicationRegisterForm(request.POST, request.FILES, instance=instance)
+
+        if form_data.is_valid():
+            application = form_data.save()
+            code = generate_random_number()
+            application.activation_code = code
+            application.save()
+
+            messages.info(request, "Application is edited successfully!")
+            return redirect('company:company-application-list')
+        else:
+            print(form_data.errors)
+            context["form"] = form_data
+            messages.error(request,"Failed To Edit Application!")
+    
+    return render(request, 'company/application/edit/index.html', context = context)
+
  
-def company_application_edit_status(request, app_id, new_status):
+def company_application_edit_status_view(request, app_id, new_status):
     valid_statuses = [ 'PENDING', 'APPROVED' , 'CREATED' ,'DECLINED', 'CANCELLED' ]
 
     if new_status not in valid_statuses:
@@ -129,6 +161,8 @@ def company_account_activate_view(request):
                         logo = companyApplication.logo,
                         activation_code = activation_code
                     )
+
+                    init_company_groups(company_id=company.pk)
                     
                     companyApplication.status = "CREATED"
                     companyApplication.save()
@@ -142,6 +176,17 @@ def company_account_activate_view(request):
 
     return render(request, 'company/application/activation/index.html', context=context)
 
+
+@login_required(login_url='/login')
+def company_application_delete_view(request, app_id):
+    app = CompanyApplication.objects.all(pk = app_id)
+
+    app.hard_delete()
+
+    return redirect('company:company-application-list')
+
+
+###################### - Company Admin User Register- ####################
 
 def company_admin_user_register_view(request, company_id):
     company = Company.objects.get(pk = company_id)
@@ -203,42 +248,6 @@ def company_admin_user_register_view(request, company_id):
     return render(request, 'company/application/admin_account/new.html', context=context)
 
 
-@login_required(login_url='/login')
-def company_application_list_view(request):
-    applications = CompanyApplication.objects.all()
-
-    context = { "applications" : applications }
-    
-    return render(request, 'company/application/list/index.html', context = context)
-
-
-@login_required(login_url='/login')
-def company_application_detail_view(request, pk):
-    data = CompanyApplication.objects.all(pk = pk)
-
-    context = { "data" : data }
-    
-    return render(request, 'company/application/detail/index.html', context = context)
-
-
-@login_required(login_url='/login')
-def company_application_edit_view(request, pk):
-    data = CompanyApplication.objects.all(pk = pk)
-
-    context = { "data" : data }
-    
-    return render(request, 'company/application/new/index.html', context = context)
-
-
-@login_required(login_url='/login')
-def company_application_delete_view(request, app_id):
-    app = CompanyApplication.objects.all(pk = app_id)
-
-    app.hard_delete()
-
-    return redirect('company:company-application-list')
-    
-
 ###################### - Company - ####################
 
 @login_required(login_url='/login')
@@ -287,8 +296,8 @@ def company_delete_view(request, pk):
     
     return render(request, 'company/new/index.html', context = context)
 
-###################### - Company Store - ####################
 
+###################### - Company Store - ####################
 
 @login_required(login_url='/login')
 def company_store_list_view(request, company_id):
@@ -298,11 +307,20 @@ def company_store_list_view(request, company_id):
     if request.method == 'POST':
         form = StoreForm(request.POST)
         if form.is_valid():
-            store = form.save(commit=False)
-            store.created_by = request.user
-            store.company = company
-            store.save()
-            return JsonResponse({'success': True, 'store_id': store.id})
+            name = form.cleaned_data.get("name")
+            store_exists = Store.objects.filter(company=company, name__iexact=name).exists()
+            if store_exists:
+                form.errors['name'] = ['Name Already Exists!']
+                return JsonResponse({'success': False, 'errors': form.errors})
+            else:         
+                store = form.save(commit=False)
+                store.created_by = request.user
+                store.company = company
+                store.save()
+
+                init_store_groups(store_id=store.pk)
+            
+            return JsonResponse({'success': True})
         else:
             return JsonResponse({'success': False, 'errors': form.errors})
     else:
@@ -314,8 +332,6 @@ def company_store_list_view(request, company_id):
         'stores': stores }
     
     return render(request, 'store/list/index.html', context = context)
-
-
 
 
 @login_required(login_url='/login')
@@ -361,11 +377,12 @@ def pos_list_view(request, store_id):
     if request.method == 'POST':
         form = PosCenterForm(request.POST)
         if form.is_valid():
-            pos_center = form.save(commit=False)
-            if PosCenter.objects.filter(name = pos_center.name, store = store).exists():
+            name = form.cleaned_data.get("name")
+            if PosCenter.objects.filter(store=store, name__iexact=name).exists():
                 form.errors['name'] = ["Name ALready Exists!"]
                 return JsonResponse({'success': False, 'errors': form.errors})
             
+            pos_center = form.save(commit=False)
             pos_center.name = form.cleaned_data['name']
             pos_center.created_by = request.user
             pos_center.store = store

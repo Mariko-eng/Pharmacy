@@ -1,14 +1,11 @@
 from django import forms
-from django.contrib.auth.models import Permission
+from utils.groups.default_roles import DefaultRoles
+from utils.groups.access_groups import AccessGroups
 from .models import User
 from .models import Company
 from .models import Store
 from .models import PosCenter
-from .permissions import DefaultRoles
-from .permissions import AccessGroups
-# from .models import AppRoles
-# from .models import CompanyRoles
-# from .models import BranchRoles
+
 
 
 class AppUserForm(forms.ModelForm):

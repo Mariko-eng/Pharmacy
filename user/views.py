@@ -6,23 +6,22 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from django.http import JsonResponse,HttpResponseServerError
+from django.http import JsonResponse
 from django.contrib.auth.models import Group, Permission
-from user.permissions import DefaultRoles
+from utils.groups.access_groups import AccessGroups
+from utils.groups.default_roles import DefaultRoles
+from utils.defaults.init_company_groups import create_company_group
 from .forms import  AppUserForm
 from .forms import CompanyRoleFrom
-from .forms import CompanyUserForm
 from .forms import CompanyAdminUserForm
 from .forms import StoreAdminUserForm
 from .forms import POSAttendantUserForm
-from .models import AccessGroups
 from .models import User
 from .models import UserProfile
 from .models import Company
 from .models import Store
 from .models import PosCenter
-from .models import CompanyGroup
-
+from company.models import CompanyLevelGroup, StoreLevelGroup
 from sales.models import SaleItem
 
 # @unauthenticated_user
@@ -183,22 +182,27 @@ def pos_dashboard(request, pos_id = None):
 # Super
 @login_required(login_url='/login')
 def users_list_view(request):
-    groups_static = []
+    users = User.objects.all()
+
+    app_groups = []
     default_groups = DefaultRoles.choices
     for default_group in default_groups:
         group, created = Group.objects.get_or_create(name = default_group[0])
-        groups_static.append(group)
+        app_groups.append(group)
 
-    groups_dynamic = Group.objects.exclude(name__in=[group.name for group in groups_static])
-    users = User.objects.all()
+    company_groups = CompanyLevelGroup.objects.all()
+    store_groups = StoreLevelGroup.objects.all()
     form = AppUserForm()
 
     context = {
         "users" : users,
-        "groups_static" : groups_static,
-        "groups_dynamic" : groups_dynamic,
-        "form" : form,
+        "app_groups" : app_groups,
+        "company_groups" : company_groups,
+        "store_groups" : store_groups,
+        "form" : form
         }
+    
+    # print(context)
     
     if request.method == 'POST':
         form_data = AppUserForm(request.POST or None)
@@ -219,7 +223,15 @@ def role_permissions_list(request, role_id):
     group = Group.objects.get(pk=role_id)
     group_permissions = group.permissions.all()
     # Specify the app labels you want to include
-    model_names = ['user', 'company','companymanager','companystaff']
+    model_names = ['rolegroup','user','userprofile','companygroup','companygrouppermission']
+
+    model_names += ['companyapplication','company','store','poscenter','supplierentity','client']
+
+    model_names += ['category','variant','productunits','stockitem']
+
+    model_names += ['receivedstock', 'receivedstockitem','stockrequest', 'stockrequestitem']
+
+    model_names += ['sale', 'saleitem','purchaseorder', 'purchaseorderitem']
 
     # Initialize an empty list to store permissions
     all_permissions = []
@@ -564,7 +576,7 @@ def users_company_roles_list_view(request, company_id):
         group, created = Group.objects.get_or_create(name = default_group[0])
         groups_static.append(group)
 
-    company_groups =  CompanyGroup.objects.filter(company = company)
+    company_groups =  CompanyLevelGroup.objects.filter(company = company)
 
     context = {
         "company": company,
@@ -604,13 +616,15 @@ def users_company_roles_new_view(request, company_id):
         form_data = CompanyRoleFrom(request.POST)
 
         if form_data.is_valid():
-            group_name = form_data.cleaned_data.get("name")
+            role_name = form_data.cleaned_data.get("name")
             selected_perms = request.POST.getlist("permissions") 
-            company_group = CompanyGroup.create_company_group(group_name=group_name, company=company)
+            
+            company_group = create_company_group(role_name=role_name, company_id=company.pk)
 
             for perm_id in selected_perms:
                 selected_perm = Permission.objects.get(pk = perm_id)
-                company_group.group.permissions.add(selected_perm)
+                if company_group:
+                    company_group.group.permissions.add(selected_perm)
         
             return redirect('user:company-roles-list', company_id=company_id)
 

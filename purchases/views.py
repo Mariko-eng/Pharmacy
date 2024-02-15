@@ -5,11 +5,11 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from .forms import RequiredFormSet
-from .forms import PurchaseOrderRequestForm
-from .forms import PurchaseOrderRequestItemForm
+from .forms import PurchaseOrderForm
+from .forms import PurchaseOrderItemForm
 from company.models import Store
-from .models import PurchaseOrderRequest
-from .models import PurchaseOrderRequestItem
+from .models import PurchaseOrder
+from .models import PurchaseOrderItem
 
 
 @login_required(login_url='/login')
@@ -17,7 +17,7 @@ def store_purchase_orders_list(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
 
-    purchase_orders = PurchaseOrderRequest.objects.filter(store = store)
+    purchase_orders = PurchaseOrder.objects.filter(store = store)
     context = {
         "company": company,
         "store": store,
@@ -34,15 +34,15 @@ def store_purchase_orders_new(request, store_id):
 
     context = { "company": company, "store": store }
 
-    form = PurchaseOrderRequestForm(company=company)
+    form = PurchaseOrderForm(company=company, store=store)
     
-    PurchaseOrderRequestItemFormset = formset_factory(PurchaseOrderRequestItemForm, formset=RequiredFormSet, extra=1, validate_min=True)
+    PurchaseOrderItemFormset = formset_factory(PurchaseOrderItemForm, formset=RequiredFormSet, extra=1, validate_min=True)
 
-    formset = PurchaseOrderRequestItemFormset(prefix='items')
+    formset = PurchaseOrderItemFormset(prefix='items')
 
     if request.method == "POST":
-        form_data = PurchaseOrderRequestForm(request.POST,company=company)
-        formset_data = PurchaseOrderRequestItemFormset(request.POST, prefix='items')
+        form_data = PurchaseOrderForm(request.POST,company=company ,store=store)
+        formset_data = PurchaseOrderItemFormset(request.POST, prefix='items')
 
         if form_data.is_valid() and formset_data.is_valid():
             supplier_type = form_data.cleaned_data.get("supplier_type", None)
@@ -61,7 +61,7 @@ def store_purchase_orders_new(request, store_id):
                 return render(request, 'purchase_orders/new/index.html', context=context)
 
             
-            order_request = PurchaseOrderRequest(
+            order_request = PurchaseOrder(
                 supplier_type = supplier_type,
                 supplier_entity = supplier_entity,
                 supplier_store = supplier_store,  
@@ -100,7 +100,7 @@ def store_purchase_orders_edit(request, store_id, purchase_order_id):
     store = get_object_or_404(Store, pk=store_id)
     company = store.company
 
-    order_request = get_object_or_404(PurchaseOrderRequest, pk=purchase_order_id, store=store)
+    order_request = get_object_or_404(PurchaseOrder, pk=purchase_order_id, store=store)
 
     context = {
         "company": company,
@@ -108,16 +108,16 @@ def store_purchase_orders_edit(request, store_id, purchase_order_id):
         "order_request": order_request,
     }
 
-    form = PurchaseOrderRequestForm(instance = order_request, company=company)
+    form = PurchaseOrderForm(instance = order_request, company=company)
 
-    PurchaseOrderRequestItemFormSet = modelformset_factory(PurchaseOrderRequestItem, form=PurchaseOrderRequestItemForm, extra=0)
+    PurchaseOrderItemFormSet = modelformset_factory(PurchaseOrderItem, form=PurchaseOrderItemForm, extra=0)
     qs = order_request.receivedstockitem_set.all()
 
-    formset = PurchaseOrderRequestItemFormSet(prefix='items',queryset=qs)
+    formset = PurchaseOrderItemFormSet(prefix='items',queryset=qs)
 
     if request.method == "POST":
-        form_data = PurchaseOrderRequestForm(request.POST, instance=order_request, company=company)
-        formset_data = PurchaseOrderRequestItemFormSet(request.POST, prefix='items', queryset=qs)
+        form_data = PurchaseOrderForm(request.POST, instance=order_request, company=company)
+        formset_data = PurchaseOrderItemFormSet(request.POST, prefix='items', queryset=qs)
 
         if form_data.is_valid() and formset_data.is_valid():
             # Update the received stock details

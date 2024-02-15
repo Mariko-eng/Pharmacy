@@ -11,6 +11,7 @@ from company.mixins import Base
 from company.models import Company, Store
 from company.models import PosCenter, Client
 from inventory.models import StockItem
+from utils.permissions.sales import *
 from .tasks import generatePDf
 
 class Sale(Base):
@@ -56,6 +57,8 @@ class Sale(Base):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="sales_createdby")
 
     class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = sale_permissions
         ordering = ("-created_at",)
     
     @property
@@ -145,6 +148,11 @@ class SaleItem(Base):
     is_paid = models.BooleanField(default=False)  # New field to track payment status
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="sale_items_createdby")
+
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = sale_item_permissions
+        ordering = ("-created_at",)
 
     def __str__(self):
         return f"{self.stock_item.name} - {self.quantity} units sold"

@@ -5,8 +5,9 @@ from company.models import Store
 from company.models import SupplierEntity
 from company.mixins import Base
 from django.template.defaultfilters import slugify
+from utils.permissions.inventory import *
 
-class ProductCategory(Base):
+class Category(Base):
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -14,9 +15,11 @@ class ProductCategory(Base):
     def __str__(self):
         return self.name 
     class Meta:
-        unique_together = ('name', 'company')
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = category_permissions
+        unique_together = ('name', 'store')
     
-class ProductVariant(Base):
+class Variant(Base):
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -24,9 +27,11 @@ class ProductVariant(Base):
     def __str__(self):
         return self.name 
     class Meta:
-        unique_together = ('name', 'company')
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = variant_permissions
+        unique_together = ('name', 'store')
 
-class ProductUnits(Base): # Units Of Measure
+class Units(Base): # Units Of Measure
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length=255)
@@ -34,7 +39,9 @@ class ProductUnits(Base): # Units Of Measure
     def __str__(self):
         return self.name
     class Meta:
-        unique_together = ('name', 'company')
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = units_permissions
+        unique_together = ('name', 'store')
 
 class StockItem(Base):
     #Owner
@@ -44,9 +51,9 @@ class StockItem(Base):
     unique_no = models.CharField(max_length=255,unique=True)
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
-    category = models.ForeignKey(ProductCategory,on_delete=models.SET_NULL, null=True)
-    variant = models.ForeignKey(ProductVariant,on_delete=models.SET_NULL, null=True)
-    units = models.ForeignKey(ProductUnits,on_delete=models.SET_NULL, null=True)
+    category = models.ForeignKey(Category,on_delete=models.SET_NULL, null=True)
+    variant = models.ForeignKey(Variant,on_delete=models.SET_NULL, null=True)
+    units = models.ForeignKey(Units,on_delete=models.SET_NULL, null=True)
     item_photo = models.ImageField(upload_to="products", null=True)    
     unit_price = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     reorder_min_qty = models.DecimalField(max_digits=12, decimal_places=3, default=0)
@@ -61,6 +68,8 @@ class StockItem(Base):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="stock_items_createdby")
 
     class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = stock_item_permissions
         ordering = ("-created_at",)
 
     def __str__(self):
@@ -100,6 +109,8 @@ class ReceivedStock(Base):
     created_by = models.ForeignKey("user.User", null=True, on_delete=models.SET_NULL, related_name="received_stocks_createdby")
     
     class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = received_stock_permissions
         ordering = ("-created_at",)
 
     @property
@@ -156,6 +167,8 @@ class ReceivedStockItem(Base):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="received_stock_items_createdby")
 
     class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = received_stock_item_permissions
         ordering = ("-created_at",)
 
     def __str__(self):
@@ -182,6 +195,8 @@ class StockRequest(Base):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="stock_requests_createdby")
 
     class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = stock_request_permissions
         ordering = ("-created_at",)
 
     @property
@@ -232,22 +247,24 @@ class StockRequestItem(Base):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="stock_request_items_createdby")
 
     class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = stock_request_item_permissions
         ordering = ("-created_at",)
 
     def __str__(self):
         return self.stock_item.product.name
     
 
-class OutgoingConsumable(Base):
-    #Owner
-    company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
-    store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
-    # Data
-    stock_item = models.ForeignKey(StockItem,on_delete=models.CASCADE)
-    quantity = models.DecimalField(max_digits=12,decimal_places=3)
-    remarks = models.TextField(null=True,blank=True)
-    updated_by = models.CharField(max_length=225,null=True,blank=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="outgoing_consumables_createdby")
+# class OutgoingConsumable(Base):
+#     #Owner
+#     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
+#     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
+#     # Data
+#     stock_item = models.ForeignKey(StockItem,on_delete=models.CASCADE)
+#     quantity = models.DecimalField(max_digits=12,decimal_places=3)
+#     remarks = models.TextField(null=True,blank=True)
+#     updated_by = models.CharField(max_length=225,null=True,blank=True)
+#     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="outgoing_consumables_createdby")
 
-    def __str__(self):
-        return self.stock_item.name
+#     def __str__(self):
+#         return self.stock_item.name

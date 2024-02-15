@@ -7,130 +7,18 @@ from django.contrib.auth.decorators import login_required
 from django.forms import ValidationError
 from django.http import JsonResponse
 from .forms import RequiredFormSet
-from .forms import ProductCategoryForm, ProductVariantForm
-from .forms import ProductUnitsForm, SupplierForm
+from .forms import CategoryForm, VariantForm
+from .forms import UnitsForm, SupplierEntityForm
 from .forms import StockItemForm, ReceivedStockForm,ReceivedStockItemForm
 from .forms import StockRequestForm, StockRequestItemForm
-from .models import ProductVariant, ProductCategory, ProductUnits, StockItem
+from .models import Variant, Category, Units, StockItem
 from .models import ReceivedStock, ReceivedStockItem
 from .models import StockRequest, StockRequestItem
-from .mixins import CompanyMixin, CompanyFormMixin
-from company.models import Company, Store, SupplierEntity
-
-@login_required(login_url='/login')
-def product_categories_list(request,store_id = None, company_id = None):
-    form = ProductCategoryForm()
-    context = { "form" : form}
-
-    store = None
-    if store_id is not None:
-        store = Store.objects.get(pk=store_id)
-        company = store.company
-        context["store"] = store
-        context["company"] = company
-    elif company_id is not None:
-        company = Company.objects.get(pk=company_id)
-        context["company"] = company
-
-    results = ProductCategory.objects.filter(store = store)
-    context["results"] = results
-
-    if request.is_ajax():
-        if request.method == "POST":
-            form = ProductCategoryForm(request.POST)
-            if form.is_valid():
-                category = form.save(commit=False)
-                if ProductCategory.objects.filter(name = category.name.capitalize(), company = company).exists():
-                    form.errors['name'] = ["Name ALready Exists!"]
-                    return JsonResponse({'success': False, 'errors': form.errors})
-                category.name = category.name.capitalize()
-                category.company = company
-                category.store = store
-                category.save()
-                return JsonResponse({'success': True, 'category_id': category.id})
-            else:
-                return JsonResponse({'success': False, 'errors': form.errors})
-            
-    return render(request, 'categories/index.html', context=context) 
-
-
-@login_required(login_url='/login')
-def product_variants_list(request,store_id = None, company_id = None):
-    form = ProductVariantForm()
-    context = { "form" : form }
-
-    store = None
-    if store_id is not None:
-        store = Store.objects.get(pk=store_id)
-        company = store.company
-        context["store"] = store
-        context["company"] = company
-    elif company_id is not None:
-        company = Company.objects.get(pk=company_id)
-        context["company"] = company
-
-    results = ProductVariant.objects.filter(store = store)
-    context["results"] = results
-
-    if request.is_ajax():
-        if request.method == "POST":
-            form = ProductVariantForm(request.POST)
-            if form.is_valid():
-                variant = form.save(commit=False)
-                if ProductVariant.objects.filter(name = variant.name.capitalize(), company = company).exists():
-                    form.errors['name'] = ["Name ALready Exists!"]
-                    return JsonResponse({'success': False, 'errors': form.errors})
-                variant.name = variant.name.capitalize()
-                variant.company = company
-                variant.store = store
-                variant.save()
-                return JsonResponse({'success': True, 'variant_id': variant.id})
-            else:
-                return JsonResponse({'success': False, 'errors': form.errors})
-            
-    return render(request, 'settings/variants/index.html', context=context) 
-
-
-@login_required(login_url='/login')
-def product_units_list(request,store_id = None, company_id = None):
-    form = ProductUnitsForm()
-    context = { "form" : form}
-
-    store = None
-    if store_id is not None:
-        store = Store.objects.get(pk=store_id)
-        company = store.company
-        context["store"] = store
-        context["company"] = company
-    elif company_id is not None:
-        company = Company.objects.get(pk=company_id)
-        context["company"] = company
-
-    results = ProductUnits.objects.filter(store = store)
-    context["results"] = results
-
-    if request.is_ajax():
-        if request.method == "POST":
-            form = ProductUnitsForm(request.POST)
-            if form.is_valid():
-                unit = form.save(commit=False)
-                if ProductUnits.objects.filter(name = unit.name.capitalize(), company = company).exists():
-                    form.errors['name'] = ["Name ALready Exists!"]
-                    return JsonResponse({'success': False, 'errors': form.errors})
-                unit.name = unit.name.capitalize()
-                unit.company = company
-                unit.store = store
-                unit.save()
-                return JsonResponse({'success': True, 'unit_id': unit.id})
-            else:
-                return JsonResponse({'success': False, 'errors': form.errors})
-            
-    return render(request, 'settings/units/index.html', context=context) 
-
+from company.models import Company, Store, PosCenter, SupplierEntity
 
 @login_required(login_url='/login')
 def suppliers_list(request, store_id = None, company_id = None):
-    form = SupplierForm()
+    form = SupplierEntityForm()
 
     context = { "form" : form}
 
@@ -147,16 +35,16 @@ def suppliers_list(request, store_id = None, company_id = None):
     results = SupplierEntity.objects.filter(store = store)
     context["results"] = results
 
-
     if request.is_ajax():
         if request.method == "POST":
-            form = SupplierForm(request.POST)
+            form = SupplierEntityForm(request.POST)
             if form.is_valid():
-                supplier = form.save(commit=False)
-                if SupplierEntity.objects.filter(name = supplier.name.capitalize(), store = store).exists():
+                name = form.cleaned_data.get("name")
+                if SupplierEntity.objects.filter(name = name, store = store).exists():
                     form.errors['name'] = ["Name ALready Exists!"]
                     return JsonResponse({'success': False, 'errors': form.errors})
-                supplier.name = supplier.name.capitalize()
+        
+                supplier = form.save(commit=False)
                 supplier.store = store
                 supplier.save()
                 return JsonResponse({'success': True, 'supplier_id': supplier.id})
@@ -168,17 +56,168 @@ def suppliers_list(request, store_id = None, company_id = None):
 
 
 @login_required(login_url='/login')
-def company_products_list(request, company_id):
-    company = Company.objects.get(pk = company_id)
-    results = StockItem.objects.filter(company = company)
+def store_product_categories_list_view(request, store_id = None, company_id = None):
+    form = CategoryForm()
+    context = { "form" : form}
 
-    context = { "company": company, "results" : results }
+    store = None
+    if store_id is not None:
+        store = Store.objects.get(pk=store_id)
+        company = store.company
+        context["store"] = store
+        context["company"] = company
+    elif company_id is not None:
+        company = Company.objects.get(pk=company_id)
+        context["company"] = company
 
-    return render(request, 'products/list/index.html', context=context) 
+    results = Category.objects.filter(store = store)
+    context["results"] = results
+
+    if request.is_ajax():
+        if request.method == "POST":
+            form = CategoryForm(request.POST)
+            if form.is_valid():
+                name = form.cleaned_data.get("name")
+                if Category.objects.filter(name__iexact = name, store = store).exists():
+                    form.errors['name'] = ["Name ALready Exists!"]
+                    return JsonResponse({'success': False, 'errors': form.errors})
+        
+                category = form.save(commit=False)
+                category.company = company
+                category.store = store
+                category.save()
+                return JsonResponse({'success': True, 'category_id': category.id})
+            else:
+                return JsonResponse({'success': False, 'errors': form.errors})
+            
+    return render(request, 'settings/categories/index.html', context=context) 
 
 
 @login_required(login_url='/login')
-def stock_items_list(request, store_id):
+def pos_product_categories_list_view(request, pos_id):
+    pos = PosCenter.objects.get(pk = pos_id)
+
+    store = pos.store
+
+    company = store.company
+
+    results = Category.objects.filter(store = store)
+
+    context = { "company" : company, "store": store, "pos": pos, "results": results}
+            
+    return render(request, 'settings/categories/pos/index.html', context=context) 
+
+
+@login_required(login_url='/login')
+def store_product_variants_list_view(request,store_id = None, company_id = None):
+    form = VariantForm()
+    context = { "form" : form }
+
+    store = None
+    company = None
+    if store_id is not None:
+        store = Store.objects.get(pk=store_id)
+        company = store.company
+        context["store"] = store
+        context["company"] = company
+    elif company_id is not None:
+        company = Company.objects.get(pk=company_id)
+        context["company"] = company
+
+    results = Variant.objects.filter(store = store)
+    context["results"] = results
+
+    if request.is_ajax():
+        if request.method == "POST":
+            form = VariantForm(request.POST)
+            if form.is_valid():
+                name = form.cleaned_data.get("name")
+                if Variant.objects.filter(name__iexact = name, store = store).exists():
+                    form.errors['name'] = ["Name ALready Exists!"]
+                    return JsonResponse({'success': False, 'errors': form.errors})
+                
+                variant = form.save(commit=False)
+                variant.company = company
+                variant.store = store
+                variant.save()
+                return JsonResponse({'success': True, 'variant_id': variant.id})
+            else:
+                return JsonResponse({'success': False, 'errors': form.errors})
+            
+    return render(request, 'settings/variants/index.html', context=context) 
+
+
+@login_required(login_url='/login')
+def pos_product_variants_list_view(request, pos_id):
+    pos = PosCenter.objects.get(pk = pos_id)
+
+    store = pos.store
+
+    company = store.company
+
+    results = Variant.objects.filter(store = store)
+
+    context = { "company" : company, "store": store, "pos": pos, "results": results}
+
+    return render(request, 'settings/variants/pos/index.html', context=context) 
+
+
+
+@login_required(login_url='/login')
+def store_product_units_list_view(request,store_id = None, company_id = None):
+    form = UnitsForm()
+    context = { "form" : form}
+
+    store = None
+    if store_id is not None:
+        store = Store.objects.get(pk=store_id)
+        company = store.company
+        context["store"] = store
+        context["company"] = company
+    elif company_id is not None:
+        company = Company.objects.get(pk=company_id)
+        context["company"] = company
+
+    results = Units.objects.filter(store = store)
+    context["results"] = results
+
+    if request.is_ajax():
+        if request.method == "POST":
+            form = UnitsForm(request.POST)
+            if form.is_valid():
+                name = form.cleaned_data.get("name")
+                if Units.objects.filter(name__iexact = name, store = store).exists():
+                    form.errors['name'] = ["Name ALready Exists!"]
+                    return JsonResponse({'success': False, 'errors': form.errors})
+            
+                units = form.save(commit=False)
+                units.company = company
+                units.store = store
+                units.save()
+                return JsonResponse({'success': True, 'unit_id': units.id})
+            else:
+                return JsonResponse({'success': False, 'errors': form.errors})
+            
+    return render(request, 'settings/units/index.html', context=context) 
+
+
+@login_required(login_url='/login')
+def pos_product_units_list_view(request, pos_id):
+    pos = PosCenter.objects.get(pk = pos_id)
+
+    store = pos.store
+
+    company = store.company
+
+    results = Units.objects.filter(store = store)
+
+    context = { "company" : company, "store": store, "pos": pos, "results": results}
+
+    return render(request, 'settings/units/pos/index.html', context=context) 
+
+
+@login_required(login_url='/login')
+def store_stock_items_list_view(request, store_id):
     store = Store.objects.get(pk=store_id)
     company = store.company
     results = StockItem.objects.filter(store=store)
@@ -186,12 +225,32 @@ def stock_items_list(request, store_id):
     context = { 
         "company": company,
         "store": store,
-        "results" : results
-        }
+        "results" : results}
 
     return render(request, 'products/list/index.html', context=context) 
 
- 
+
+@login_required(login_url='/login')
+def pos_stock_items_list_view(request, pos_id):
+    pos = PosCenter.objects.get(pk=pos_id)
+    store = pos.store
+    company = store.company
+    results = StockItem.objects.filter(store=store)
+
+    context = { "company" : company, "store": store, "pos": pos, "results": results}
+
+    return render(request, 'products/list/pos/index.html', context=context) 
+
+
+@login_required(login_url='/login')
+def company_stock_items_list_view(request, company_id):
+    company = Company.objects.get(pk = company_id)
+    results = StockItem.objects.filter(company = company)
+
+    context = { "company": company, "results" : results }
+
+    return render(request, 'products/list/index.html', context=context) 
+
 @login_required(login_url='/login')
 def stock_items_detail(request, store_id, stock_item_id):
     store = Store.objects.get(pk=store_id)
@@ -213,14 +272,14 @@ def stock_items_new(request, store_id):
         company = store.company
 
 
-    form = StockItemForm(company=company)
+    form = StockItemForm(store=store)
     context = {
         "company": company,
         "store": store,
         "form" : form }
 
     if request.method == "POST":
-        form = StockItemForm(request.POST, request.FILES, company=company)
+        form = StockItemForm(request.POST, request.FILES, store=store)
         if form.is_valid():
             name = form.cleaned_data.get("name")
             description = form.cleaned_data.get("description")
@@ -268,7 +327,7 @@ def stock_items_edit(request, store_id, stock_item_id):
 
     product = StockItem.objects.get(pk = stock_item_id)
 
-    form = StockItemForm(instance=product, company=company)
+    form = StockItemForm(instance=product, store=store)
 
     context = { 
         "company": company,
@@ -278,7 +337,7 @@ def stock_items_edit(request, store_id, stock_item_id):
         }
 
     if request.method == "POST":
-        form = StockItemForm(request.POST, request.FILES, instance=product)
+        form = StockItemForm(request.POST, request.FILES, instance=product, store=store)
         if form.is_valid():
             name = form.cleaned_data.get("name")
             category = form.cleaned_data.get("category")
@@ -371,15 +430,14 @@ def store_received_stock_new(request, store_id):
         "company": company,
         "store": store}
 
-    form = ReceivedStockForm(company=company, store=store)
+    form = ReceivedStockForm(company=company,store=store)
     
-    # ReceivedStockItemFormSet = formset_factory(ReceivedStockItemForm, extra=1, validate_min=True)
     ReceivedStockItemFormSet = formset_factory(ReceivedStockItemForm, formset=RequiredFormSet, extra=1, validate_min=True)
 
     formset = ReceivedStockItemFormSet(prefix='items', form_kwargs={'store': store})
 
     if request.method == "POST":
-        form_data = ReceivedStockForm(request.POST,company=company, store=store)
+        form_data = ReceivedStockForm(request.POST, company=company, store=store)
         formset_data = ReceivedStockItemFormSet(request.POST, prefix='items')
 
         if form_data.is_valid() and formset_data.is_valid():
@@ -458,7 +516,7 @@ def store_received_stock_edit(request, store_id, received_stock_id):
     formset = ReceivedStockItemFormSet(prefix='items',queryset=qs, form_kwargs={'store': store})
 
     if request.method == "POST":
-        form_data = ReceivedStockForm(request.POST, instance=received_stock, company=company)
+        form_data = ReceivedStockForm(request.POST, instance=received_stock, company=company, store=store)
         formset_data = ReceivedStockItemFormSet(request.POST, prefix='items', queryset=qs)
 
         if form_data.is_valid() and formset_data.is_valid():

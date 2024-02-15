@@ -1,6 +1,7 @@
 from django.db import models
+from django.contrib.auth.models import Group
 from .mixins import Base
-
+from utils.permissions.company import *
 class CompanyApplication(Base):
     STATUS_TYPES = [('PENDING', 'PENDING'), 
                     ('APPROVED', 'APPROVED'),
@@ -18,6 +19,10 @@ class CompanyApplication(Base):
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = company_application_permissions
+
 
 class Company(Base):
     application = models.ForeignKey(CompanyApplication,null=True,on_delete=models.SET_NULL)
@@ -30,8 +35,20 @@ class Company(Base):
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = company_permissions
+
     def __str__(self):
         return self.name
+    
+class CompanyLevelGroup(Base): # Company level groups
+    company = models.ForeignKey(Company,on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    name = models.CharField(max_length = 225, blank=True, null=True)
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = company_group_level_permissions
 
 class Store(Base):
     STORE_TYPES = [('RETAIL', 'RETAIL'),('WHOLESALE', 'WHOLESALE'),]
@@ -48,8 +65,21 @@ class Store(Base):
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = store_permissions
+
     def __str__(self):
         return self.name
+
+class StoreLevelGroup(Base): # Company level groups
+    store = models.ForeignKey(Store,on_delete=models.CASCADE)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    name = models.CharField(max_length = 225, blank=True, null=True)
+
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = company_group_level_permissions
 
 class PosCenter(Base):
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
@@ -57,9 +87,12 @@ class PosCenter(Base):
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = pos_center_permissions
+
     def __str__(self):
         return f"{self.name} - {self.store.name}"
-
 
 class SupplierEntity(Base):
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
@@ -69,6 +102,10 @@ class SupplierEntity(Base):
     location = models.CharField(max_length=225, null=True, blank=True)
     updated_by = models.CharField(max_length=225, null=True, blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="suppliers_createdby")
+
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = supplier_entity_permissions
 
     def __str__(self):
         return self.name
@@ -81,6 +118,10 @@ class Client(Base):
     address = models.TextField(blank=True, null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="posusers")
+
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = client_permissions
 
     def __str__(self):
         return self.name

@@ -4,27 +4,6 @@ from . import views
 app_name = 'inventory' 
 
 urlpatterns = [
-    ## Company Categories
-    path('home/company/<int:company_id>/inventory/products/categories/list/',
-        views.product_categories_list, name="company-product-categories-list"),
-    # Store Categories
-    path('home/store/<int:store_id>/inventory/products/categories/list/',
-        views.product_categories_list, name="store-product-categories-list"),
-
-    ## Company Variants
-    path('home/company/<int:company_id>/inventory/products/variants/list/',
-        views.product_variants_list, name="company-product-variants-list"),
-    # Store Variants
-    path('home/store/<int:store_id>/inventory/products/variants/list/',
-        views.product_variants_list, name="store-product-variants-list"),
-
-    ## Company Product Units
-    path('home/company/<int:company_id>/inventory/products/units/list/',
-        views.product_units_list, name="company-product-units-list"),
-    # Store Product Units
-    path('home/store/<int:store_id>/inventory/products/units/list/',
-        views.product_units_list, name="store-product-units-list"),
-
     ## Company Suppliers
     path('home/company/<int:company_id>/inventory/products/suppliers/list/',
         views.suppliers_list, name="company-product-suppliers-list"),
@@ -32,13 +11,37 @@ urlpatterns = [
     path('home/store/<int:store_id>/inventory/products/suppliers/list/',
         views.suppliers_list, name="store-product-suppliers-list"),
 
+    # Store Categories
+    path('home/store/<int:store_id>/inventory/products/categories/list/',
+        views.store_product_categories_list_view, name="store-product-categories-list"),
+    # Pos Categories
+    path('home/pos/<int:pos_id>/inventory/products/categories/list/',
+        views.pos_product_categories_list_view, name="pos-product-categories-list"),
 
-    ## Company Products
-    path('home/company/<int:company_id>/inventory/products/list/',
-        views.company_products_list, name="company-products-list"),
+    # Store Variants
+    path('home/store/<int:store_id>/inventory/products/variants/list/',
+        views.store_product_variants_list_view, name="store-product-variants-list"),
+    # Pos Variants
+    path('home/pos/<int:pos_id>/inventory/products/variants/list/',
+        views.pos_product_variants_list_view, name="pos-product-variants-list"),
+
+    # Store Units
+    path('home/store/<int:store_id>/inventory/products/variants/list/',
+        views.store_product_units_list_view, name="store-product-units-list"),
+    # Pos Variants
+    path('home/pos/<int:pos_id>/inventory/products/variants/list/',
+        views.pos_product_units_list_view, name="pos-product-units-list"),
+
     # Store Products
     path('home/store/<int:store_id>/inventory/products/list/',
-        views.stock_items_list, name="store-products-list"),
+        views.store_stock_items_list_view, name="store-products-list"),
+    # Pos Products
+    path('home/pos/<int:pos_id>/inventory/products/list/',
+        views.pos_stock_items_list_view, name="pos-products-list"),
+    ## Company Products
+    path('home/company/<int:company_id>/inventory/products/list/',
+        views.company_stock_items_list_view, name="company-products-list"),
+
     path('home/store/<int:store_id>/inventory/products/detail/<int:stock_item_id>/',
         views.stock_items_detail, name="store-products-detail"),
     path('home/store/<int:store_id>/inventory/products/edit/<int:stock_item_id>/',

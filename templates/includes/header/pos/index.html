@@ -45,25 +45,25 @@
         
         <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
           <li class="dropdown-header">
-            <a class="nav-link nav-icon" href="{% url 'inventory:store-products-list' store_id=store.id %}">All Products</a>
+            <a class="nav-link nav-icon" href="{% url 'inventory:pos-products-list' pos_id=pos.id %}">All Products</a>
           </li>
           <li>
             <hr class="dropdown-divider">
           </li>
           <li class="dropdown-header">
-            <a class="nav-link nav-icon" href="{% url 'inventory:store-product-categories-list' store_id=store.id %}">Categories</a>
+            <a class="nav-link nav-icon" href="{% url 'inventory:pos-product-categories-list' pos_id=pos.id %}">Categories</a>
           </li>
           <li>
             <hr class="dropdown-divider">
           </li>
           <li class="dropdown-header">
-            <a class="nav-link nav-icon" href="{% url 'inventory:store-product-variants-list' store_id=store.id %}">Variants</a>
+            <a class="nav-link nav-icon" href="{% url 'inventory:pos-product-variants-list' pos_id=pos.id %}">Variants</a>
           </li>
           <li>
             <hr class="dropdown-divider">
           </li>
           <li class="dropdown-header">
-            <a class="nav-link nav-icon" href="{% url 'inventory:store-product-units-list' store_id=store.id %}">Metrics/Units</a>
+            <a class="nav-link nav-icon" href="{% url 'inventory:pos-product-units-list' pos_id=pos.id %}">Metrics/Units</a>
           </li>
           <li>
             <hr class="dropdown-divider">

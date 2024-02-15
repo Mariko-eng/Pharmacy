@@ -1,26 +1,26 @@
 from django import forms
-from .models import ProductVariant, ProductCategory, ProductUnits
+from .models import Variant, Category, Units
 from .models import StockItem, ReceivedStock, ReceivedStockItem
 from .models import StockRequest, StockRequestItem
 from company.models import SupplierEntity, Store
 from django.forms import BaseFormSet
 
-class ProductCategoryForm(forms.ModelForm):
+class CategoryForm(forms.ModelForm):
     class Meta:
-        model = ProductCategory
+        model = Category
         fields = ['name']
 
-class ProductVariantForm(forms.ModelForm):
+class VariantForm(forms.ModelForm):
     class Meta:
-        model = ProductVariant
+        model = Variant
         fields = ['name']
         
-class ProductUnitsForm(forms.ModelForm):
+class UnitsForm(forms.ModelForm):
     class Meta:
-        model = ProductUnits 
+        model = Units 
         fields = ['name']
 
-class SupplierForm(forms.ModelForm):
+class SupplierEntityForm(forms.ModelForm):
     class Meta:
         model = SupplierEntity
         fields = ['name','phone','email','location']
@@ -64,13 +64,13 @@ class StockItemForm(forms.ModelForm):
                    'created_by',
                    'created_at',]
         
-    def __init__(self, *args, company=None, **kwargs):
+    def __init__(self, *args, store=None, **kwargs):
         super(StockItemForm, self).__init__(*args, **kwargs)
 
-        if company:
-            self.fields['category'].queryset = ProductCategory.objects.filter(company=company)
-            self.fields['variant'].queryset = ProductVariant.objects.filter(company=company)
-            self.fields['units'].queryset = ProductUnits.objects.filter(company=company)
+        if store:
+            self.fields['category'].queryset = Category.objects.filter(store=store)
+            self.fields['variant'].queryset = Variant.objects.filter(store=store)
+            self.fields['units'].queryset = Units.objects.filter(store=store)
 
 
 class RequiredFormSet(BaseFormSet):

@@ -5,8 +5,9 @@ from company.models import Company, SupplierEntity
 from company.models import Store
 from company.mixins import Base
 from inventory.models import StockItem
+from utils.permissions.purchases import *
 
-class PurchaseOrderRequest(Base):
+class PurchaseOrder(Base):
     SUPPLIER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]
 
     PAYMENT_PERIODS = [
@@ -40,6 +41,8 @@ class PurchaseOrderRequest(Base):
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="purchase_orders_createdby")
 
     class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = purchase_order_permissions
         ordering = ("-created_at",)
     
     @property
@@ -52,12 +55,12 @@ class PurchaseOrderRequest(Base):
 
     @property
     def items_count(self):
-        return self.purchaseorderrequestitem_set.count()
+        return self.purchaseorderitem_set.count()
     
     @property
     def total_cost(self):
         total = 0
-        items = self.purchaseorderrequestitem_set.all()
+        items = self.purchaseorderitem_set.all()
         for item in items:
             total = total + item.total_cost
         return total
@@ -66,19 +69,24 @@ class PurchaseOrderRequest(Base):
         if self.uniqueId is None:
             self.uniqueId = str(uuid4()).split('-')[4]
 
-        super(PurchaseOrderRequest, self).save(*args, **kwargs)
+        super(PurchaseOrder, self).save(*args, **kwargs)
 
-class PurchaseOrderRequestItem(Base):
+class PurchaseOrderItem(Base):
     #Owner
     company = models.ForeignKey(Company,on_delete=models.SET_NULL,null=True)
     store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True)
     # Data
-    order_request = models.ForeignKey(PurchaseOrderRequest, on_delete=models.CASCADE)
+    order_request = models.ForeignKey(PurchaseOrder, on_delete=models.CASCADE)
     stock_item = models.ForeignKey(StockItem,on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=12, decimal_places=3)
     total_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="purchase_order_items_createdby")
+
+    class Meta:
+        default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
+        permissions = purchase_order_item_permissions
+        ordering = ("-created_at",)
 
     def __str__(self):
         return f"{self.product.name} - {self.quantity}"

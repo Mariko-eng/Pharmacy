@@ -1,8 +1,7 @@
 from django import forms
-from .models import PurchaseOrderRequest
-from .models import PurchaseOrderRequestItem 
+from .models import PurchaseOrder
+from .models import PurchaseOrderItem 
 from company.models import SupplierEntity, Store
-# from django.forms import inlineformset_factory
 from django.forms import BaseFormSet
 
 
@@ -13,10 +12,10 @@ class RequiredFormSet(BaseFormSet):
             form.empty_permitted = False
 
 
-class PurchaseOrderRequestForm(forms.ModelForm):
+class PurchaseOrderForm(forms.ModelForm):
     
     supplier_type = forms.ChoiceField(
-        choices = PurchaseOrderRequest.SUPPLIER_TYPES,
+        choices = PurchaseOrder.SUPPLIER_TYPES,
         widget = forms.RadioSelect(),
     )
 
@@ -31,22 +30,27 @@ class PurchaseOrderRequestForm(forms.ModelForm):
     )
     
     class Meta:
-        model = PurchaseOrderRequest
+        model = PurchaseOrder
         fields = [
+            'supplier_type',
+            'supplier_entity',
+            'supplier_store',
             'order_date',
             'delivery_date',
             'order_notes',] 
         exclude = ['company','store','payment_period','updated_by','updated_at','created_by','created_at']
 
+    def __init__(self, *args, company=None, store=None, **kwargs):
+        super(PurchaseOrderForm, self).__init__(*args, **kwargs)
 
-    def __init__(self, *args, company=None, **kwargs):
-        super(PurchaseOrderRequestForm, self).__init__(*args, **kwargs)
+        if store:
+            self.fields['supplier_entity'].queryset = SupplierEntity.objects.filter(store=store)
 
         if company:
-            self.fields['supplier_entity'].queryset = SupplierEntity.objects.filter(company=company)
-            self.fields['supplier_store'].queryset = Store.objects.filter(company=company)
+            if store:
+                self.fields['supplier_store'].queryset = Store.objects.filter(company=company).exclude(pk=store.id)
 
-                    # Check if an instance is passed and set the initial value for supplier_entity
+        # Check if an instance is passed and set the initial value for supplier_entity
         instance = kwargs.get('instance')
         if instance and instance.supplier_entity:
             self.initial['supplier_entity'] = instance.supplier_entity
@@ -55,10 +59,10 @@ class PurchaseOrderRequestForm(forms.ModelForm):
             self.initial['supplier_store'] = instance.supplier_store
 
 
-class PurchaseOrderRequestItemForm(forms.ModelForm):
+class PurchaseOrderItemForm(forms.ModelForm):
     total_cost = forms.DecimalField(max_digits=12, decimal_places=3)
     class Meta:
-        model = PurchaseOrderRequestItem
+        model = PurchaseOrderItem
         fields = [
             'stock_item','quantity','total_cost',
         ]

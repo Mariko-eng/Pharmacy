@@ -1,6 +1,4 @@
 from django.db.models import Manager, QuerySet
-# from .models import CompanyBranch, CompanyStaff
-
 
 class CompanyDataManager(Manager):
 
@@ -134,7 +132,33 @@ class SaleItemManager(Manager):
         return self.get_queryset().for_pos_center(pos_center)
     
     
-    
-
 
     
+# class ProductQuerySet(QuerySet):
+#     def for_company(self, user, company):
+#         if user.is_superuser:
+#             return self.filter(company = company)
+#         else:
+#             user_company = user.userprofile.company
+#             return self.filter(company = user_company)
+    
+#     def for_store(self, user, store):
+#         if user.is_superuser:
+#             return self.filter(store = store)
+        
+#         user_company = user.userprofile.company
+#         user_store = user.userprofile.store
+#         user_account_type = user.account_type
+
+#         if user_account_type == "Company Admin":
+#             return self.filter(company=user_company, store=store)
+#         else:
+#             return self.filter(company=user_company, store=user_store)
+        
+        
+
+        
+        
+
+        
+        return self.filter(store = store)

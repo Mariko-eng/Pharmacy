@@ -1,0 +1,56 @@
+{% extends 'base/pos/index.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">
+  <h1>Store : {{ store.name }}!</h1>
+  <h1>POS : {{ pos.name }}!</h1>
+  
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">Home</a></li>
+      <li class="breadcrumb-item active"><a>Variants</a></li>
+    </ol>
+  </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="card">
+  <div class="card-body">
+    <h5 class="card-title">Product Variants</h5>
+    
+    <!-- Default Tabs -->
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">List</button>
+      </li>
+    </ul>
+    <div class="tab-content pt-2" id="myTabContent">
+      <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+        <div class="table-responsive small">
+          <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for result in results %}
+              <tr>
+                <td>{{result.name}}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div><!-- End Default Tabs -->
+</div>
+</div>
+{% endblock %}
+
