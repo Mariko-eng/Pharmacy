@@ -10,6 +10,8 @@ from django.http import JsonResponse
 from django.contrib.auth.models import Group, Permission
 from utils.groups.access_groups import AccessGroups
 from utils.groups.default_roles import DefaultRoles
+from utils.permissions.user import user_app_admin_permissions
+from utils.permissions.user import user_company_admin_permissions
 from utils.defaults.init_company_groups import create_company_group
 from .forms import  AppUserForm
 from .forms import CompanyRoleFrom
@@ -199,8 +201,7 @@ def users_list_view(request):
         "app_groups" : app_groups,
         "company_groups" : company_groups,
         "store_groups" : store_groups,
-        "form" : form
-        }
+        "form" : form }
     
     # print(context)
     
@@ -219,9 +220,11 @@ def users_list_view(request):
 
 
 @login_required(login_url='/login')
-def role_permissions_list(request, role_id):
+def super_role_permissions_edit_view(request, group_id):
     group = Group.objects.get(pk=role_id)
+    # print(group)
     group_permissions = group.permissions.all()
+    # print(group_permissions)
     # Specify the app labels you want to include
     model_names = ['rolegroup','user','userprofile','companygroup','companygrouppermission']
 
@@ -266,6 +269,137 @@ def role_permissions_list(request, role_id):
                 group.permissions.remove(existing_perm)
         
     return render(request, "user/super/roles/index.html", context= context)
+
+#  Company Roles
+@login_required(login_url='/login')
+def company_role_permissions_edit_view(request, group_id):
+    group = Group.objects.get(pk=group_id)
+    company_group = CompanyLevelGroup.objects.get(group=group)
+    company = company_group.company
+
+    # print(group)
+    group_permissions = group.permissions.all()
+    # print(group_permissions)
+    # Specify the app labels you want to include
+    model_names = ['rolegroup','user','userprofile','companygroup','companygrouppermission']
+
+    model_names += ['companyapplication','company','store','poscenter','supplierentity','client']
+
+    model_names += ['category','variant','productunits','stockitem']
+
+    model_names += ['receivedstock', 'receivedstockitem','stockrequest', 'stockrequestitem']
+
+    model_names += ['sale', 'saleitem','purchaseorder', 'purchaseorderitem']
+
+    # Initialize an empty list to store permissions
+    all_permissions = []
+
+    # Loop through each app label and filter permissions
+    for model_name in model_names:
+        permissions_for_app = Permission.objects.filter(
+            content_type__model=model_name
+        )
+        # print(permissions_for_app)
+        all_permissions.extend(permissions_for_app)
+
+    context = {
+        "company": company,
+        "company_group": company_group,
+        "group": group,
+        "group_permissions": group_permissions,
+        "all_permissions" : all_permissions }
+
+    if request.method == "POST":
+        selected_perms = request.POST.getlist("permissions") 
+        
+        # Get the existing permissions of the group
+        existing_perms = list(group.permissions.values_list('id', flat=True))
+
+        for perm_id in selected_perms:
+            selected_perm = Permission.objects.get(pk = perm_id)
+            group.permissions.add(selected_perm)
+
+        # Remove permissions that are not in the selected list
+        for perm_id in existing_perms:
+            if str(perm_id) not in selected_perms:
+                existing_perm = Permission.objects.get(pk=perm_id)
+                group.permissions.remove(existing_perm)
+        
+    return render(request, "user/company/roles/index.html", context= context)
+
+
+#  Store Roles
+@login_required(login_url='/login')
+def store_role_permissions_edit_view(request, group_id):
+    group = Group.objects.get(pk=group_id)
+    store_group = StoreLevelGroup.objects.get(group=group)
+    store = store_group.store
+    company = store.company
+
+    # print(group)
+    group_permissions = group.permissions.all()
+    # print(group_permissions)
+    # Specify the app labels you want to include
+    model_names = ['store','user','userprofile','storelevelgroup']
+
+    model_names += ['poscenter','supplierentity','client']
+
+    model_names += ['category','variant','productunits','stockitem']
+
+    model_names += ['receivedstock', 'receivedstockitem','stockrequest', 'stockrequestitem']
+
+    model_names += ['sale', 'saleitem','purchaseorder', 'purchaseorderitem']
+
+    # Initialize an empty list to store permissions
+    all_permissions = []
+
+    # Loop through each model label and filter permissions
+    for model_name in model_names:
+        permissions_for_model = Permission.objects.filter(content_type__model=model_name)
+        # print(permissions_for_app)
+        all_permissions.extend(permissions_for_model)
+
+    app_and_company_admin_permissions = user_app_admin_permissions + user_company_admin_permissions
+    # Create a set of non_store_permissions
+    non_store_permissions_set = set()
+    for codename, description in app_and_company_admin_permissions:
+        permission, created = Permission.objects.get_or_create(codename=codename)
+        non_store_permissions_set.add(permission) # Add items to the set
+
+    # Convert the list of all_permissions to a set
+    all_permissions_set = set(all_permissions)
+
+    # Remove non_store_permissions from all_permissions_set
+    filtered_permissions_set = all_permissions_set - non_store_permissions_set
+
+    # Convert the set back to a list if needed
+    filtered_permissions = list(filtered_permissions_set)
+
+    context = {
+        "company": company,
+        "store": store,
+        "store_group": store_group,
+        "group": group,
+        "group_permissions": group_permissions,
+        "all_permissions" : filtered_permissions}
+
+    if request.method == "POST":
+        selected_perms = request.POST.getlist("permissions") 
+        
+        # Get the existing permissions of the group
+        existing_perms = list(group.permissions.values_list('id', flat=True))
+
+        for perm_id in selected_perms:
+            selected_perm = Permission.objects.get(pk = perm_id)
+            group.permissions.add(selected_perm)
+
+        # Remove permissions that are not in the selected list
+        for perm_id in existing_perms:
+            if str(perm_id) not in selected_perms:
+                existing_perm = Permission.objects.get(pk=perm_id)
+                group.permissions.remove(existing_perm)
+        
+    return render(request, "user/store/roles/index.html", context= context)
 
 
 # Company Users
@@ -503,7 +637,6 @@ def users_store_admin_user_new(request, store_id):
     return render(request, "user/store/new/store_admin.html", context=context)
 
 
-
 @login_required(login_url='/login')
 def users_store_pos_attendant_user_new(request, store_id):
     store = Store.objects.get(pk = store_id)
@@ -562,7 +695,6 @@ def users_store_pos_attendant_user_new(request, store_id):
             messages.error(request,"Failed to create a POS attendant account!")
 
     return render(request, "user/store/new/pos_attendant.html", context=context)
-
 
 
 ########################### Company Roles #######################

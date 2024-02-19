@@ -84,7 +84,7 @@
                                         {% for item in app_groups %}
                                         <tr>
                                             <td>{{item.name}}</td>
-                                            <td><a href="{% url 'user:users-roles-permissions-list' role_id=item.id %}">
+                                            <td><a href="{% url 'user:users-roles-permissions-list' group_id=item.id %}">
                                                 <i class="bi bi-pencil"></i>View Permissions</a></td>
                                             </tr>
                                             {% endfor %}
@@ -110,7 +110,7 @@
                                                 <td>{{item.company}}</td>
                                                 <td>{{item.name}}</td>
                                                 <td>{{item.group.name}}</td>
-                                                <td><a href="{% url 'user:users-roles-permissions-list' role_id=item.id %}">
+                                                <td><a href="{% url 'user:users-company-roles-permissions-list' group_id=item.group.id %}">
                                                     <i class="bi bi-pencil"></i>View Permissions</a>
                                                 </td>
                                             </tr>
@@ -139,7 +139,7 @@
                                                 <td>{{item.store.name}}</td>
                                                 <td>{{item.name}}</td>
                                                 <td>{{item.group.name}}</td>
-                                                <td><a href="{% url 'user:users-roles-permissions-list' role_id=item.id %}">
+                                                <td><a href="{% url 'user:users-store-roles-permissions-list' group_id=item.group.id %}">
                                                     <i class="bi bi-pencil"></i>View Permissions</a>
                                                 </td>
                                             </tr>

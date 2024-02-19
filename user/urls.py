@@ -20,7 +20,9 @@ urlpatterns = [
     path('home/pos/dashboard/', views.pos_dashboard, name="pos-dashboard"),
 
     path('home/users/list/',views.users_list_view,name="users-list"),  
-    path('home/users/roles/<int:role_id>/permissions/',views.role_permissions_list, name="users-roles-permissions-list"),
+    path('home/users/roles/<int:group_id>/permissions/',views.super_role_permissions_edit_view, name="users-roles-permissions-list"),
+    path('home/users/company/roles/<int:group_id>/permissions/',views.company_role_permissions_edit_view, name="users-company-roles-permissions-list"),
+    path('home/users/store/roles/<int:group_id>/permissions/',views.store_role_permissions_edit_view, name="users-store-roles-permissions-list"),
 
     path('home/company/<int:company_id>/users/', views.users_company_list_view, name="users-company-list"),
     path('home/company/<int:company_id>/users/add/', views.users_company_new_view,name="users-company-new"),

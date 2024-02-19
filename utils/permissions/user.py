@@ -1,6 +1,6 @@
 
 
-user_app_specific_permissions = [
+user_app_admin_permissions = [
     ("add_app_superuser", "Add app superuser"),
     ("edit_app_superuser", "Edit app superuser"),
     ("activate_app_superuser", "Activate app superuser"),
@@ -20,7 +20,7 @@ user_app_specific_permissions = [
     ("delete_company_account_holder","Delete company account holder"),
 ]
 
-user_company_specific_permissions = [
+user_company_admin_permissions = [
     ("add_company_admin","Add company admin"),
     ("edit_company_admin","Edit company admin"),
     ("activate_company_admin","Activate company admin"),
@@ -32,6 +32,21 @@ user_company_specific_permissions = [
     ("activate_store_manager","Activate store manager"),
     ("deactivate_store_manager","Deactivate store manager"),
     ("delete_store_manager","Delete store manager"),
+]
+
+user_pos_attendant_permissions = [
+    ("list_sale","List sale"),
+    ("view_sale","View sale"),
+    ("add_sale","Add sale"),
+    ("cancel_sale","Cancel sale"),
+    ("list_category","List category"),
+    ("view_category","View category"),
+    ("list_variant","List variant"),
+    ("view_variant","View variant"),
+    ("list_units","List units"),
+    ("view_units","View units"),
+    ("list_stock_item","List stock item"),
+    ("view_stock_item","View stock item"),
 ]
 
 user_permissions = [
@@ -61,6 +76,6 @@ user_profile_permissions = [
 ]
 
 all_user_permissions = user_permissions
-all_user_permissions += user_app_specific_permissions
-all_user_permissions += user_company_specific_permissions
+all_user_permissions += user_app_admin_permissions
+all_user_permissions += user_company_admin_permissions
 

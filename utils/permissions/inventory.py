@@ -86,4 +86,3 @@ stock_request_item_permissions = [
     ("deactivate_stock_request_item","Deactivate stock request item"),
     ("delete_stock_request_item","Delete stock request item"),   
 ]
-

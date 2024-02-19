@@ -19,9 +19,8 @@ class Command(BaseCommand):
         for group_name, _ in DefaultRoles.choices:
             group, created = Group.objects.get_or_create(name=group_name)
 
-            # Assign default permissions to each group
-            if created:
-                self.create_default_role_groups()
+        # Assign default permissions to each group
+        self.create_default_role_groups()
 
         self.stdout.write(self.style.SUCCESS('Default groups and permissions set successfully.'))
 

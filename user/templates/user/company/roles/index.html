@@ -4,6 +4,8 @@
 
 {% block pagetitle%}
 <div class="pagetitle">
+    <h1>Hello, {{ company.name|default:"Guest" }}!</h1>
+
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'user:home' %}">Home</a></li>
@@ -21,7 +23,7 @@
     <div class="card">
         <div class="card-body">
             <h6 class="card-title m-0">Edit Permissions</h6>
-            <h5 class="m-0 text-success">{{ group.name }}</h5>
+            <h5 class="m-0 text-success">{{ company_group.name }}</h5>
             
             <form action="" method="post">
                 {% csrf_token %}
