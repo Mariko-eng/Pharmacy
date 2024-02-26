@@ -2,17 +2,20 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.http import Http404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import JsonResponse
-from django.contrib.auth.models import Group, Permission
+from django.contrib.auth.models import Group
+from django.contrib.auth.models import Permission
 from utils.groups.access_groups import AccessGroups
 from utils.groups.default_roles import DefaultRoles
-from utils.permissions.user import user_app_admin_permissions
-from utils.permissions.user import user_company_admin_permissions
+from utils.permissions.user import superuser_permissions
+from utils.permissions.user import app_admin_permissions
+from utils.permissions.user import company_admin_permissions
 from utils.defaults.init_company_groups import create_company_group
+from utils.defaults.init_store_groups import create_store_group
 from .forms import  AppUserForm
 from .forms import CompanyRoleFrom
 from .forms import CompanyAdminUserForm
@@ -25,6 +28,9 @@ from .models import Store
 from .models import PosCenter
 from company.models import CompanyLevelGroup, StoreLevelGroup
 from sales.models import SaleItem
+
+def custom_permission_denied(request, exception):
+    return render(request, '403.html', status=403)
 
 # @unauthenticated_user
 def index(request):
@@ -102,11 +108,6 @@ def company_dashboard(request, company_id = None):
     data1 = SaleItem.get_sales_and_revenue(company=company)
     data2 = SaleItem.get_sales_data(company=company)
 
-    # print("data1")
-    # print(data1)
-    # print("data2")
-    # print(data2)
-
     context = { 
         "company" : company, 
         "summary": data1,
@@ -130,19 +131,13 @@ def store_dashboard(request, store_id = None):
     data1 = SaleItem.get_sales_and_revenue(store=store)
     data2 = SaleItem.get_sales_data(store=store)
 
-    # print("data1")
-    # print(data1)
-    # print("data2")
-    # print(data2)
-
 
     context = { 
         "company" : store.company, 
         "store" : store, 
         "summary": data1,
-        "reports": data2,
-        }
-
+        "reports": data2,}
+    
     if store is not None:
         return render(request, "dashboard/store/index.html", context = context)
     else:
@@ -160,11 +155,6 @@ def pos_dashboard(request, pos_id = None):
     data1 = SaleItem.get_sales_and_revenue(pos_center=pos)
     data2 = SaleItem.get_sales_data(pos_center=pos)
 
-    # print("data1")
-    # print(data1)
-    # print("data2")
-    # print(data2)
-
     context = { 
         "company" : pos.store.company,
         "store" :  pos.store,
@@ -179,18 +169,22 @@ def pos_dashboard(request, pos_id = None):
     else:
         raise Http404('Page Not Found!')
 
-
 ########################### Users & Roles##################
 # Super
 @login_required(login_url='/login')
+@permission_required("user.manage_all_users", raise_exception=True)
 def users_list_view(request):
     users = User.objects.all()
 
     app_groups = []
     default_groups = DefaultRoles.choices
     for default_group in default_groups:
-        group, created = Group.objects.get_or_create(name = default_group[0])
-        app_groups.append(group)
+        if Group.objects.filter(name = default_group[0]).exists():
+            group = Group.objects.filter(name = default_group[0]).first()
+            app_groups.append(group)
+
+        # group, created = Group.objects.get_or_create(name = default_group[0])
+        # app_groups.append(group)
 
     company_groups = CompanyLevelGroup.objects.all()
     store_groups = StoreLevelGroup.objects.all()
@@ -202,9 +196,7 @@ def users_list_view(request):
         "company_groups" : company_groups,
         "store_groups" : store_groups,
         "form" : form }
-    
-    # print(context)
-    
+        
     if request.method == 'POST':
         form_data = AppUserForm(request.POST or None)
         if form_data.is_valid():
@@ -220,13 +212,14 @@ def users_list_view(request):
 
 
 @login_required(login_url='/login')
+@permission_required("user.manage_all_roles", raise_exception=True)
 def super_role_permissions_edit_view(request, group_id):
-    group = Group.objects.get(pk=role_id)
+    group = Group.objects.get(pk=group_id)
     # print(group)
     group_permissions = group.permissions.all()
     # print(group_permissions)
     # Specify the app labels you want to include
-    model_names = ['rolegroup','user','userprofile','companygroup','companygrouppermission']
+    model_names = ['user','userprofile','companygroup','companygrouppermission']
 
     model_names += ['companyapplication','company','store','poscenter','supplierentity','client']
 
@@ -244,13 +237,16 @@ def super_role_permissions_edit_view(request, group_id):
         permissions_for_app = Permission.objects.filter(
             content_type__model=model_name
         )
-        # print(permissions_for_app)
         all_permissions.extend(permissions_for_app)
+
+    super_user_permissions = [Permission.objects.get(codename=codename, name=description) for codename, description in superuser_permissions]
 
     context = {
         "group": group,
         "group_permissions": group_permissions,
-        "all_permissions" : all_permissions}
+        "all_permissions" : all_permissions,
+        "super_user_permissions": super_user_permissions,
+        }
 
     if request.method == "POST":
         selected_perms = request.POST.getlist("permissions") 
@@ -272,6 +268,7 @@ def super_role_permissions_edit_view(request, group_id):
 
 #  Company Roles
 @login_required(login_url='/login')
+@permission_required("user.manage_company_roles", raise_exception=True)
 def company_role_permissions_edit_view(request, group_id):
     group = Group.objects.get(pk=group_id)
     company_group = CompanyLevelGroup.objects.get(group=group)
@@ -281,7 +278,7 @@ def company_role_permissions_edit_view(request, group_id):
     group_permissions = group.permissions.all()
     # print(group_permissions)
     # Specify the app labels you want to include
-    model_names = ['rolegroup','user','userprofile','companygroup','companygrouppermission']
+    model_names = ['user','userprofile','companygroup','companygrouppermission']
 
     model_names += ['companyapplication','company','store','poscenter','supplierentity','client']
 
@@ -299,7 +296,6 @@ def company_role_permissions_edit_view(request, group_id):
         permissions_for_app = Permission.objects.filter(
             content_type__model=model_name
         )
-        # print(permissions_for_app)
         all_permissions.extend(permissions_for_app)
 
     context = {
@@ -330,6 +326,7 @@ def company_role_permissions_edit_view(request, group_id):
 
 #  Store Roles
 @login_required(login_url='/login')
+@permission_required("user.manage_store_roles", raise_exception=True)
 def store_role_permissions_edit_view(request, group_id):
     group = Group.objects.get(pk=group_id)
     store_group = StoreLevelGroup.objects.get(group=group)
@@ -356,14 +353,13 @@ def store_role_permissions_edit_view(request, group_id):
     # Loop through each model label and filter permissions
     for model_name in model_names:
         permissions_for_model = Permission.objects.filter(content_type__model=model_name)
-        # print(permissions_for_app)
         all_permissions.extend(permissions_for_model)
 
-    app_and_company_admin_permissions = user_app_admin_permissions + user_company_admin_permissions
+    app_and_company_admin_permissions = app_admin_permissions + company_admin_permissions
     # Create a set of non_store_permissions
     non_store_permissions_set = set()
     for codename, description in app_and_company_admin_permissions:
-        permission, created = Permission.objects.get_or_create(codename=codename)
+        permission = Permission.objects.get(codename=codename)
         non_store_permissions_set.add(permission) # Add items to the set
 
     # Convert the list of all_permissions to a set
@@ -463,11 +459,10 @@ def users_company_admin_user_new(request, company_id):
             user.set_password(str(email))
             user.save()
 
-            group, created = Group.objects.get_or_create(
-                name = DefaultRoles.COMPANY_ADMIN
-            )
+            group  = create_company_group(company_id=company.pk, role_name=DefaultRoles.COMPANY_ADMIN)
 
-            user.groups.add(group)
+            if group:
+                user.groups.add(group)
 
             UserProfile.objects.get_or_create(user=user, company=company)
 
@@ -522,8 +517,9 @@ def users_company_store_admin_user_new(request, company_id):
             user.save()
 
             for role in roles:
-                group, created = Group.objects.get_or_create(name = role)
-                user.groups.add(group)
+                group = create_store_group(store_id=store.pk, role_name=role)
+                if role: 
+                    user.groups.add(group)
 
             user_profile, created = UserProfile.objects.get_or_create(user=user, company=company)
             user_profile.store = store
@@ -620,8 +616,9 @@ def users_store_admin_user_new(request, store_id):
             user.save()
 
             for role in roles:
-                group, created = Group.objects.get_or_create(name = role)
-                user.groups.add(group)
+                group = create_store_group(store_id=store.pk, role_name=role)
+                if group: 
+                    user.groups.add(group)
 
             user_profile, created = UserProfile.objects.get_or_create(user=user, company=company)
             user_profile.store = store
@@ -679,8 +676,9 @@ def users_store_pos_attendant_user_new(request, store_id):
             user.set_password(str(email))
             user.save()
 
-            group, created = Group.objects.get_or_create(name = DefaultRoles.CASHIER)
-            user.groups.add(group)
+            group = create_store_group(store_id=store.pk, role_name = DefaultRoles.CASHIER)
+            if group:
+                user.groups.add(group)
 
             user_profile, created = UserProfile.objects.get_or_create(user=user, company=company)
             user_profile.store = store
@@ -702,17 +700,10 @@ def users_store_pos_attendant_user_new(request, store_id):
 def users_company_roles_list_view(request, company_id):
     company = Company.objects.get(pk = company_id)
 
-    groups_static = []
-    default_groups = DefaultRoles.choices
-    for default_group in default_groups:
-        group, created = Group.objects.get_or_create(name = default_group[0])
-        groups_static.append(group)
-
     company_groups =  CompanyLevelGroup.objects.filter(company = company)
 
     context = {
         "company": company,
-        "groups_static": groups_static,
         "company_groups": company_groups
     }
 
@@ -734,7 +725,6 @@ def users_company_roles_new_view(request, company_id):
         permissions_for_app = Permission.objects.filter(
             content_type__model=model_name
         )
-        # print(permissions_for_app)
         all_permissions.extend(permissions_for_app)
 
     form = CompanyRoleFrom()
@@ -781,7 +771,6 @@ def users_company_role_permissions_list_view(request, company_id, role_id):
         permissions_for_app = Permission.objects.filter(
             content_type__model=model_name
         )
-        # print(permissions_for_app)
         all_permissions.extend(permissions_for_app)
 
     context = {

@@ -4,7 +4,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.generic import TemplateView
 from django.contrib.auth import views as auth_views
+from user.views import custom_permission_denied
 
+handler403 = custom_permission_denied
 
 urlpatterns = [
     path('admin/', admin.site.urls),

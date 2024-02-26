@@ -1,7 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import Group
 from .mixins import Base
-from utils.permissions.company import *
+from utils.permissions.company import company_application_permissions
+from utils.permissions.company import company_permissions
+from utils.permissions.company import company_group_level_permissions
+from utils.permissions.company import store_permissions
+from utils.permissions.company import store_group_level_permissions
+from utils.permissions.company import pos_center_permissions
+from utils.permissions.company import supplier_entity_permissions
+from utils.permissions.company import client_permissions
+
 class CompanyApplication(Base):
     STATUS_TYPES = [('PENDING', 'PENDING'), 
                     ('APPROVED', 'APPROVED'),
@@ -79,7 +87,7 @@ class StoreLevelGroup(Base): # Company level groups
 
     class Meta:
         default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
-        permissions = company_group_level_permissions
+        permissions = store_group_level_permissions
 
 class PosCenter(Base):
     store = models.ForeignKey(Store,on_delete=models.CASCADE)

@@ -584,6 +584,42 @@ def store_received_stock_approve(request, store_id, received_stock_id):
     
 
 @login_required(login_url='/login')
+def store_received_stock_cancel(request, store_id, received_stock_id):
+    store = get_object_or_404(Store, pk=store_id)
+
+    received_stock = get_object_or_404(ReceivedStock, pk=received_stock_id, store=store)
+
+    if received_stock.status == "PENDING":
+        received_stock.status = "CANCELLED"
+        received_stock.save()
+    
+        qs = received_stock.receivedstockitem_set.all()
+
+        for item in qs:
+            stock_item = item.stock_item
+            new_actual_qty = item.stock_item.available_qty + item.stock_item.actual_qty
+            stock_item.actual_qty = new_actual_qty
+            stock_item.save()
+    
+    return redirect('inventory:store-received-stock-list', store_id=store_id)
+    
+   
+@login_required(login_url='/login')
+def store_received_stock_delete(request, store_id, received_stock_id):
+    store = get_object_or_404(Store, pk=store_id)
+
+    received_stock = get_object_or_404(ReceivedStock, pk=received_stock_id, store=store)
+
+    if received_stock.status != "APPROVED":
+        received_stock.hard_delete()
+    
+    return redirect('inventory:store-received-stock-list', store_id=store_id)
+    
+  
+ 
+
+
+@login_required(login_url='/login')
 def company_stock_requests_list(request, company_id):
     company = Company.objects.get(pk=company_id)
 

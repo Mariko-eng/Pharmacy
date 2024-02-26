@@ -6,7 +6,7 @@ app_name = 'company'
 urlpatterns = [
     path('company/application/add/', views.company_application_add_view, name="company-application-add"),
     path('company/account/activate/', views.company_account_activate_view, name="company-account-activate"),
-    path('company/<int:company_id>/admin-user/register/', views.company_admin_user_register_view, name="company-admin-user-register"),
+    # path('company/<int:company_id>/admin-user/register/', views.company_admin_user_register_view, name="company-admin-user-register"),
 
     path('company/application/list/', views.company_application_list_view, name="company-application-list"),
     path('company/application/<int:app_id>/', views.company_application_detail_view, name="company-application-detail"),
@@ -24,8 +24,8 @@ urlpatterns = [
     path('home/company/<int:company_id>/store/list/', views.company_store_list_view, name="company-store-list"),
 
     ## Store Proifle
-    path('home/store/<int:store_id>/profile/', views.store_profile_view, name="store-profile"),
-    path('home/store/<int:store_id>/delete/', views.store_delete_view, name="store-delete"),
+    path('home/company/<int:company_id>/store/<int:store_id>/profile/', views.store_detail_view, name="store-detail"),
+    path('home/company/<int:company_id>/store/<int:store_id>/delete/', views.store_delete_view, name="store-delete"),
 
     path('home/company/<int:company_id>/pos-center/list/', views.pos_list_view, name="company-pos-list"),
     path('home/company/store/<int:store_id>/pos-center/list/', views.pos_list_view, name="store-pos-list"),

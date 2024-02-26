@@ -37,28 +37,60 @@
             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-row justify-content-end">
+                        {% if perms.company.list_store %}
                         <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createBranchModal"><i class="bi bi-plus"></i><span>Add</span></button>
+                        {%  endif %}
                     </div>
+                    
                     <div>
-                        <div class="row">
-                            {% if stores %}
-                            {% for store in stores %}
-                            <div class="col-xs-12 col-sm-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
-                                <a href="{% url 'user:store-dashboard'  store_id=store.id %}">
-                                    <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
-                                        <i class="bi bi-house text-white" style="font-size: 2em;"></i>
-                                    </div>
-                                    <p>{{store.name}}</p>
-                                </a>
-                            </div>
-                            {% endfor %}
-                            {%  endif %}
+                        <div class="table-responsive small">
+                            <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Type</th>
+                                        <th scope="col">Status</th>
+                                        <th scope="col">Email</th>
+                                        <th scope="col">Phone</th>
+                                        <th scope="col">District</th>
+                                        <th scope="col">Village</th>
+                                        <th scope="col">Action</th>
+                                        {% comment %} <th scope="col">Actions</th> {% endcomment %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for result in stores %}
+                                    <tr> 
+                                        <td>{{result.created_at}}</td>
+                                        <td>{{result.name}}</td>
+                                        <td>{{result.store_type}}</td>
+                                        
+                                        <td><span class="{% if result.status_type == "OPEN"%} bg-primary {% else %} bg-warning {%endif%} badge">{{result.status_type}}</span></td>
+                                        <td>{{result.email}}</td>
+                                        <td>{{result.phone}}</td>
+                                        <td>{{result.location_district}}</td>
+                                        <td>{{result.location_village}}</td>
+                                        <td>
+                                            <select data-store-id="{{ result.id }}"  class="action-select">
+                                                <option value="" selected disabled>Actions</option>
+                                                <option value="view">View Store</option>
+                                                <option value="edit">Edit Store</option>
+                                                <option value="delete">Delete Store</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
+                
             </div>
-        </div><!-- End Default Tabs -->
-    </div>
+        </div>
+    </div><!-- End Default Tabs -->
+</div>
 </div>
 
 <div class="modal fade" id="createBranchModal" tabindex="-1">
@@ -95,10 +127,10 @@
                         </div>
                         <div class = "col-6">
                             <div class="row">
-                                <label for="status" class="col-sm-3 col-form-label">Status</label>
+                                <label for="status_type" class="col-sm-3 col-form-label">Status</label>
                                 <div class="col-sm-9">
-                                    {% render_field form.status|add_class:"form-select"|attr:"id:status" %}
-                                    <div id = "statusError" class="invalid-feedback">
+                                    {% render_field form.status_type|add_class:"form-select"|attr:"id:status_type" %}
+                                    <div id = "statusTypeError" class="invalid-feedback">
                                         Please Select Status
                                     </div>
                                 </div>
@@ -176,7 +208,7 @@
     
     $(document).ready(function() {  
         $("#formSubmitButton").click(function () {
-
+            
             // Disable the submit button to prevent multiple submissions
             $("#formSubmitButton").prop("disabled", true);
             $("#formCancelButton").prop("disabled", true);
@@ -200,8 +232,8 @@
                         $('#name').addClass('is-valid');
                         $('#store_type').removeClass('is-invalid');
                         $('#store_type').addClass('is-valid');
-                        $('#status').removeClass('is-invalid');
-                        $('#status').addClass('is-valid');
+                        $('#status_type').removeClass('is-invalid');
+                        $('#status_type').addClass('is-valid');
                         $('#email').removeClass('is-invalid');
                         $('#email').addClass('is-valid');
                         $('#phone').removeClass('is-invalid');
@@ -231,13 +263,13 @@
                             $('#store_type').removeClass('is-invalid');
                             $('#store_type').addClass('is-valid');
                         }
-                        if(data.errors.status){
-                            $('#status').removeClass('is-valid');
-                            $('#status').addClass('is-invalid');
-                            $('#statusError').text(data.errors.status[0])
+                        if(data.errors.status_type){
+                            $('#status_type').removeClass('is-valid');
+                            $('#status_type').addClass('is-invalid');
+                            $('#statusTypeError').text(data.errors.status_type[0])
                         }else{
-                            $('#status').removeClass('is-invalid');
-                            $('#status').addClass('is-valid');
+                            $('#status_type').removeClass('is-invalid');
+                            $('#status_type').addClass('is-valid');
                         }
                         if(data.errors.email){
                             $('#email').removeClass('is-valid');
@@ -276,12 +308,44 @@
                     // Disable the submit button to prevent multiple submissions
                     $("#formSubmitButton").prop("disabled", false);
                     $("#formCancelButton").prop("disabled", false);
-
+                    
                     $("#isLoading").removeClass("d-block");
                     $("#isLoading").addClass("d-none");
                 }
             })
         })
     })
+    
+    $(document).ready(function (){
+        
+        $('.action-select').on('change', function () {
+            var selectBtn = $(this);
+            var selectedAction = selectBtn.val();
+            
+            var companyId = "{{company.id}}";
+            var storeId = selectBtn.data('store-id');
+                        
+            // Disable the select Button
+            selectBtn.prop('disabled', true);
+            selectBtn.val('');
+            
+            
+            if (selectedAction === "view") {
+                window.location.href = "{% url 'user:store-dashboard' store_id=0 %}".replace('0', storeId);
+            }
+            
+            if (selectedAction === "delete") {
+                const isConfirmed = window.confirm("Are You sure that you want to continue?")  
+
+                if (isConfirmed === false){
+                    // Reset the  select button And Able  it
+                    selectBtn.prop('disabled', false);
+                    return
+                }
+                window.location.href = "{% url 'company:store-delete' company_id=0 store_id=0 %}".replace('0', {{company.id}}).replace('0', storeId);
+            }
+        });
+    })
+    
 </script>
 {% endblock %}

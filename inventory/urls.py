@@ -24,12 +24,12 @@ urlpatterns = [
     # Pos Variants
     path('home/pos/<int:pos_id>/inventory/products/variants/list/',
         views.pos_product_variants_list_view, name="pos-product-variants-list"),
-
-    # Store Units
-    path('home/store/<int:store_id>/inventory/products/variants/list/',
+ 
+    # Store Units/Metrics
+    path('home/store/<int:store_id>/inventory/products/units/list/',
         views.store_product_units_list_view, name="store-product-units-list"),
-    # Pos Variants
-    path('home/pos/<int:pos_id>/inventory/products/variants/list/',
+    # Pos Units/Metrics
+    path('home/pos/<int:pos_id>/inventory/products/units/list/',
         views.pos_product_units_list_view, name="pos-product-units-list"),
 
     # Store Products
@@ -58,14 +58,18 @@ urlpatterns = [
     #Store Recieved Stock     
     path('home/store/<int:store_id>/inventory/received_stock/list/',
         views.store_received_stock_list, name="store-received-stock-list"),
-    path('home/store/<int:store_id>/inventory/received_stock/detail/<int:received_stock_id>/',
-        views.store_received_stock_detail, name="store-received-stock-detail"),
     path('home/store/<int:store_id>/inventory/received_stock/new/',
         views.store_received_stock_new, name="store-received-stock-new"),
+    path('home/store/<int:store_id>/inventory/received_stock/detail/<int:received_stock_id>/',
+        views.store_received_stock_detail, name="store-received-stock-detail"),
     path('home/store/<int:store_id>/inventory/received_stock/edit/<int:received_stock_id>/',
         views.store_received_stock_edit, name="store-received-stock-edit"),
-    path('home/store/<int:store_id>/inventory/received_stock/approve/<int:received_stock_id>/',
+    path('home/store/<int:store_id>/inventory/received_stock/<int:received_stock_id>/approve/',
         views.store_received_stock_approve, name="store-received-stock-approve"),
+    path('home/store/<int:store_id>/inventory/received_stock/<int:received_stock_id>/cancel/',
+        views.store_received_stock_cancel, name="store-received-stock-cancel"),
+    path('home/store/<int:store_id>/inventory/received_stock/<int:received_stock_id>/delete',
+        views.store_received_stock_delete, name="store-received-stock-delete"),
 
     #Company Recieved Stock     
     path('home/company/<int:company_id>/inventory/stock-requests/list/',

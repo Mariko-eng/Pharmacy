@@ -1,24 +1,25 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse, resolve
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from pharmacy.utils import generate_random_number
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseServerError
-from django.contrib.auth.models import Group
+# from django.contrib.auth.models import Group
 from utils.groups.access_groups import AccessGroups
+from utils.groups.default_roles import DefaultRoles
 from .forms import CompanyApplicationRegisterForm
 from .forms import CompanyAccountActivationForm
-from .forms import CompanyAdminRegisterForm
+# from .forms import CompanyAdminRegisterForm
 from .forms import StoreForm
 from .forms import PosCenterForm
 from user.models import User, UserProfile
 from .models import CompanyApplication
 from .models import Company, Store, PosCenter
 from .tasks import send_company_approval_email
-from utils.groups.default_roles import DefaultRoles
 from utils.defaults.init_company_groups import init_company_groups
+from utils.defaults.init_company_groups import create_company_group
 from utils.defaults.init_store_groups import init_store_groups
 
 ################### - Company Application - ################# 
@@ -132,46 +133,62 @@ def company_account_activate_view(request):
         form = CompanyAccountActivationForm(request.POST, request.FILES)
 
         if form.is_valid():
-            email = form.cleaned_data.get('email')
+            company_email = form.cleaned_data.get('company_email')
             activation_code = form.cleaned_data.get('activation_code')
 
-            if CompanyApplication.objects.filter(email = email, activation_code = activation_code).exists():
-                companyApplication = CompanyApplication.objects.filter(email = email, activation_code = activation_code).first()
-
-                if companyApplication.status == "DECLINED":
-                    messages.info(request, "Company application was declined!")
-                    return render(request, 'company/activation/index.html', context=context)
-                
-                if companyApplication.status == "CREATED":
-                    messages.info(request, "Company account already activated!")    
-                    company_exists = Company.objects.filter(activation_code=activation_code).exists()
-                    if company_exists:
-                        company = Company.objects.filter(activation_code=activation_code).first()
-                        return redirect('company:company-admin-user-register', company_id = company.id)
-                    else:
-                        companyApplication.status = "APPROVED"
-                        companyApplication.save()
-                
-                if companyApplication.status == "APPROVED":
-                    company, created = Company.objects.get_or_create(
-                        name = companyApplication.name,
-                        phone = companyApplication.phone,
-                        email = companyApplication.email,
-                        location = companyApplication.location,
-                        logo = companyApplication.logo,
-                        activation_code = activation_code
-                    )
-
-                    init_company_groups(company_id=company.pk)
-                    
-                    companyApplication.status = "CREATED"
-                    companyApplication.save()
-                    messages.info(request, "Company account activated successfully!")                  
-                    return redirect('company:company-admin-user-register', company_id = company.id)
+            if not CompanyApplication.objects.filter(email = company_email, activation_code = activation_code).exists():
+                messages.error(request, "Company Application Not Found!")
+                return render(request, 'company/application/activation/index.html', context=context)
             else:
-                messages.error(request,"Failed To Activate Company!")
-                form.errors['activation_code'] = ['You have submitted a Wrong code!'] 
+                companyApplication = CompanyApplication.objects.filter(email = company_email, activation_code = activation_code).first()
+            
+
+            if companyApplication.status == "DECLINED":
+                messages.info(request, "Company application was declined!")
+                return render(request, 'company/activation/index.html', context=context)
+            
+            if companyApplication.status == "APPROVED" or companyApplication.status == "CREATED":
+                company, _ = Company.objects.get_or_create(
+                            name = companyApplication.name,
+                            phone = companyApplication.phone,
+                            email = companyApplication.email,
+                            location = companyApplication.location,
+                            logo = companyApplication.logo,
+                            activation_code = activation_code)
+                
+                init_company_groups(company_id=company.pk)
+                
+                companyApplication.status = "CREATED"
+                companyApplication.save()
+
+                first_name = form.cleaned_data.get("first_name")
+                last_name = form.cleaned_data.get("last_name")
+                phone = form.cleaned_data.get("phone")
+                email = form.cleaned_data.get("email")
+                password2 = form.cleaned_data.get("password2")
+
+                user = User(
+                    username = email,
+                    email = email,
+                    first_name = first_name,
+                    last_name = last_name,
+                    phone = phone)
+
+                user.account_type = AccessGroups.COMPANY_ADMIN
+                user.set_password(str(password2))
+                user.save()
+
+                UserProfile.objects.get_or_create(user=user, company=company)
+
+                group = create_company_group(company_id=company.pk, role_name= DefaultRoles.ACCOUNT_HOLDER)
+
+                if group:
+                    user.groups.add(group)
+
+                messages.info(request, "Company account activated successfully!")                  
+                return redirect('user:home')
         else:
+            context['form'] = form
             messages.error(request,"Failed To Submit Application!")
 
     return render(request, 'company/application/activation/index.html', context=context)
@@ -186,71 +203,10 @@ def company_application_delete_view(request, app_id):
     return redirect('company:company-application-list')
 
 
-###################### - Company Admin User Register- ####################
-
-def company_admin_user_register_view(request, company_id):
-    company = Company.objects.get(pk = company_id)
-
-    form = CompanyAdminRegisterForm()
-    context = { 
-        "company": company,
-        "form": form 
-        }
-
-    if request.method == "POST":
-        form_data = CompanyAdminRegisterForm(request.POST)
-
-        if form_data.is_valid():
-            activation_code = form_data.cleaned_data.get('activation_code', None)
-            first_name = form_data.cleaned_data.get('first_name')
-            last_name = form_data.cleaned_data.get('last_name')
-            phone = form_data.cleaned_data.get('phone')
-            email = form_data.cleaned_data.get('email')
-            password2 = form_data.cleaned_data.get('password2')
-
-            if activation_code:
-                company_exists = Company.objects.filter(activation_code=activation_code).exists()
-                if company_exists:
-                    company = Company.objects.filter(activation_code=activation_code).first()
-                else:
-                    form_data.errors['activation_code'] = ['Wrong Activation Code!']
-                    context['form'] = form_data
-                    # print(form_data.errors)
-                    messages.error(request,"Failed to create company admin account!")
-                    return render(request, 'company/application/admin_account/new.html', context=context)
-
-            user = User(
-                username = email,
-                first_name = first_name,
-                last_name = last_name,
-                phone = phone,
-                email = email,
-            )
-            user.account_type = AccessGroups.COMPANY_ADMIN
-            user.set_password(str(password2))
-            user.save()
-
-            group, created = Group.objects.get_or_create(
-                name = DefaultRoles.ACCOUNT_HOLDER
-            )
-
-            user.groups.add(group)
-
-            UserProfile.objects.get_or_create(user=user, company=company)
-
-            messages.info(request, "Company admin account created successfully!")
-            return redirect('user:home')
-        else:
-            context['form'] = form_data
-            # print(form_data.errors)
-            messages.error(request,"Failed to create company admin account!")
-            
-    return render(request, 'company/application/admin_account/new.html', context=context)
-
-
 ###################### - Company - ####################
 
 @login_required(login_url='/login')
+@permission_required("company.list_company", raise_exception=True)
 def company_list_view(request):
     companies = Company.objects.all()
 
@@ -260,6 +216,7 @@ def company_list_view(request):
 
 
 @login_required(login_url='/login')
+@permission_required("company.view_company", raise_exception=True)
 def company_detail_view(request, company_id):
     company = Company.objects.get(pk = company_id)
 
@@ -269,6 +226,7 @@ def company_detail_view(request, company_id):
 
 
 @login_required(login_url='/login')
+@permission_required("company.edit_company", raise_exception=True)
 def company_edit_view(request, company_id):
     data = Company.objects.all(pk = company_id)
 
@@ -279,6 +237,7 @@ def company_edit_view(request, company_id):
 
 @login_required(login_url='/login')
 @csrf_exempt  # Use this decorator if you don't need CSRF protection for this view
+@permission_required("company.deactivate_company", raise_exception=True)
 def company_deactivate_view(request, company_id):
     if request.method == 'POST':
         try:
@@ -289,6 +248,7 @@ def company_deactivate_view(request, company_id):
             return HttpResponseServerError({'message': f'Failed to delete company. Error: {str(e)}'})
 
 
+@permission_required("company.delete_company", raise_exception=True)
 def company_delete_view(request, pk):
     data = Company.objects.all(pk = pk)
 
@@ -300,6 +260,7 @@ def company_delete_view(request, pk):
 ###################### - Company Store - ####################
 
 @login_required(login_url='/login')
+@permission_required("company.list_store", raise_exception=True) #app_name.codename
 def company_store_list_view(request, company_id):
     company = Company.objects.get(pk=company_id) 
     stores = Store.objects.filter(company = company)
@@ -335,7 +296,8 @@ def company_store_list_view(request, company_id):
 
 
 @login_required(login_url='/login')
-def store_profile_view(request, store_id):
+@permission_required("company.view_store", raise_exception=True)
+def store_detail_view(request, store_id):
     store = Store.objects.get(pk = store_id) 
 
     if request.is_ajax():
@@ -357,19 +319,23 @@ def store_profile_view(request, store_id):
     return render(request, 'store/detail/index.html', context = context)
 
 
-
 @login_required(login_url='/login')
-def store_delete_view(request, store_id):
+@permission_required("company.delete_store", raise_exception=True)
+def store_delete_view(request, company_id, store_id):
+    company = Company.objects.get(pk=company_id) 
     store = Store.objects.get(pk = store_id) 
 
     store.hard_delete()
-
-    return JsonResponse({'success': True})
+    if request.is_ajax():
+        return JsonResponse({'success': True})
+    else:
+        return redirect(reverse('company:company-store-list', kwargs={'company_id': company.id}))
 
 
 ###################### - Company PosCenter - ####################
 
 @login_required(login_url='/login')
+@permission_required("company.list_pos_center", raise_exception=True)
 def pos_list_view(request, store_id):
     store = Store.objects.get(pk=store_id) 
     pos_centers = PosCenter.objects.filter(store= store)

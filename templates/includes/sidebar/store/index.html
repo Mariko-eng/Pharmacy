@@ -27,9 +27,123 @@
           </li>
         </ul>
       </li> 
+
+        <!-- Inventory Nav -->
+      <li class="nav-heading">Inventory</li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#company-products-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Products</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="company-products-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a class="nav-link" href="{% url 'inventory:store-products-list' store_id=store.id %}">
+              <i class="bi bi-circle"></i><span>List Products</span>
+            </a>
+          </li>
+          
+          <li>
+            <a class="nav-link" href="{% url 'inventory:store-product-categories-list' store_id=store.id %}">
+              <i class="bi bi-circle"></i><span>Categories</span>
+            </a>
+          </li>
+
+         <li>
+            <a class="nav-link" href="{% url 'inventory:store-product-variants-list' store_id=store.id %}">
+              <i class="bi bi-circle"></i><span>Variants</span>
+            </a>
+          </li>
+
+         <li>
+            <a class="nav-link" href="{% url 'inventory:store-product-units-list' store_id=store.id %}">
+              <i class="bi bi-circle"></i><span>Units/Metrics</span>
+            </a>
+          </li>
+          
+          {% comment %} <li>
+            <a class="nav-link" href="#">
+              <i class="bi bi-circle"></i><span>Consummables</span>
+            </a>
+          </li> {% endcomment %}
+        </ul>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#company-incoming-stock-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Received Stock</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="company-incoming-stock-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a class="nav-link" href="{% url 'inventory:store-received-stock-list' store_id=store.id %}">
+              <i class="bi bi-circle"></i><span>Manage Received Stock</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#company-stock-requests-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Stock Requests</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="company-stock-requests-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a class="nav-link" href="{% url 'inventory:store-stock-requests-list' store_id=store.id %}">
+              <i class="bi bi-circle"></i><span>Manage Requests</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <!-- End Inventory Nav -->
+
+      <!-- Purchase Orders Nav -->
+      <li class="nav-heading">Purchase Orders</li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#purchase-order-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Purchase Orders</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="purchase-order-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a class="nav-link" href="{% url 'purchase_orders:purchase-orders-list' store_id=store.id %}">
+              <i class="bi bi-circle"></i><span>List Orders</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <!-- End Purchase Orders Nav -->
+      
+      <li class="nav-heading">Sales</li>
+      <li class="nav-item">
+        <a class="nav-link collapsed" data-bs-target="#sales-nav" data-bs-toggle="collapse" href="#">
+          <i class="bi bi-menu-button-wide"></i><span>Sales</span><i class="bi bi-chevron-down ms-auto"></i>
+        </a>
+        <ul id="sales-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+          <li>
+            <a class="nav-link" href="{% url 'sales:store-sales-list' store_id=store.id %}">
+              <i class="bi bi-circle"></i><span>List Sales</span>
+            </a>
+          </li>
+        </ul>
+      </li>
+      <!-- End sales Nav -->
+
+      <!-- Uitilty  Nav -->
+      <li class="nav-heading">Uitilty</li>
+        <li class="nav-item">
+        <a class="nav-link" class="nav-link" href="{% url 'inventory:store-product-suppliers-list' store_id=store.id %}">
+          <i class="bi bi-grid"></i>
+          <span>Suppliers</span>
+        </a>
+      </li>
+      
+      <li class="nav-item">
+        <a class="nav-link" class="nav-link" href="{% url 'inventory:store-product-suppliers-list' store_id=store.id %}">
+          <i class="bi bi-grid"></i>
+          <span>Customers</span>
+        </a>
+      </li>
+
       <li class="nav-item">
         <a class="nav-link collapsed" data-bs-target="#store-users-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Users</span><i class="bi bi-chevron-down ms-auto"></i>
+          <i class="bi bi-menu-button-wide"></i><span>Users & Access</span><i class="bi bi-chevron-down ms-auto"></i>
         </a>
         <ul id="store-users-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
           <li>
@@ -54,122 +168,12 @@
           </li>                
         </ul>
       </li>
-      
-      <li class="nav-heading">Inventory</li>
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#company-products-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Products</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="company-products-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a class="nav-link" href="{% url 'inventory:store-products-list' store_id=store.id %}">
-              <i class="bi bi-circle"></i><span>List Products</span>
-            </a>
-          </li>
-          
-          <li>
-            <a class="nav-link" href="{% url 'inventory:store-product-categories-list' store_id=store.id %}">
-              <i class="bi bi-circle"></i><span>Product Categories</span>
-            </a>
-          </li>
+      <!-- End Uitilty Nav -->
 
-         <li>
-            <a class="nav-link" href="{% url 'inventory:store-product-variants-list' store_id=store.id %}">
-              <i class="bi bi-circle"></i><span>Product Variants</span>
-            </a>
-          </li>
-
-         <li>
-            <a class="nav-link" href="{% url 'inventory:store-product-units-list' store_id=store.id %}">
-              <i class="bi bi-circle"></i><span>Product Units</span>
-            </a>
-          </li>
-          
-          <li>
-            <a class="nav-link" href="#">
-              <i class="bi bi-circle"></i><span>Consummables</span>
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#company-incoming-stock-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Received Stock</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="company-incoming-stock-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a class="nav-link" href="{% url 'inventory:store-received-stock-list' store_id=store.id %}">
-              <i class="bi bi-circle"></i><span>Manage Received Stock</span>
-            </a>
-          </li>
-        </ul>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#company-stock-requests-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Stock Requests</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="company-stock-requests-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a class="nav-link" href="{% url 'inventory:store-stock-requests-list' store_id=store.id %}">
-              <i class="bi bi-circle"></i><span>Manage Requests</span>
-            </a>
-          </li>
-        </ul>
-      </li>
-      
-      <!-- End Inventory Nav -->
-      
-      <li class="nav-heading">Purchase Orders</li>
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#purchase-order-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Purchase Orders</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="purchase-order-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a class="nav-link" href="{% url 'purchase_orders:purchase-orders-list' store_id=store.id %}">
-              <i class="bi bi-circle"></i><span>List Orders</span>
-            </a>
-          </li>
-        </ul>
-      </li>
-      <!-- End Purchase Orders Nav -->
-      
-      <li class="nav-heading">Sales</li>
-      
-      <li class="nav-item">
-        <a class="nav-link collapsed" data-bs-target="#sales-nav" data-bs-toggle="collapse" href="#">
-          <i class="bi bi-menu-button-wide"></i><span>Sales</span><i class="bi bi-chevron-down ms-auto"></i>
-        </a>
-        <ul id="sales-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-          <li>
-            <a class="nav-link" href="{% url 'sales:store-sales-list' store_id=store.id %}">
-              <i class="bi bi-circle"></i><span>List Sales</span>
-            </a>
-          </li>
-        </ul>
-      </li>
-      <!-- End sales Nav -->
-
-      <li class="nav-heading">Uitilty</li>
-        <li class="nav-item">
-        <a class="nav-link" class="nav-link" href="{% url 'inventory:store-product-suppliers-list' store_id=store.id %}">
-          <i class="bi bi-grid"></i>
-          <span>Suppliers</span>
-        </a>
-      </li>
-      
-      <li class="nav-item">
-        <a class="nav-link" class="nav-link" href="{% url 'inventory:store-product-suppliers-list' store_id=store.id %}">
-          <i class="bi bi-grid"></i>
-          <span>Customers</span>
-        </a>
-      </li>
-      
-      
+      <!-- Profile Nav -->
       <li class="nav-heading">Account</li>
-      
       <li class="nav-item">
-        <a class="nav-link" href="{% url 'company:store-profile' store_id=store.id %}">
+        <a class="nav-link" href="{% url 'company:store-detail' company_id=store.company.id store_id=store.id %}">
           <i class="bi bi-grid"></i>
           <span>Profile</span>
         </a>

@@ -33,7 +33,8 @@
                 <th scope="col">Email</th>
                 <th scope="col">location</th>
                 <th scope="col">Status</th>
-                <th scope="col">Actions</th>
+                <th scope="col">Action</th>
+                {% comment %} <th scope="col">Actions</th> {% endcomment %}
               </tr>
             </thead>
             <tbody>
@@ -43,105 +44,140 @@
                 <td>{{result.name}}</td>
                 <td>{{result.phone}}</td>
                 <td>{{result.email}}</td>
-                <td>{{result.location}}</td>
-                <td>{{result.status}}</td>
+                <td>{{result.location}}</td> 
                 <td>
-                  {% if result.status == "CREATED" %}
-                  <div></div> 
-                  {% elif result.status == "PENDING" %}
-                  <a href="{% url 'company:company-application-edit' app_id=result.id  %}" class="approveBtn text-white btn btn-primary btn-outlined py-0"><i class="bi bi-edit"></i>Edit</a>
-                  <button data-app-id="{{ result.id }}" class="approveBtn text-white btn btn-primary btn-outlined py-0"><i class="bi bi-check"></i>Approve</button>
-                  <button data-app-id="{{ result.id }}" class="declineBtn text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle">Decline</i></button>
-                  {% elif result.status == "APPROVED" %}
-                  <a href="{% url 'company:company-application-edit' app_id=result.id  %}" class="approveBtn text-white btn btn-primary btn-outlined py-0"><i class="bi bi-edit"></i>Edit</a>
-                  <button data-app-id="{{ result.id }}" class="approveBtn text-white btn btn-success btn-outlined py-0"><i class="bi bi-envelope">Resend</i></button>
-                  <button data-app-id="{{ result.id }}" class="declineBtn text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle"></i>Cancel</button>
-                  {% else %}
-                  <div></div>
-                  {% endif %} 
+                  <span class="{% if result.status == "PENDING"%} bg-primary {%endif%}
+                    {% if result.status == "CANCELLED" or result.status == "DECLINED" %} bg-danger {%endif%}
+                    {% if result.status == "APPROVED"%} bg-warning {%endif%}
+                    {% if result.status == "CREATED"%} bg-success {%endif%} badge">
+                    {{result.status}}
+                  </span>
                 </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+                  <td>
+                    <select data-app-id="{{ result.id }}"  class="action-select">
+                      <option value="" selected disabled>Actions</option>
+                      {% if result.status != "CREATED" %}
+                      <option value="edit">Edit</option>
+                      {% endif %}
+                      {% if result.status == "PENDING" %}
+                      <option value="approve">Approve</option>
+                      {% endif %}
+                      {% if result.status == "APPROVED" %}
+                      <option value="resend">Resend</option>
+                      <option value="cancel">Cancel</option>
+                      {% endif %}
+                      {% if result.status == "PENDING" %}
+                      <option value="decline">Decline</option>
+                      <option value="cancel">Cancel</option>
+                      {% endif %}
+                      {% if result.status == "PENDING" or result.status == "DECLINED" or result.status == "CANCELLED" %}
+                      <option value="delete">Delete</option>
+                      {% endif %}
+                      {% if result.status == "DECLINED" or result.status == "CANCELLED" %}
+                      <option value="republish">Republish</option>
+                      {% endif %}
+                    </select>
+                  </td>
+                  {% comment %} <td>
+                    {% if result.status == "CREATED" %}
+                    <div></div> 
+                    {% elif result.status == "PENDING" %}
+                    <a href="{% url 'company:company-application-edit' app_id=result.id  %}" class="approveBtn text-white btn btn-primary btn-outlined py-0"><i class="bi bi-edit"></i>Edit</a>
+                    <button data-app-id="{{ result.id }}" class="approveBtn text-white btn btn-primary btn-outlined py-0"><i class="bi bi-check"></i>Approve</button>
+                    <button data-app-id="{{ result.id }}" class="declineBtn text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle">Decline</i></button>
+                    {% elif result.status == "APPROVED" %}
+                    <a href="{% url 'company:company-application-edit' app_id=result.id  %}" class="approveBtn text-white btn btn-primary btn-outlined py-0"><i class="bi bi-edit"></i>Edit</a>
+                    <button data-app-id="{{ result.id }}" class="approveBtn text-white btn btn-success btn-outlined py-0"><i class="bi bi-envelope">Resend</i></button>
+                    <button data-app-id="{{ result.id }}" class="declineBtn text-white btn btn-danger btn-outlined py-0"><i class="bi bi-x-circle"></i>Cancel</button>
+                    {% else %}
+                    <div></div>
+                    {% endif %} 
+                  </td> {% endcomment %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<script type='text/javascript'>
+  </section>
   
-  $(document).ready(function () {
+  <script type='text/javascript'>
     
-    $('.approveBtn').on('click', function () {      
-      var btn = $(this);  // Store reference to the button
-      btn.addClass("disabled")
-      
-      var appId = $(this).data('app-id');
-      
-      var new_status = 'APPROVED';
-      
-      console.log("clicked")
-            
+    function editStatusAction (appId, new_status) {
       // Perform Ajax call to approve application
       $.ajax({
         url: '{% url "company:company-application-edit-status" app_id=0 new_status=0 %}'.replace('0', appId).replace('0', new_status),
         type: 'GET',
         success: function (response) {
           // Handle success
+          setTimeout(function () {
+            // Enable the select and reset its value after 5 seconds
+          }, 5000);
+          
           window.location.reload()
         },
         error: function (error) {
           // Handle error
         },
         complete: function () {
-          btn.removeClass("disabled");
+          // Handle Complete
         }
       });
-      
-    })
+    }
     
-    $('.declineBtn').click(function () {
-      var btn = $(this);  // Store reference to the button
+    $(document).ready(function (){
       
-      btn.addClass("disabled")
-      
-      var appId = $(this).data('app-id');
-      
-      var new_status = 'APPROVED';
-      
-      // Perform Ajax call to approve application
-      $.ajax({
-        url: '{% url "company:company-application-edit-status" app_id=0 new_status=0 %}'.replace('0', appId).replace('0', new_status),
-        type: 'GET',
-        success: function (response) {
-          // Handle success
-          window.location.reload()
-        },
-        error: function (error) {
-          // Handle error
-        },
-        complete: function () {
-          // Remove the "disabled" class after the request is complete
-          btn.removeClass("disabled");
+      $('.action-select').on('change', function () {
+        var selectBtn = $(this);
+        var selectedAction = selectBtn.val();
+        var appId = selectBtn.data('app-id');
+        
+        const isConfirmed = window.confirm("Are You sure that you want to continue?")  
+        
+        // Disable the select Button
+        selectBtn.prop('disabled', true);
+        selectBtn.val('');
+        
+        if (isConfirmed === false){
+          // Reset the  select button And Able  it
+          selectBtn.prop('disabled', false);
+          return
         }
+        
+        
+        if (selectedAction === "edit") {
+          console.log("Edit clicked for App ID: " + appId)
+          window.location.href = "{% url 'company:company-application-edit' app_id=0 %}".replace('0', appId);
+        } else if (selectedAction === "approve" || selectedAction === "resend") {
+          // Handle the approval logic using AJAX or other methods
+          console.log("Approve clicked for App ID: " + appId);
+          editStatusAction(appId, "APPROVED")
+        } else if (selectedAction === "decline") {
+          // Handle the decline logic using AJAX or other methods
+          console.log("Decline clicked for App ID: " + appId);
+          editStatusAction(appId, "DECLINED")
+        } else if (selectedAction === "cancel") {
+          // Handle the decline logic using AJAX or other methods
+          console.log("Cancel clicked for App ID: " + appId);
+          editStatusAction(appId, "CANCELLED")
+        } else if (selectedAction === "delete") {
+          // Handle the decline logic using AJAX or other methods
+          console.log("Delete clicked for App ID: " + appId);
+        } else if (selectedAction === "republish") {
+          // Handle the decline logic using AJAX or other methods
+          console.log("Republish clicked for App ID: " + appId);
+          editStatusAction(appId, "PENDING")
+        }
+        
+        // Reset the  select button And Able  it
+        // selectBtn.prop('disabled', false);
       });
-    })
+    })    
     
-    $('.deleteBtn').click(function () {
-      var btn = $(this);  // Store reference to the button
-      
-      btn.addClass("disabled")
-      
-      var applicationId = $(this).data('app-id');
-      
-    })
-    
-  })
+  </script>
+  
+  {% endblock %}
   
   
-</script>
-
-{% endblock %}
-

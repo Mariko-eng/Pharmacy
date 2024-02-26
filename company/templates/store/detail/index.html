@@ -221,7 +221,7 @@
         headers: {
           'X-CSRFToken': csrfToken,
         },
-        url: '{% url "company:store-profile" 0 %}'.replace('0', {{store.id}}), 
+        url: '{% url "company:store-detail" 0 0 %}'.replace('0', {{company.id}}).replace('0', {{store.id}}), 
         data: data,
         success: function (data) {
           // console.log(data)

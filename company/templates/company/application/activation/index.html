@@ -21,7 +21,7 @@
                         <div class="card-body">
                             
                             <div class="pt-4 pb-2">
-                                <h5 class="card-title text-center pb-0 fs-4">Company Account Verification & Activation</h5>
+                                <h5 class="card-title text-center pb-0 fs-4">Company Verification | Activation</h5>
                             </div>
                             
                             {% if messages %}
@@ -42,27 +42,97 @@
                             <form id="userForm" class="row g-3" method="post" novalidate>
                                 {% csrf_token %}
                                 
+                                <hr class="p-0"/>
+                                <h5 class="text-start fs-6 py-0 px-2 m-0 text-primary">Company Credentials</h5>
+                                
                                 <div class="col-12">
-                                    <label for="email" class="form-label">Company Email address</label>
-                                    {% if form.errors.email %}
-                                    {% render_field form.email|add_class:"form-control is-invalid"|attr:"id:email" %}
+                                    {% if form.errors.company_email %}
+                                    {% render_field form.company_email|add_class:"form-control is-invalid"|attr:"id:company_email" placeholder="Email Address"%}
                                     {% else %}
-                                    {% render_field form.email|add_class:"form-control"|attr:"id:email" %}
+                                    {% render_field form.company_email|add_class:"form-control"|attr:"id:company_email" placeholder="Email Address" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.company_email.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    {% if form.errors.activation_code %}
+                                    {% render_field form.activation_code|add_class:"form-control is-invalid"|attr:"id:activation_code" placeholder="Activation Code" %}
+                                    {% else %}
+                                    {% render_field form.activation_code|add_class:"form-control"|attr:"id:activation_code" placeholder="Activation Code" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.activation_code.0  }}
+                                    </div>
+                                </div>
+                                
+                                <hr class="p-0"/>
+                                <h5 class="text-start fs-6 py-0 px-2 m-0 text-primary">Additional User Information</h5>
+                                
+                                <div class="col-6">
+                                    {% if form.errors.first_name %}
+                                    {% render_field form.first_name|add_class:"form-control is-invalid"|attr:"id:first_name" placeholder="First Name" %}
+                                    {% else %}
+                                    {% render_field form.first_name|add_class:"form-control"|attr:"id:first_name" placeholder="First Name" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.first_name.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-6">
+                                    {% if form.errors.last_name %}
+                                    {% render_field form.last_name|add_class:"form-control is-invalid"|attr:"id:last_name" placeholder="Last Name" %}
+                                    {% else %}
+                                    {% render_field form.last_name|add_class:"form-control"|attr:"id:last_name" placeholder="Last Name" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.last_name.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    {% if form.errors.phone %}
+                                    {% render_field form.phone|add_class:"form-control is-invalid"|attr:"id:phone" placeholder="Phone Number" %}
+                                    {% else %}
+                                    {% render_field form.phone|add_class:"form-control"|attr:"id:phone" placeholder="Phone Number" %}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.phone.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-12">
+                                    {% if form.errors.email %}
+                                    {% render_field form.email|add_class:"form-control is-invalid"|attr:"id:email" placeholder="Account Email Address"%}
+                                    {% else %}
+                                    {% render_field form.email|add_class:"form-control"|attr:"id:email" placeholder="Account Email Address" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.email.0  }}
                                     </div>
                                 </div>
                                 
-                                <div class="col-12">
-                                    <label for="activation_code" class="form-label">Activation & Verification Code</label>
-                                    {% if form.errors.activation_code %}
-                                    {% render_field form.activation_code|add_class:"form-control is-invalid"|attr:"id:activation_code" %}
+                                <div class="col-6">
+                                    {% if form.errors.password1 %}
+                                    {% render_field form.password1|add_class:"form-control is-invalid"|attr:"id:password1" type="password" placeholder="Enter Password" %}
                                     {% else %}
-                                    {% render_field form.activation_code|add_class:"form-control"|attr:"id:activation_code" %}
+                                    {% render_field form.password1|add_class:"form-control"|attr:"id:password1" type="password" placeholder="Enter Password"%}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
-                                        {{  form.errors.activation_code.0  }}
+                                        {{  form.errors.password1.0  }}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-6">
+                                    {% if form.errors.password2 %}
+                                    {% render_field form.password2|add_class:"form-control is-invalid"|attr:"id:password2" type="password" placeholder="Confirm Password"%}
+                                    {% else %}
+                                    {% render_field form.password2|add_class:"form-control"|attr:"id:password2" type="password" placeholder="Confirm Password"%}
+                                    {% endif %}
+                                    <div id = "" class="invalid-feedback">
+                                        {{  form.errors.password2.0  }}
                                     </div>
                                 </div>
                                 
@@ -98,7 +168,7 @@
     
     $(document).ready(function(){
         $("#userForm").submit(function(e){
-
+            
         })
     })
 </script>

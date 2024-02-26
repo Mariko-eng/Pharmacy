@@ -36,5 +36,5 @@ urlpatterns = [
 
     path('home/company/<int:company_id>/user-roles/', views.users_company_roles_list_view, name="users-company-roles-list"),
     path('home/company/<int:company_id>/user-roles/add/', views.users_company_roles_new_view, name="users-company-roles-new"),
-    path('home/company/<int:company_id>/user-roles/<int:role_id>/permissions/',views.users_company_role_permissions_list_view, name="users-company-roles-permissions-list"),
-    ]
+    path('home/company/<int:company_id>/user-roles/<int:group_id>/permissions/',views.users_company_role_permissions_list_view, name="users-company-roles-permissions-list"),
+]

@@ -31,6 +31,7 @@
                             <tr>
                                 <th scope="col">App</th>
                                 <th scope="col">Name</th>
+                                <th scope="col">Code Name</th>
                                 <th scope="col">Action</th>
                             </tr>
                         </thead>
@@ -39,11 +40,16 @@
                             <tr>
                                 <td>{{item.content_type.name|upper}}</td>
                                 <td>{{item.name}}</td>
+                                <td>{{item.codename}}</td>
                                 <td>
+                                    {% if item in super_user_permissions %} 
+                                    <div>-</div>
+                                    {% else %}
                                     <div class="form-check">
                                         <input type="checkbox" class="form-check-input" name="permissions" value="{{ item.id }}"
                                         {% if item in group_permissions %} checked {% endif %}>
                                     </div>
+                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}

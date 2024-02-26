@@ -36,7 +36,7 @@
                         {% endfor %}  
                     </select>
                 </div> 
-                <div class="mt-2" style="width:100%; height:400px; background: blue;">
+                <div class="mt-2" style="width:100%; height:400px;">
                     <object id="pdf-object" type="application/pdf" style="width:100%; height:400px;">
                         <iframe id="pdf-container" width="100%" height="100%" frameborder="0"></iframe>
                     </object>
@@ -305,6 +305,9 @@
         $('.js-select-products').on('select2:select', function (e) {
             // Reset the selected items
             $(this).val([]).trigger('change');
+
+            $('#pdf-object').attr('data', '');
+            $('#pdf-container').attr('src', '');
         });
     })
     
@@ -620,9 +623,7 @@
                 url: '{% url "sales:pos-sales-new" pos_id=0 %}'.replace('0', id),  
                 data: formData,
                 success: function (data){
-                    if (data.success) {
-                        console.log(data)
-                        
+                    if (data.success) {                         
                         // Show the toast
                         $("#toast-header").addClass("text-success")
                         $("#toast-body").text("Added Sucessfully!");

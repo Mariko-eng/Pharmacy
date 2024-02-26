@@ -3,9 +3,9 @@ from company.models import StoreLevelGroup
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
 from utils.groups.default_roles import DefaultRoles
-from utils.permissions.user import user_app_admin_permissions
-from utils.permissions.user import user_company_admin_permissions
-from utils.permissions.user import user_pos_attendant_permissions
+from utils.permissions.user import app_admin_permissions
+from utils.permissions.user import company_admin_permissions
+from utils.permissions.user import pos_attendant_permissions
 
 
 def init_store_groups(store_id=None):
@@ -29,7 +29,7 @@ def init_store_groups(store_id=None):
         )
 
         all_permissions_set = set(Permission.objects.all()) # Use a set insteead of a list
-        app_and_company_admin_permissions = user_app_admin_permissions + user_company_admin_permissions
+        app_and_company_admin_permissions = app_admin_permissions + company_admin_permissions
         # Get the permissions associated with the ContentType objects
         excluded_model_permissions_set = set(permissions_for_model)
  
@@ -45,7 +45,7 @@ def init_store_groups(store_id=None):
             # Create a set of non_store_permissions
             non_store_permissions_set = set()
             for codename, description in app_and_company_admin_permissions:
-                permission, created = Permission.objects.get_or_create(codename=codename)
+                permission = Permission.objects.get(codename=codename, name=description)
                 non_store_permissions_set.add(permission) # Add items to the set
 
             # Add all other permissions to the group
@@ -53,28 +53,35 @@ def init_store_groups(store_id=None):
                 group.permissions.add(perm)
 
 
-        # Pos Attendant/Cashier Permissions             
-        cashier_group, created = Group.objects.get_or_create(name=DefaultRoles.CASHIER)
-        for codename, description in user_pos_attendant_permissions:
-            cashier_permission, created = Permission.objects.get_or_create(codename=codename)
+        # Pos Attendant/Cashier Permissions
+        # Role Name
+        role_name = DefaultRoles.CASHIER.replace(" ", "-")
+        group_name = f"{company_name}_{store_name}_{role_name}"              
+        cashier_group, created = Group.objects.get_or_create(name=group_name)
+        StoreLevelGroup.objects.get_or_create(store=store, group=cashier_group, name=role_name.replace("-", " "))
+        for codename, description in pos_attendant_permissions:
+            cashier_permission = Permission.objects.get(codename=codename, name=description)
             cashier_group.permissions.add(cashier_permission)
 
 
 
-def create_store_group(role_name=None, store_id=None):
-    if store_id and role_name:
-        store = Store.objects.get(pk = store_id)
-        # Store Name
-        store_name = store.name.replace(" ", "-")
-        # Company Name
-        company_name = store.company.name.replace(" ", "-")
-        # Role Name
-        role_name = role_name.replace(" ", "-")
+def create_store_group(store_id=None, role_name=None):
+    try:
+        if store_id and role_name:
+            store = Store.objects.get(pk = store_id)
+            # Store Name
+            store_name = store.name.replace(" ", "-")
+            # Company Name
+            company_name = store.company.name.replace(" ", "-")
+            # Role Name
+            role_name = role_name.replace(" ", "-")
 
-        # Group Name
-        group_name = f"{company_name}_{store_name}_{role_name}"
-        group, created = Group.objects.get_or_create(name=group_name)
-        StoreLevelGroup.objects.get_or_create(store=store, group=group, name=role_name.replace("-", " "))
-        return group
-    else:
+            # Group Name
+            group_name = f"{company_name}_{store_name}_{role_name}"
+            group, created = Group.objects.get_or_create(name=group_name)
+            StoreLevelGroup.objects.get_or_create(store=store, group=group, name=role_name.replace("-", " "))
+            return group
+        else:
+            return None
+    except:
         return None

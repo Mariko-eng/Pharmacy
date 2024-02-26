@@ -50,16 +50,39 @@
                   <th scope="col">Action</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody> 
                 {% for result in results %}
                 <tr>
                   <td>{{result.recv_stock_unique_id}}</td>
                   <td>{{result.provider_details.name}}</td>
                   <td>{{result.items_count}}</td>
                   <td>
+                  <span class="{% if result.status == "PENDING"%} bg-primary {%endif%}
+                    {% if result.status == "CANCELLED" %} bg-danger {%endif%}
+                    {% if result.status == "APPROVED"%} bg-success {%endif%} badge">
                     {{result.status}}
-                  </td>
+                  </span>
+                </td>
                   <td>{{result.created_at|date:"Y-m-d H:i:A"}}</td>
+                  <td>
+                    <select data-item-id="{{ result.id }}"  class="action-select">
+                      <option value="" selected disabled>Actions</option>
+                      <option value="view">View</option>
+                      {% if result.status == "PENDING" %}
+                      <option value="edit">Edit</option>
+                      {% endif %}
+                      {% if result.status == "PENDING" or result.status == "CANCELLED" %}
+                      <option value="approve">Approve</option>
+                      {% endif %}
+                      {% if result.status == "PENDING" or result.status == "APPROVED" %}
+                      <option value="cancel">Cancel</option>
+                      {% endif %}
+                      {% if result.status == "PENDING" %}
+                      <option value="delete">Delete</option>
+                      {% endif %}              
+                    </select>
+                  </td>
+                  {% comment %} 
                   <td>
                     <div class="d-flex">
                       <a href="{% url 'inventory:store-received-stock-detail' store_id=store.id received_stock_id=result.id %}" class="mx-1 text-primary">View</a>
@@ -71,7 +94,7 @@
                       {% endif %}
                       <a href="#" class="mx-1 text-danger">Cancel</a>
                     </div>
-                  </td>
+                  </td> {% endcomment %}
                 </tr>
                 {% endfor %}
               </tbody>
@@ -83,6 +106,53 @@
   </div><!-- End Default Tabs -->
 </div>
 </div>
+
+
+<script type='text/javascript'>
+  
+  $(document).ready(function (){
+    
+    $('.action-select').on('change', function () {
+      var selectBtn = $(this);
+      var selectedAction = selectBtn.val();
+      var itemId = selectBtn.data('item-id');
+
+      if (selectedAction === "view") {
+        window.location.href = "{% url 'inventory:store-received-stock-detail' store_id=0 received_stock_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+        return
+      }
+
+      if (selectedAction === "edit") {
+        window.location.href = "{% url 'inventory:store-received-stock-edit' store_id=0 received_stock_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+        return
+      }
+      
+      const isConfirmed = window.confirm("Are You sure that you want to continue?")  
+      // Disable the select Button
+      selectBtn.prop('disabled', true);
+      selectBtn.val('');
+      
+      if (isConfirmed === false){
+        // Reset the  select button And Able  it
+        selectBtn.prop('disabled', false);
+        return
+      }
+      
+      
+      if(selectedAction === "approve") {
+        window.location.href = "{% url 'inventory:store-received-stock-approve' store_id=0 received_stock_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+      } else if(selectedAction === "cancel") {
+        window.location.href = "{% url 'inventory:store-received-stock-cancel' store_id=0 received_stock_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+      } else if(selectedAction === "delete") {
+        window.location.href = "{% url 'inventory:store-received-stock-delete' store_id=0 received_stock_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+      } 
+      
+      // Reset the  select button And Able  it
+      // selectBtn.prop('disabled', false);
+    });
+  }) 
+  
+</script>
 
 {% endblock %}
 
