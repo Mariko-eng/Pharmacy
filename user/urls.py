@@ -19,22 +19,27 @@ urlpatterns = [
     path('home/pos/dashboard//<int:pos_id>/', views.pos_dashboard, name="pos-dashboard"),
     path('home/pos/dashboard/', views.pos_dashboard, name="pos-dashboard"),
 
+    # Super - Users & Roles
     path('home/users/list/',views.users_list_view,name="users-list"),  
-    path('home/users/roles/<int:group_id>/permissions/',views.super_role_permissions_edit_view, name="users-roles-permissions-list"),
-    path('home/users/company/roles/<int:group_id>/permissions/',views.company_role_permissions_edit_view, name="users-company-roles-permissions-list"),
-    path('home/users/store/roles/<int:group_id>/permissions/',views.store_role_permissions_edit_view, name="users-store-roles-permissions-list"),
-
-    path('home/company/<int:company_id>/users/', views.users_company_list_view, name="users-company-list"),
+    path('home/users-roles/list/',views.users_list_view,name="users-roles-list"),  
+    path('home/users-roles/<int:group_id>/permissions/',views.super_role_permissions_edit_view, name="users-roles-permissions-list"),
+    # Company - Users & Roles
+    path('home/company/<int:company_id>/users/list/', views.users_company_list_view, name="users-company-list"),
     path('home/company/<int:company_id>/users/add/', views.users_company_new_view,name="users-company-new"),
     path('home/company/<int:company_id>/users/company_admin/add/', views.users_company_admin_user_new, name="users-company-admin-new"),
-    path('home/company/<int:company_id>/users/store_admin/add/', views.users_company_store_admin_user_new, name="users-company-store-admin-new"),
-
+    # Company - Users & Roles & Permissions
+    path('home/company/<int:company_id>/users-roles/list/', views.company_roles_list_view, name="users-company-roles-list"),
+    path('home/company/<int:company_id>/users-roles/<int:group_id>/permissions/list/', views.company_role_permissions_list_view, name="users-company-role-permissions-list"),
+    path('home/company/<int:company_id>/users-roles/<int:group_id>/permissions/edit/',views.company_role_permissions_edit_view, name="users-company-role-permissions-edit"),
+    # Store - Users & Roles
     path('home/store/<int:store_id>/users/', views.users_store_list_view, name="users-store-list"),
     path('home/store/<int:store_id>/users/add/', views.users_store_new_view,name="users-store-new"),
+    path('home/company/<int:company_id>/users/store_admin/add/', views.users_company_store_admin_user_new, name="users-company-store-admin-new"),
     path('home/store/<int:store_id>/users/store_admin/add/', views.users_store_admin_user_new, name="users-store-admin-new"),
     path('home/store/<int:store_id>/users/pos_attendant/add/', views.users_store_pos_attendant_user_new, name="users-store-pos-attendant-new"),
+    # Store - Users & Roles & Permissions
+    path('home/store/<int:store_id>/users-roles/list/', views.store_roles_list_view, name="users-store-roles-list"),
+    path('home/store/<int:store_id>/users-roles/<int:group_id>/permissions/list/',views.store_role_permissions_list_view, name="users-store-role-permissions-list"),
+    path('home/store/<int:store_id>/users-roles/<int:group_id>/permissions/edit/',views.store_role_permissions_edit_view, name="users-store-role-permissions-edit"),
 
-    path('home/company/<int:company_id>/user-roles/', views.users_company_roles_list_view, name="users-company-roles-list"),
-    path('home/company/<int:company_id>/user-roles/add/', views.users_company_roles_new_view, name="users-company-roles-new"),
-    path('home/company/<int:company_id>/user-roles/<int:group_id>/permissions/',views.users_company_role_permissions_list_view, name="users-company-roles-permissions-list"),
 ]

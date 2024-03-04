@@ -92,6 +92,7 @@
                                     </table>
                                 </div>
                             </div>
+
                             <div>
                                 <h6 class="card-title">Company Roles</h6>
                                 <div class="table-responsive small">
@@ -110,7 +111,7 @@
                                                 <td>{{item.company}}</td>
                                                 <td>{{item.name}}</td>
                                                 <td>{{item.group.name}}</td>
-                                                <td><a href="{% url 'user:users-company-roles-permissions-list' group_id=item.group.id %}">
+                                                <td><a href="{% url 'user:users-company-role-permissions-list' company_id=item.company.id group_id=item.group.id %}">
                                                     <i class="bi bi-pencil"></i>View Permissions</a>
                                                 </td>
                                             </tr>
@@ -139,7 +140,7 @@
                                                 <td>{{item.store.name}}</td>
                                                 <td>{{item.name}}</td>
                                                 <td>{{item.group.name}}</td>
-                                                <td><a href="{% url 'user:users-store-roles-permissions-list' group_id=item.group.id %}">
+                                                <td><a href="{% url 'user:users-store-roles-permissions-list' store_id=item.store.id group_id=item.group.id %}">
                                                     <i class="bi bi-pencil"></i>View Permissions</a>
                                                 </td>
                                             </tr>
@@ -256,7 +257,7 @@
                 </div>
             </div>
         </div>
-        
+         
         
         <!-- End Modal Dialog Scrollable--> 
         

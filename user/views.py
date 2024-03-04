@@ -16,7 +16,8 @@ from utils.permissions.user import app_admin_permissions
 from utils.permissions.user import company_admin_permissions
 from utils.defaults.init_company_groups import create_company_group
 from utils.defaults.init_store_groups import create_store_group
-from .forms import  AppUserForm
+from .forms import RoleForm
+from .forms import AppUserForm
 from .forms import CompanyRoleFrom
 from .forms import CompanyAdminUserForm
 from .forms import StoreAdminUserForm
@@ -170,47 +171,8 @@ def pos_dashboard(request, pos_id = None):
         raise Http404('Page Not Found!')
 
 ########################### Users & Roles##################
-# Super
-@login_required(login_url='/login')
-@permission_required("user.manage_all_users", raise_exception=True)
-def users_list_view(request):
-    users = User.objects.all()
 
-    app_groups = []
-    default_groups = DefaultRoles.choices
-    for default_group in default_groups:
-        if Group.objects.filter(name = default_group[0]).exists():
-            group = Group.objects.filter(name = default_group[0]).first()
-            app_groups.append(group)
-
-        # group, created = Group.objects.get_or_create(name = default_group[0])
-        # app_groups.append(group)
-
-    company_groups = CompanyLevelGroup.objects.all()
-    store_groups = StoreLevelGroup.objects.all()
-    form = AppUserForm()
-
-    context = {
-        "users" : users,
-        "app_groups" : app_groups,
-        "company_groups" : company_groups,
-        "store_groups" : store_groups,
-        "form" : form }
-        
-    if request.method == 'POST':
-        form_data = AppUserForm(request.POST or None)
-        if form_data.is_valid():
-            user = form_data.save(commit=False)
-            user.set_password(str(user.email))
-            user.created_by = request.user
-            user.save()
-            return JsonResponse({'success': True, 'email': form_data.cleaned_data['email']})
-        else:
-            return JsonResponse({'success': False, 'errors': form_data.errors})
-
-    return render(request, "user/super/list/index.html", context = context)
-
-
+# All App Roles
 @login_required(login_url='/login')
 @permission_required("user.manage_all_roles", raise_exception=True)
 def super_role_permissions_edit_view(request, group_id):
@@ -266,13 +228,68 @@ def super_role_permissions_edit_view(request, group_id):
         
     return render(request, "user/super/roles/index.html", context= context)
 
-#  Company Roles
+
+# Company Roles
 @login_required(login_url='/login')
 @permission_required("user.manage_company_roles", raise_exception=True)
-def company_role_permissions_edit_view(request, group_id):
+def company_roles_list_view(request, company_id):
+    company = Company.objects.get(pk = company_id)
+
+    company_groups = CompanyLevelGroup.objects.filter(company = company)
+
+    form =  RoleForm()
+
+    context = {
+        "company": company,
+        "company_groups": company_groups,
+        "form": form,
+    }
+
+    if request.is_ajax():
+        if request.method == "POST":
+            form = RoleForm(request.POST)
+            if form.is_valid():
+                name = form.cleaned_data.get("name")
+                if CompanyLevelGroup.objects.filter(company=company, name__iexact=name).exists():
+                    form.errors['name'] = ["Name ALready Exists!"]
+                    return JsonResponse({'success': False, 'errors': form.errors})
+                else:
+                    group = create_company_group(company_id=company.pk,role_name=name)
+                    return JsonResponse({'success': True, 'group_id': group.id})
+            else:  
+                return JsonResponse({'success': False, 'errors': form.errors})      
+
+    return render(request, "role/company/list/index.html", context = context)
+
+
+#  Company Role - permissions
+@login_required(login_url='/login')
+@permission_required("user.manage_company_roles", raise_exception=True)
+def company_role_permissions_list_view(request, company_id, group_id):
+    company = Company.objects.get(pk = company_id)
+
     group = Group.objects.get(pk=group_id)
     company_group = CompanyLevelGroup.objects.get(group=group)
-    company = company_group.company
+
+    # print(group)
+    permissions = group.permissions.all()
+
+    context = {
+        "company": company,
+        "company_group": company_group,
+        "permissions": permissions,
+        }
+        
+    return render(request, "perms/company/list.html", context= context)
+
+
+@login_required(login_url='/login')
+@permission_required("user.manage_company_roles", raise_exception=True)
+def company_role_permissions_edit_view(request, company_id, group_id):
+    company = Company.objects.get(pk = company_id)
+
+    group = Group.objects.get(pk=group_id)
+    company_group = CompanyLevelGroup.objects.get(group=group)
 
     # print(group)
     group_permissions = group.permissions.all()
@@ -301,7 +318,6 @@ def company_role_permissions_edit_view(request, group_id):
     context = {
         "company": company,
         "company_group": company_group,
-        "group": group,
         "group_permissions": group_permissions,
         "all_permissions" : all_permissions }
 
@@ -320,18 +336,77 @@ def company_role_permissions_edit_view(request, group_id):
             if str(perm_id) not in selected_perms:
                 existing_perm = Permission.objects.get(pk=perm_id)
                 group.permissions.remove(existing_perm)
+
+        return redirect(reverse('user:users-company-role-permissions-list', 
+                        kwargs={'company_id': company_id, 'group_id': group_id}))
         
-    return render(request, "user/company/roles/index.html", context= context)
+    return render(request, "perms/company/edit.html", context= context)
 
 
-#  Store Roles
+# Store Roles
 @login_required(login_url='/login')
 @permission_required("user.manage_store_roles", raise_exception=True)
-def store_role_permissions_edit_view(request, group_id):
+def store_roles_list_view(request, store_id):
+    store = Store.objects.get(pk = store_id)
+    company = store.company
+
+    store_groups = StoreLevelGroup.objects.filter(store = store)
+    form =  RoleForm()
+
+    context = {
+        "company": company,
+        "store": store,
+        "store_groups": store_groups,
+        "form": form
+    }
+
+    if request.is_ajax():
+        if request.method == "POST":
+            form = RoleForm(request.POST)
+            if form.is_valid():
+                name = form.cleaned_data.get("name")
+                if StoreLevelGroup.objects.filter(store=store, name__iexact=name).exists():
+                    form.errors['name'] = ["Name ALready Exists!"]
+                    return JsonResponse({'success': False, 'errors': form.errors})
+                else:
+                    group = create_store_group(store_id=store.pk, role_name=name)
+                    return JsonResponse({'success': True, 'group_id': group.id})
+            else:  
+                return JsonResponse({'success': False, 'errors': form.errors}) 
+
+
+    return render(request, "role/store/list/index.html", context = context)
+
+#  Store Role - permissions
+@login_required(login_url='/login')
+@permission_required("user.manage_store_roles", raise_exception=True)
+def store_role_permissions_list_view(request, store_id, group_id):
+    store = Store.objects.get(pk = store_id)
+    company = store.company
+
     group = Group.objects.get(pk=group_id)
     store_group = StoreLevelGroup.objects.get(group=group)
-    store = store_group.store
+
+    # print(group)
+    permissions = group.permissions.all()
+
+    context = {
+        "company": company,
+        "store": store,
+        "store_group": store_group,
+        "permissions": permissions,
+        }
+    return render(request, "perms/store/list.html", context= context)
+
+
+@login_required(login_url='/login')
+@permission_required("user.manage_store_roles", raise_exception=True)
+def store_role_permissions_edit_view(request, store_id, group_id):
+    store = Store.objects.get(pk = store_id)
     company = store.company
+
+    group = Group.objects.get(pk=group_id)
+    store_group = StoreLevelGroup.objects.get(group=group)
 
     # print(group)
     group_permissions = group.permissions.all()
@@ -395,8 +470,51 @@ def store_role_permissions_edit_view(request, group_id):
                 existing_perm = Permission.objects.get(pk=perm_id)
                 group.permissions.remove(existing_perm)
         
-    return render(request, "user/store/roles/index.html", context= context)
+        return redirect(reverse('user:users-store-role-permissions-list', 
+                        kwargs={'store_id': store_id, 'group_id': group_id}))
+        
+    return render(request, "perms/store/edit.html", context= context)
 
+
+# All App Users
+@login_required(login_url='/login')
+@permission_required("user.manage_all_users", raise_exception=True)
+def users_list_view(request):
+    users = User.objects.all()
+
+    app_groups = []
+    default_groups = DefaultRoles.choices
+    for default_group in default_groups:
+        if Group.objects.filter(name = default_group[0]).exists():
+            group = Group.objects.filter(name = default_group[0]).first()
+            app_groups.append(group)
+
+        # group, created = Group.objects.get_or_create(name = default_group[0])
+        # app_groups.append(group)
+
+    company_groups = CompanyLevelGroup.objects.all()
+    store_groups = StoreLevelGroup.objects.all()
+    form = AppUserForm()
+
+    context = {
+        "users" : users,
+        "app_groups" : app_groups,
+        "company_groups" : company_groups,
+        "store_groups" : store_groups,
+        "form" : form }
+        
+    if request.method == 'POST':
+        form_data = AppUserForm(request.POST or None)
+        if form_data.is_valid():
+            user = form_data.save(commit=False)
+            user.set_password(str(user.email))
+            user.created_by = request.user
+            user.save()
+            return JsonResponse({'success': True, 'email': form_data.cleaned_data['email']})
+        else:
+            return JsonResponse({'success': False, 'errors': form_data.errors})
+
+    return render(request, "user/super/list/index.html", context = context)
 
 # Company Users
 @login_required(login_url='/login')
@@ -476,6 +594,32 @@ def users_company_admin_user_new(request, company_id):
     return render(request, "user/company/new/company_admin.html", context=context)
 
 
+# Store Users
+@login_required(login_url='/login')
+def users_store_list_view(request, store_id):
+
+    store = Store.objects.get(pk = store_id)
+
+    users = User.objects.filter(userprofile__store=store)
+
+    access_group = request.GET.get('access_group', None)
+
+    if access_group is not None:
+        if access_group == AccessGroups.COMPANY_ADMIN:
+            users = User.objects.filter(userprofile__company=store.company)
+            users  = users.filter(account_type = access_group)
+        else:
+            users  = users.filter(account_type = access_group)
+
+    context = {
+        "company": store.company,
+        "store": store,
+        "users" : users,
+        "access_group": access_group
+    }
+    return render(request, "user/store/list/index.html", context = context)
+
+
 @login_required(login_url='/login')
 def users_company_store_admin_user_new(request, company_id):
     company = Company.objects.get(pk = company_id)
@@ -533,45 +677,6 @@ def users_company_store_admin_user_new(request, company_id):
             messages.error(request,"Failed to create store admin account!")
             
     return render(request, "user/company/new/store_admin.html", context=context)
-
-
-@login_required(login_url='/login')
-def users_store_list_view(request, store_id):
-
-    store = Store.objects.get(pk = store_id)
-
-    users = User.objects.filter(userprofile__store=store)
-
-    access_group = request.GET.get('access_group', None)
-
-    if access_group is not None:
-        if access_group == AccessGroups.COMPANY_ADMIN:
-            users = User.objects.filter(userprofile__company=store.company)
-            users  = users.filter(account_type = access_group)
-        else:
-            users  = users.filter(account_type = access_group)
-
-    context = {
-        "company": store.company,
-        "store": store,
-        "users" : users,
-        "access_group": access_group
-    }
-    return render(request, "user/store/list/index.html", context = context)
-
-
-@login_required(login_url='/login')
-def users_store_new_view(request, store_id):
-    access_group = request.GET.get('access_group', None)
-
-    if  access_group == AccessGroups.STORE_ADMIN:
-        return redirect(reverse('user:users-store-admin-new', kwargs={'store_id': store_id}))
-
-    if  access_group == AccessGroups.POS_ATTENDANT:
-        return redirect(reverse('user:users-store-pos-attendant-new', kwargs={'store_id': store_id}))
-
-    return redirect(reverse('user:store-index'))
-
 
 @login_required(login_url='/login')
 def users_store_admin_user_new(request, store_id):
@@ -632,6 +737,19 @@ def users_store_admin_user_new(request, store_id):
             messages.error(request,"Failed to create store admin account!")
             
     return render(request, "user/store/new/store_admin.html", context=context)
+
+
+@login_required(login_url='/login')
+def users_store_new_view(request, store_id):
+    access_group = request.GET.get('access_group', None)
+
+    if  access_group == AccessGroups.STORE_ADMIN:
+        return redirect(reverse('user:users-store-admin-new', kwargs={'store_id': store_id}))
+
+    if  access_group == AccessGroups.POS_ATTENDANT:
+        return redirect(reverse('user:users-store-pos-attendant-new', kwargs={'store_id': store_id}))
+
+    return redirect(reverse('user:store-index'))
 
 
 @login_required(login_url='/login')
@@ -696,105 +814,106 @@ def users_store_pos_attendant_user_new(request, store_id):
 
 
 ########################### Company Roles #######################
-@login_required(login_url='/login')
-def users_company_roles_list_view(request, company_id):
-    company = Company.objects.get(pk = company_id)
+# @login_required(login_url='/login')
+# def users_company_roles_list_view(request, company_id):
+#     company = Company.objects.get(pk = company_id)
 
-    company_groups =  CompanyLevelGroup.objects.filter(company = company)
+#     company_groups =  CompanyLevelGroup.objects.filter(company = company)
 
-    context = {
-        "company": company,
-        "company_groups": company_groups
-    }
+#     context = {
+#         "company": company,
+#         "company_groups": company_groups
+#     }
 
-    return render(request, "role/company/list/index.html", context = context)
+#     return render(request, "role/company/list/index.html", context = context)
 
-@login_required(login_url='/login')
-def users_company_roles_new_view(request, company_id):
+# @login_required(login_url='/login')
+# def users_company_roles_new_view(request, company_id):
 
-    company = Company.objects.get(pk = company_id)
+#     company = Company.objects.get(pk = company_id)
 
-    # Specify the app labels you want to include
-    model_names = ['company','store','poscenter', 'supplierentity']
+#     # Specify the app labels you want to include
+#     model_names = ['company','store','poscenter', 'supplierentity']
 
-        # Initialize an empty list to store permissions
-    all_permissions = []
+#         # Initialize an empty list to store permissions
+#     all_permissions = []
 
-    # Loop through each app label and filter permissions
-    for model_name in model_names:
-        permissions_for_app = Permission.objects.filter(
-            content_type__model=model_name
-        )
-        all_permissions.extend(permissions_for_app)
+#     # Loop through each app label and filter permissions
+#     for model_name in model_names:
+#         permissions_for_app = Permission.objects.filter(
+#             content_type__model=model_name
+#         )
+#         all_permissions.extend(permissions_for_app)
 
-    form = CompanyRoleFrom()
+#     form = CompanyRoleFrom()
 
-    context = {
-        "company": company,
-        "all_permissions" : all_permissions,
-        "form": form }
+#     context = {
+#         "company": company,
+#         "all_permissions" : all_permissions,
+#         "form": form }
 
-    if request.method == "POST":
-        form_data = CompanyRoleFrom(request.POST)
+#     if request.method == "POST":
+#         form_data = CompanyRoleFrom(request.POST)
 
-        if form_data.is_valid():
-            role_name = form_data.cleaned_data.get("name")
-            selected_perms = request.POST.getlist("permissions") 
+#         if form_data.is_valid():
+#             role_name = form_data.cleaned_data.get("name")
+#             selected_perms = request.POST.getlist("permissions") 
             
-            company_group = create_company_group(role_name=role_name, company_id=company.pk)
+#             company_group = create_company_group(role_name=role_name, company_id=company.pk)
 
-            for perm_id in selected_perms:
-                selected_perm = Permission.objects.get(pk = perm_id)
-                if company_group:
-                    company_group.group.permissions.add(selected_perm)
+#             for perm_id in selected_perms:
+#                 selected_perm = Permission.objects.get(pk = perm_id)
+#                 if company_group:
+#                     company_group.group.permissions.add(selected_perm)
         
-            return redirect('user:company-roles-list', company_id=company_id)
+#             return redirect('user:company-roles-list', company_id=company_id)
 
-        context['form'] = form_data
+#         context['form'] = form_data
 
-    return render(request, "role/company/new/index.html", context=context)
+#     return render(request, "role/company/new/index.html", context=context)
 
-@login_required(login_url='/login')
-def users_company_role_permissions_list_view(request, company_id, role_id):
-    company = Company.objects.get(pk = company_id)
 
-    group = Group.objects.get(pk=role_id)
-    group_permissions = group.permissions.all()
-    # Specify the app labels you want to include
-    model_names = ['user', 'company','companymanager','companystaff']
+# @login_required(login_url='/login')
+# def users_company_role_permissions_list_view(request, company_id, role_id):
+#     company = Company.objects.get(pk = company_id)
 
-    # Initialize an empty list to store permissions
-    all_permissions = []
+#     group = Group.objects.get(pk=role_id)
+#     group_permissions = group.permissions.all()
+#     # Specify the app labels you want to include
+#     model_names = ['user', 'company','companymanager','companystaff']
 
-    # Loop through each app label and filter permissions
-    for model_name in model_names:
-        permissions_for_app = Permission.objects.filter(
-            content_type__model=model_name
-        )
-        all_permissions.extend(permissions_for_app)
+#     # Initialize an empty list to store permissions
+#     all_permissions = []
 
-    context = {
-        "company": company,
-        "group": group,
-        "group_permissions": group_permissions,
-        "all_permissions" : all_permissions}
+#     # Loop through each app label and filter permissions
+#     for model_name in model_names:
+#         permissions_for_app = Permission.objects.filter(
+#             content_type__model=model_name
+#         )
+#         all_permissions.extend(permissions_for_app)
 
-    if request.method == "POST":
-        selected_perms = request.POST.getlist("permissions") 
+#     context = {
+#         "company": company,
+#         "group": group,
+#         "group_permissions": group_permissions,
+#         "all_permissions" : all_permissions}
+
+#     if request.method == "POST":
+#         selected_perms = request.POST.getlist("permissions") 
         
-        # Get the existing permissions of the group
-        existing_perms = list(group.permissions.values_list('id', flat=True))
+#         # Get the existing permissions of the group
+#         existing_perms = list(group.permissions.values_list('id', flat=True))
 
-        for perm_id in selected_perms:
-            selected_perm = Permission.objects.get(pk = perm_id)
-            group.permissions.add(selected_perm)
+#         for perm_id in selected_perms:
+#             selected_perm = Permission.objects.get(pk = perm_id)
+#             group.permissions.add(selected_perm)
 
-        # Remove permissions that are not in the selected list
-        for perm_id in existing_perms:
-            if str(perm_id) not in selected_perms:
-                existing_perm = Permission.objects.get(pk=perm_id)
-                group.permissions.remove(existing_perm)
+#         # Remove permissions that are not in the selected list
+#         for perm_id in existing_perms:
+#             if str(perm_id) not in selected_perms:
+#                 existing_perm = Permission.objects.get(pk=perm_id)
+#                 group.permissions.remove(existing_perm)
         
-    return render(request, "user/super/roles/index.html", context= context)
+#     return render(request, "user/super/roles/index.html", context= context)
 
 

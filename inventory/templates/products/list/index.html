@@ -67,6 +67,14 @@
                     <td>{{result.actual_qty|floatformat:1}}</td>
                     <td>{{result.created_at|date:"Y-m-d H:i:A"}}</td>
                     <td>
+                      <select data-item-id="{{ result.id }}"  class="action-select">
+                        <option value="" selected disabled>Actions</option>
+                        <option value="view">View</option>
+                        <option value="edit">Edit</option>
+                        <option value="delete">Delete</option>
+                      </select>
+                    </td>
+                    {% comment %} <td>
                       <div class="d-flex">
                         <a href="{% url 'inventory:store-products-detail' store_id=store.id stock_item_id=result.id %}" 
                         class="mx-1 text-primary">View</a>
@@ -75,7 +83,7 @@
                         <a href="{% url 'inventory:store-products-delete' store_id=store.id stock_item_id=result.id %}" 
                         class="mx-1 text-danger">Delete</a>
                       </div>
-                    </td>
+                    </td> {% endcomment %}
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -87,6 +95,42 @@
     </div><!-- End Default Tabs -->
   </div>
 </div>
+
+<script type='text/javascript'>
+  
+  $(document).ready(function (){
+    
+    $('.action-select').on('change', function () {
+      var selectBtn = $(this);
+      var selectedAction = selectBtn.val();
+      var itemId = selectBtn.data('item-id');
+      
+      selectBtn.prop('disabled', true);
+      selectBtn.val('');
+      
+      if (selectedAction === "view") {
+        window.location.href = "{% url 'inventory:store-products-detail' store_id=0 stock_item_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+      }
+      
+      if (selectedAction === "edit") {
+        window.location.href = "{% url 'inventory:store-products-edit' store_id=0 stock_item_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+      }
+      
+      if (selectedAction === "delete") {
+        const isConfirmed = window.confirm("Are You sure that you want to continue?") 
+        
+        if (isConfirmed === false){
+          // Reset the  select button And Able  it
+          selectBtn.prop('disabled', false);
+          return
+        }
+        
+        window.location.href = "{% url 'inventory:store-products-delete' store_id=0 stock_item_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+      }
+      
+    });
+  })   
+</script>
 
 {% endblock %}
 

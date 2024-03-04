@@ -5,6 +5,7 @@ from django.contrib.auth.models import Permission
 from utils.groups.default_roles import DefaultRoles
 from utils.permissions.user import app_admin_permissions
 from utils.permissions.user import company_admin_permissions
+from utils.permissions.user import store_manager_permissions
 from utils.permissions.user import pos_attendant_permissions
 
 
@@ -51,6 +52,11 @@ def init_store_groups(store_id=None):
             # Add all other permissions to the group
             for perm in all_permissions_set - (non_store_permissions_set | excluded_model_permissions_set): # Subtract the sets
                 group.permissions.add(perm)
+            
+            # Add specific store manager permissions
+            for codename, description in store_manager_permissions:
+                permission1 = Permission.objects.get(codename=codename, name=description)
+                group.permissions.add(permission1)
 
 
         # Pos Attendant/Cashier Permissions

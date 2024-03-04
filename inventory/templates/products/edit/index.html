@@ -8,7 +8,7 @@
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item"><a>Products</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'inventory:store-products-list' store_id=store.id %}">Products</a></li>
             <li class="breadcrumb-item active"><a>Edit</a></li>
         </ol>
     </nav>
@@ -50,31 +50,34 @@
                     {% endif %}
                 </div>
             </div>
+            
             <div class="row mb-3">
                 <label for="item_photo" class="col-sm-2 col-form-label">Item Photo</label>
                 <div class="col-sm-10">
                     {% if form.instance.item_photo %}
-                    <div class="d-flex">
-                    <div class="form-group">
-                        <label for="item_photo">Current Photo:</label>
-                        <img src="{{ form.instance.item_photo.url }}" alt="Photo" class="rounded-circle" width="30">
-                    </div>
-                    
-                    <div class="form-group">
-                        <input type="checkbox" name="item_photo-clear" id="item_photo-clear_id">
-                        <label class="form-check-label" for="item_photo-clear">Remove Current Photo</label>
-                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="form-group">
+                            <img src="{{ form.instance.item_photo.url }}" alt="Photo" class="rounded-circle" width="50">
+                        </div>
+                        
+                        <div class="form-group m-2">
+                            {% render_field form.item_photo_clear|add_class:"form-check" %}
+                            <label class="form-check-label" for="item_photo-clear">Remove Current Item Photo</label>
+                        </div>
                     </div>
                     {% endif %}
-
-                    <div class="form-group">
-                        <label for="id_item_photo">Or Update Photo:</label>
+                    <div class="form-group mt-2">
+                        {% if form.instance.item_photo %}
+                        <label for="id_item_photo">OR Update Item Photo</label>
                         <input class="form-control" name="item_photo" type="file" id="formFile">
+                        {% else %}
+                        <input class="form-control" name="item_photo" type="file" id="formFile">
+                        {% endif %}
                         {{ form.item_photo.errors }}
                     </div>
-                    
                 </div>
             </div>
+            
             <div class="row mb-3">
                 <div class="col-sm-6">
                     <label for="category" class="col-sm-12 col-form-label">Category</label>
@@ -120,7 +123,7 @@
                 </div>
                 
                 <div class="col-sm-6">
-                    <label for="unit_price" class="col-sm-12 col-form-label">Unit Price</label>
+                    <label for="unit_price" class="col-sm-12 col-form-label">Retail Price (SHS)</label>
                     <div class="col-sm-12">
                         {% if form.errors.unit_price %}
                         {% render_field form.unit_price|add_class:"form-control is-invalid" %}

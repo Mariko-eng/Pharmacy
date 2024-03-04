@@ -1,15 +1,15 @@
-{% extends 'base/company/index.html' %}
+{% extends 'base/store/index.html' %}
 {% load widget_tweaks %}
 
 
 {% block pagetitle%}
 <div class="pagetitle">
-    <h1>Hello, {{ request.session.company_name|default:"Guest" }}!</h1>
+  <h1>Store : {{ store.name }}!</h1>
 
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="{% url 'user:home' %}">Home</a></li>
-            <li class="breadcrumb-item"><a href="{% url 'user:users-company-roles-list' company_id=company.id %}">Roles</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'user:users-store-roles-list' store_id=store.id %}">Roles</a></li>
             <li class="breadcrumb-item"><a href="#">List</a></li>
         </ol>
     </nav>
@@ -23,11 +23,11 @@
     
     <div class="card">
         <div class="card-body">
-            <h5 class="card-title">Company Level Roles</h5>
+            <h5 class="card-title">Store Level Roles</h5>
             
             <div class="d-flex flex-column">
                 <div class="d-flex flex-row justify-content-end">
-                    {% if perms.user.manage_company_roles %}
+                    {% if perms.user.manage_store_roles %}
                     <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createRoleModal"><i class="bi bi-plus"></i><span>Add</span></button>
                     {% endif %}
                 </div>
@@ -36,6 +36,7 @@
                         <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
                             <thead>
                                 <tr>
+                                    <th scope="col">Store</th>
                                     <th scope="col">Role</th>
                                     <th scope="col">Group</th>
                                     <th scope="col">Action</th>
@@ -43,14 +44,15 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for item in company_groups %}
+                                {% for item in store_groups %}
                                 <tr>
+                                    <td>{{item.store}}</td>
                                     <td>{{item.name}}</td>
                                     <td>{{item.group.name}}</td>
-                                    <td><a href="{% url 'user:users-company-role-permissions-list' company_id=item.company.id group_id=item.group.id %}">
-                                        <i class="bi bi-pencil"></i>View Permissions</a>
+                                    <td><a href="{% url 'user:users-store-role-permissions-list' store_id=item.store.id group_id=item.group.id %}">
+                                        View Permissions</a>
                                     </td>
-                                    <td><a href="{% url 'user:users-company-role-permissions-edit' company_id=item.company.id group_id=item.group.id %}">
+                                    <td><a href="{% url 'user:users-store-role-permissions-edit' store_id=item.store.id group_id=item.group.id %}">
                                         <i class="bi bi-pencil"></i>Edit Permissions</a>
                                     </td>
                                 </tr>
@@ -105,7 +107,7 @@
             
             $.ajax({
                 type: 'POST',
-                url: '{% url "user:users-company-roles-list" 0 %}'.replace('0', {{company.id}}),
+                url: '{% url "user:users-store-roles-list" 0 %}'.replace('0', {{store.id}}),
                 data: data,
                 success: function (data) {
                     // console.log(data)

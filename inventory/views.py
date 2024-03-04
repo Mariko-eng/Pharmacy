@@ -9,7 +9,7 @@ from django.http import JsonResponse
 from .forms import RequiredFormSet
 from .forms import CategoryForm, VariantForm
 from .forms import UnitsForm, SupplierEntityForm
-from .forms import StockItemForm, ReceivedStockForm,ReceivedStockItemForm
+from .forms import StockItemNewForm, StockItemEditForm, ReceivedStockForm,ReceivedStockItemForm
 from .forms import StockRequestForm, StockRequestItemForm
 from .models import Variant, Category, Units, StockItem
 from .models import ReceivedStock, ReceivedStockItem
@@ -271,14 +271,14 @@ def stock_items_new(request, store_id):
         company = store.company
 
 
-    form = StockItemForm(store=store)
+    form = StockItemNewForm(store=store)
     context = {
         "company": company,
         "store": store,
         "form" : form }
 
     if request.method == "POST":
-        form = StockItemForm(request.POST, request.FILES, store=store)
+        form = StockItemNewForm(request.POST, request.FILES, store=store)
         if form.is_valid():
             name = form.cleaned_data.get("name")
             description = form.cleaned_data.get("description")
@@ -324,9 +324,9 @@ def stock_items_edit(request, store_id, stock_item_id):
         store = Store.objects.get(pk=store_id)
         company = store.company
 
-    product = StockItem.objects.get(pk = stock_item_id)
+    product = get_object_or_404(StockItem, pk=stock_item_id)
 
-    form = StockItemForm(instance=product, store=store)
+    form = StockItemEditForm(instance=product, store=store)
 
     context = { 
         "company": company,
@@ -336,36 +336,52 @@ def stock_items_edit(request, store_id, stock_item_id):
         }
 
     if request.method == "POST":
-        form = StockItemForm(request.POST, request.FILES, instance=product, store=store)
+        form = StockItemEditForm(request.POST, request.FILES, instance=product, store=store)
+        
         if form.is_valid():
-            name = form.cleaned_data.get("name")
-            category = form.cleaned_data.get("category")
-            variant = form.cleaned_data.get("variant")
-            units = form.cleaned_data.get("units")
-            description = form.cleaned_data.get("description")
-            item_photo = form.cleaned_data.get("item_photo", None)
-            unit_price = form.cleaned_data.get("unit_price")
-            reorder_min_qty = form.cleaned_data.get("reorder_min_qty")
-            is_for_sale = form.cleaned_data.get("is_for_sale", True)
-            is_consummable = form.cleaned_data.get("is_consummable", False)
+            # name = form.cleaned_data.get("name")
+            # category = form.cleaned_data.get("category")
+            # variant = form.cleaned_data.get("variant")
+            # units = form.cleaned_data.get("units")
+            # description = form.cleaned_data.get("description")
+            # item_photo = form.cleaned_data.get("item_photo", None)
+            # unit_price = form.cleaned_data.get("unit_price")
+            # reorder_min_qty = form.cleaned_data.get("reorder_min_qty")
+            # is_for_sale = form.cleaned_data.get("is_for_sale", True)
+            # is_consummable = form.cleaned_data.get("is_consummable", False)
 
-            product.name = name
-            product.description = description
-            product.category = category
-            product.variant = variant
-            product.units = units
-            product.item_photo = item_photo
-            product.unit_price = unit_price
-            product.reorder_min_qty = reorder_min_qty
-            product.is_for_sale = is_for_sale
-            product.is_consummable = is_consummable
-            product.company = company
-            product.store = store
-            product.created_by = request.user
-            product.save()
+            item_photo_clear = form.cleaned_data.get("item_photo_clear", False)
+            if item_photo_clear == True:
+                product.item_photo.delete()
+                product.item_photo = None
+                product.save()
 
-            return redirect('inventory:store-products-list', store_id=store_id)
+            stock_item = form.save(commit=False)
+
+            if 'item_photo' in request.FILES: # Update the Image
+                stock_item.item_photo = request.FILES['item_photo']
+            
+            stock_item.save()
+            return redirect(reverse('inventory:store-products-detail', kwargs={'store_id': store_id, "stock_item_id": stock_item_id}))
+
+            # product.name = name
+            # product.description = description
+            # product.category = category
+            # product.variant = variant
+            # product.units = units
+            # product.item_photo = item_photo
+            # product.unit_price = unit_price
+            # product.reorder_min_qty = reorder_min_qty
+            # product.is_for_sale = is_for_sale
+            # product.is_consummable = is_consummable
+            # product.company = company
+            # product.store = store
+            # product.created_by = request.user
+            # product.save()
+
+            # return redirect('inventory:store-products-list', store_id=store_id)
         else:
+            print(form.errors)
             context["form"] = form
 
     return render(request, 'products/edit/index.html', context=context) 

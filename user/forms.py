@@ -6,13 +6,14 @@ from .models import Company
 from .models import Store
 from .models import PosCenter
 
-
+class RoleForm(forms.Form):
+    name = forms.CharField(max_length=20)
 
 class AppUserForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.CharField(max_length=30)
-    phone = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=15)
     is_superuser = forms.BooleanField(initial=False, required=False)
     is_staff = forms.BooleanField(initial = True)
     class Meta:
@@ -23,7 +24,7 @@ class CompanyUserForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.CharField(max_length=30)
-    phone = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=15)
     account_type = forms.ChoiceField(
         choices=[('', '---------')] + AccessGroups.choices,
         widget=forms.RadioSelect()
@@ -99,7 +100,7 @@ class CompanyAdminUserForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.CharField(max_length=30)
-    phone = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=15)
 
     class Meta:
         model = User
@@ -110,7 +111,7 @@ class StoreAdminUserForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.CharField(max_length=30)
-    phone = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=15)
     roles = forms.MultipleChoiceField(
         choices=[('', '---------')] + DefaultRoles.choices,
         widget= forms.CheckboxSelectMultiple())
@@ -151,7 +152,7 @@ class POSAttendantUserForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30)
     last_name = forms.CharField(max_length=30)
     email = forms.CharField(max_length=30)
-    phone = forms.CharField(max_length=30)
+    phone = forms.CharField(max_length=15)
     store = forms.ModelChoiceField(
         queryset= None,
         required= True,

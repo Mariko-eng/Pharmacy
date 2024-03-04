@@ -152,6 +152,11 @@ company_admin_permissions = [
     ("manage_store_roles", "Manage store roles"),
 ]
 
+store_manager_permissions = [
+    ("manage_store_users", "Manage store users"),
+    ("manage_store_roles", "Manage store roles"),
+]
+
 # Not added to the users table
 pos_attendant_permissions = [
     ("list_sale","List sale"),

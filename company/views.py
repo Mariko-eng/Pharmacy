@@ -349,7 +349,7 @@ def pos_list_view(request, store_id):
                 return JsonResponse({'success': False, 'errors': form.errors})
             
             pos_center = form.save(commit=False)
-            pos_center.name = form.cleaned_data['name']
+            pos_center.name = form.cleaned_data['name'] 
             pos_center.created_by = request.user
             pos_center.store = store
             pos_center.save()

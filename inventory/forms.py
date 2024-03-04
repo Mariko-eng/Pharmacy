@@ -25,7 +25,7 @@ class SupplierEntityForm(forms.ModelForm):
         model = SupplierEntity
         fields = ['name','phone','email','location']
 
-class StockItemForm(forms.ModelForm):
+class StockItemNewForm(forms.ModelForm):
     name = forms.CharField(max_length=30)
     description = forms.CharField(widget=forms.Textarea, required=False) # For type TextField
     item_photo = forms.ImageField(required=False)
@@ -65,12 +65,74 @@ class StockItemForm(forms.ModelForm):
                    'created_at',]
         
     def __init__(self, *args, store=None, **kwargs):
-        super(StockItemForm, self).__init__(*args, **kwargs)
+        super(StockItemNewForm, self).__init__(*args, **kwargs)
 
         if store:
             self.fields['category'].queryset = Category.objects.filter(store=store)
             self.fields['variant'].queryset = Variant.objects.filter(store=store)
             self.fields['units'].queryset = Units.objects.filter(store=store)
+
+class StockItemEditForm(forms.ModelForm):
+    name = forms.CharField(max_length=30)
+    description = forms.CharField(widget=forms.Textarea, required=False) # For type TextField
+    item_photo_clear = forms.BooleanField(required=False, initial=False, widget=forms.CheckboxInput)
+    item_photo = forms.ImageField(required=False)
+    category = forms.ModelChoiceField(
+        queryset= None,  # Provide the queryset
+        required= True,  # Set to True if you want it to be required
+    )
+    variant = forms.ModelChoiceField(
+        queryset= None,  # Provide the queryset
+        required= False,  # Set to True if you want it to be required
+    )
+    units = forms.ModelChoiceField(
+        queryset= None,  # Provide the queryset
+        required= True,  # Set to True if you want it to be required
+    )
+    unit_price = forms.DecimalField(initial=0)
+    reorder_min_qty = forms.DecimalField(initial=0)
+
+    class Meta:
+        model = StockItem
+        fields = [ 
+            'name',
+            'description',
+            'category',
+            'variant',
+            'units',
+            'unit_price',
+            'item_photo_clear',
+            'item_photo',
+            'reorder_min_qty',
+            'is_for_sale',
+            'is_consummable',
+        ]
+        exclude = ['company',
+                   'updated_by',
+                   'updated_at',
+                   'created_by',
+                   'created_at',]
+        
+    def __init__(self, *args, store=None, **kwargs):
+        super(StockItemEditForm, self).__init__(*args, **kwargs)
+
+        if store:
+            self.fields['category'].queryset = Category.objects.filter(store=store)
+            self.fields['variant'].queryset = Variant.objects.filter(store=store)
+            self.fields['units'].queryset = Units.objects.filter(store=store)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        item_photo_clear = cleaned_data.get('item_photo_clear')
+
+        if item_photo_clear:
+            # If item_photo-clear is checked, mark item_photo as not required
+            self.fields['item_photo'].required = False
+
+            # Clear any errors related to item_photo
+            self.errors.pop('item_photo', None)
+
+        return cleaned_data
 
 
 class RequiredFormSet(BaseFormSet):
