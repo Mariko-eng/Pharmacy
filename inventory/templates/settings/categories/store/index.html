@@ -3,14 +3,14 @@
 
 {% block pagetitle%}
 <div class="pagetitle">
-    <h1>Store : {{ store.name }}!</h1>
-
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active"><a>Variants</a></li>
-        </ol>
-    </nav>
+  <h1>Store : {{ store.name }}!</h1>
+  
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">Home</a></li>
+      <li class="breadcrumb-item active"><a>Categories</a></li>
+    </ol>
+  </nav>
 </div><!-- End Page Title --> 
 {% endblock %} 
 
@@ -19,7 +19,6 @@
 
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Product Variants</h5>
     
     <!-- Default Tabs -->
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -35,43 +34,47 @@
           </div>
         </div>
         <div class="table-responsive small">
-        <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
-          <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Edit</th>
-              <th scope="col">Delete</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for result in results %}
-             <tr>
-              <td>{{result.name}}</td>
-              <td><i class="bi bi-pencil-square text-warning"></i></td>
-              <td><i class="bi bi-trash text-danger"></i></td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-          </div>
+          <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+            <thead>
+              <tr>
+                <th scope="col">Name</th>
+                <th scope="col">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for result in results %}
+              <tr>
+                <td>{{result.name}}</td>
+                <td>
+                  <select data-item-id="{{ result.id }}"  class="action-select">
+                    <option value="" selected disabled>Actions</option>
+                    <option value="edit">Edit</option>
+                    <option value="delete">Delete</option>
+                  </select>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
       </div>
-    </div><!-- End Default Tabs -->
+    </div>
   </div>
+</div><!-- End Default Tabs -->
+</div>
 </div>
 
 <div class="modal fade" id="createPosModal" tabindex="-1">
   <div class="modal-dialog modal-lg modal-dialog-scrollable">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title text-center">Add Product Variant</h5>
+        <h5 class="modal-title text-center">Add Product Category</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body row g-3 needs-validation">
         <form id = "posForm" method="post" novalidate >
           <input type="hidden" id="storeId" name="storeId" value="{{store.id}}">
-
+          
           {% csrf_token %}
           <div class="row mt-1 mb-3">
             <label for="name" class="col-sm-3 col-form-label">Name</label>
@@ -104,7 +107,7 @@
       
       $.ajax({
         type: 'POST',
-        url: '{% url "inventory:store-product-variants-list" 0 %}'.replace('0', id),
+        url: '{% url "inventory:store-product-categories-list" 0 %}'.replace('0', id),
         data: data,
         success: function (data) {
           // console.log(data)
@@ -112,7 +115,7 @@
             // Close the modal on success
             $('#name').removeClass('is-invalid');
             $('#name').addClass('is-valid');
-
+            
             $('#createPosModal').modal('hide');
             window.location.reload()            
             // Optionally, you can redirect or perform other actions after a successful submission

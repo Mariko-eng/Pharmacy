@@ -33,11 +33,12 @@
                 aria-selected="true">List Stores</button>
             </li>
         </ul>
+        
         <div class="tab-content pt-2" id="myTabContent">
             <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
                 <div class="d-flex flex-column">
                     <div class="d-flex flex-row justify-content-end">
-                        {% if perms.company.list_store %}
+                        {% if perms.company.list_store %} 
                         <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createBranchModal"><i class="bi bi-plus"></i><span>Add</span></button>
                         {%  endif %}
                     </div>

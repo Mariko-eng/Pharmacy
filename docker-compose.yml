@@ -1,0 +1,61 @@
+version: '3.4'
+services:
+  web:
+    build: .
+    platform: "linux/amd64"
+    image: yigamarkgabriel333288/pharmacy:v1.0.0.1
+    container_name: "pharmacy_sys"
+    volumes:
+      - .:/app
+      - static_volume:/app/static
+      - media_volume:/app/media
+    ports:
+      - 8000:8000
+    environment:
+      - SECRET_KEY=qwerty1234
+      - DATABASE_NAME=pharmacydb
+      - DATABASE_USER=root
+      - DATABASE_HOST=10.5.5.57
+      - DATABASE_PASSWORD=icon5b3t
+
+volumes:
+  static_volume:
+  media_volume:
+
+
+# version: '3.4'
+# services:
+#   # db:
+#   #   image: mysql:5.7
+#   #   restart: always
+#   #   environment:
+#   #     MYSQL_ROOT_PASSWORD: icon5b3t
+#   #     DATABASE_NAME: pharmacydb
+#   #     DATABASE_USER: root
+#   #     DATABASE_PASSWORD: icon@2023
+#   #   volumes:
+#   #     - db_data:/var/lib/mysql
+#   web:
+#     build: .
+#     platform: "linux/amd64"
+#     image: yigamarkgabriel333288/pharmacy:v1.0.0.1
+#     container_name: "pharmacy_sys"
+#     volumes:
+#       - .:/app
+#       - static_volume:/app/static
+#       - media_volume:/app/media
+#     ports:
+#       - 8000:8000
+#     environment:
+#       - SECRET_KEY=qwerty1234
+#       - DATABASE_NAME=pharmacydb
+#       - DATABASE_USER=root
+#       - DATABASE_HOST=127.0.0.1
+#       - DATABASE_PASSWORD=icon@2023
+
+# volumes:
+#   # db_data:
+#   static_volume:
+#   media_volume:
+
+

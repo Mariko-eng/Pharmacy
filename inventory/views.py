@@ -16,6 +16,7 @@ from .models import ReceivedStock, ReceivedStockItem
 from .models import StockRequest, StockRequestItem
 from company.models import Company, Store, PosCenter, SupplierEntity
 
+
 @login_required(login_url='/login')
 def suppliers_list(request, store_id = None, company_id = None):
     form = SupplierEntityForm()
@@ -90,7 +91,7 @@ def store_product_categories_list_view(request, store_id = None, company_id = No
             else:
                 return JsonResponse({'success': False, 'errors': form.errors})
             
-    return render(request, 'settings/categories/index.html', context=context) 
+    return render(request, 'settings/categories/store/index.html', context=context) 
 
 
 @login_required(login_url='/login')
@@ -144,7 +145,7 @@ def store_product_variants_list_view(request,store_id = None, company_id = None)
             else:
                 return JsonResponse({'success': False, 'errors': form.errors})
             
-    return render(request, 'settings/variants/index.html', context=context) 
+    return render(request, 'settings/variants/store/index.html', context=context) 
 
 
 @login_required(login_url='/login')
@@ -197,7 +198,7 @@ def store_product_units_list_view(request,store_id = None, company_id = None):
             else:
                 return JsonResponse({'success': False, 'errors': form.errors})
             
-    return render(request, 'settings/units/index.html', context=context) 
+    return render(request, 'settings/units/store/index.html', context=context) 
 
 
 @login_required(login_url='/login')
@@ -226,7 +227,7 @@ def store_stock_items_list_view(request, store_id):
         "store": store,
         "results" : results}
 
-    return render(request, 'products/list/index.html', context=context) 
+    return render(request, 'products/list/store/index.html', context=context) 
 
 
 @login_required(login_url='/login')
@@ -240,15 +241,6 @@ def pos_stock_items_list_view(request, pos_id):
 
     return render(request, 'products/list/pos/index.html', context=context) 
 
-
-@login_required(login_url='/login')
-def company_stock_items_list_view(request, company_id):
-    company = Company.objects.get(pk = company_id)
-    results = StockItem.objects.filter(company = company)
-
-    context = { "company": company, "results" : results }
-
-    return render(request, 'products/list/index.html', context=context) 
 
 @login_required(login_url='/login')
 def stock_items_detail(request, store_id, stock_item_id):

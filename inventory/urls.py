@@ -38,9 +38,6 @@ urlpatterns = [
     # Pos Products
     path('home/pos/<int:pos_id>/inventory/products/list/',
         views.pos_stock_items_list_view, name="pos-products-list"),
-    ## Company Products
-    path('home/company/<int:company_id>/inventory/products/list/',
-        views.company_stock_items_list_view, name="company-products-list"),
 
     path('home/store/<int:store_id>/inventory/products/detail/<int:stock_item_id>/',
         views.stock_items_detail, name="store-products-detail"),
