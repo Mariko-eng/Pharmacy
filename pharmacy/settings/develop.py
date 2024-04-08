@@ -57,8 +57,7 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'pharmacy.urls'
 
 # TEMPLATES = os.path.join(BASE_DIR, 'templates')
-# TEMPLATES = os.path.join(BASE_DIR, 'templates')
-TEMPLATES = ['/home/app/Pharmacy/templates']
+TEMPLATES = '/home/app/Pharmacy/templates'
 
 
 TEMPLATES = [
@@ -94,13 +93,9 @@ DATABASES = {
     },
 
     # 'default': {
-    #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': os.environ.get('DATABASE_NAME'),
-    #     'USER': os.environ.get('DATABASE_USER'),
-    #     'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-    #     'HOST': os.environ.get('MYSQL_HOST'),
-    #     'PORT': '3306',  # Default MySQL port
-    # },
+    #     'ENGINE': 'django.db.backends.sqlite3',
+    #     'NAME': BASE_DIR / 'db.sqlite3',
+    # }
 }
 
 
