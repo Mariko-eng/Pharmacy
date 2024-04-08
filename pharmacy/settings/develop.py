@@ -57,7 +57,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'pharmacy.urls'
 
 # TEMPLATES = os.path.join(BASE_DIR, 'templates')
-TEMPLATES = os.path.join(BASE_DIR, 'templates')
+# TEMPLATES = os.path.join(BASE_DIR, 'templates')
+TEMPLATES = ['/home/app/Pharmacy/templates']
 
 
 TEMPLATES = [
