@@ -17,7 +17,11 @@ SECRET_KEY = 'django-insecure-v3ape*^+#so+y0#8c^tg7z@^qy3_!_yja7shl9e)bb-lketz^-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "62.72.24.189",
+]
 
 # Application definition
 
@@ -52,13 +56,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'pharmacy.urls'
 
+# TEMPLATES = os.path.join(BASE_DIR, 'templates')
 TEMPLATES = os.path.join(BASE_DIR, 'templates')
+
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [TEMPLATES],
-        # 'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Specify the correct directory here
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,19 +83,23 @@ WSGI_APPLICATION = 'pharmacy.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'pharmacydb_staging',
+        'USER': 'root',
+        'HOST': '62.72.24.189',
+        'PASSWORD': 'Mariko@123',
+        'PORT': '3306',
+    },
+
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': 'pharmacydb',
-    #     'USER': 'root',
-    #     'PASSWORD': 'icon5b3t',
-    #     'HOST': 'localhost', # Use Ip Address Instead of localhost,  when in docker
+    #     'NAME': os.environ.get('DATABASE_NAME'),
+    #     'USER': os.environ.get('DATABASE_USER'),
+    #     'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+    #     'HOST': os.environ.get('MYSQL_HOST'),
     #     'PORT': '3306',  # Default MySQL port
     # },
-
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
 }
 
 

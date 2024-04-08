@@ -15,9 +15,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-v3ape*^+#so+y0#8c^tg7z@^qy3_!_yja7shl9e)bb-lketz^-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "localhost",
+    "127.0.0.1",
+    "62.72.24.189",
+]
 
 
 # Application definition
@@ -82,12 +86,21 @@ WSGI_APPLICATION = 'pharmacy.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('DATABASE_NAME'),
-        'USER': os.environ.get('DATABASE_USER'),
-        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-        'HOST': os.environ.get('DATABASE_HOST'),
-        'PORT': '3306',  # Default MySQL port
+        'NAME': 'pharmacydb',
+        'USER': 'root',
+        'HOST': '62.72.24.189',
+        'PASSWORD': 'Mariko@123',
+        'PORT': '3306',
     },
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': os.environ.get('DATABASE_NAME'),
+    #     'USER': os.environ.get('DATABASE_USER'),
+    #     'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+    #     'HOST': os.environ.get('MYSQL_HOST'),
+    #     'PORT': '3306',  # Default MySQL port
+    # },
 }
 
 

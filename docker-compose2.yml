@@ -1,19 +1,33 @@
 version: '3.4'
 services:
+  nginx: # Nginx server
+    # Build context
+    build: ./nginx
+    # Mapping machine and container ports
+    ports:
+      - 80:80
+    # Storage volumes
+    volumes:
+      - static_volume:/app/static
+      - media_volume:/app/media
+    depends_on:
+      - web
+    restart: "on-failure"
+
   web:
     build: .
     platform: "linux/amd64"
-    image: yigamarkgabriel333288/pharmacy_prod:v1.0.0.0  #  Production
-    container_name: "pharmacy_sys_prod"
+    image: yigamarkgabriel333288/pharmacy_staging:v1.0.0.1      #  Staging
+    container_name: "pharmacy_sys_staging"
     volumes:
       - .:/app
       - static_volume:/app/static
       - media_volume:/app/media
     ports:
-      - 8000:8000
+      - 8001:8001
     environment:
       - SECRET_KEY=qwerty1234
-      - DATABASE_NAME=pharmacydb
+      - DATABASE_NAME=pharmacydb_staging
       - DATABASE_USER=root
       - MYSQL_HOST=62.72.24.189
       - DATABASE_PASSWORD=Mariko@123

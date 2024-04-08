@@ -17,4 +17,5 @@ python3 manage.py setup_app_groups
 
 # Start server
 echo "Starting server"
-python3 manage.py runserver 0.0.0.0:8000 --settings=pharmacy.settings.production
+# python3 manage.py runserver 0.0.0.0:8000 --settings=pharmacy.settings.production
+gunicorn pharmacy.wsgi:application --bind 0.0.0.0:8000
