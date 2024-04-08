@@ -87,7 +87,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'pharmacydb_staging',
         'USER': 'root',
-        'HOST': '62.72.24.189',
+        'HOST': 'localhost',
         'PASSWORD': 'Mariko@123',
         'PORT': '3306',
     },
@@ -141,16 +141,17 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 # DIRECTORIES WHERE YOU PUT YOUR STATIC FILES
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR,'assets'),
-] 
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/') 
-#  STATIC_ROOT = '/app/static/' # PATH IN THE CONTAINER, root directory
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR,'assets'),
+# ]
+STATICFILES_DIRS = ['/home/app/Pharmacy/assets']
+# STATIC_ROOT = os.path.join(BASE_DIR, 'static/') 
+STATIC_ROOT = '/home/app/Pharmacy/static/'
 
 MEDIA_URL = '/media/'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
-# MEDIA_ROOT = '/app/media/' # PATH IN THE CONTAINER, root directory
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+MEDIA_ROOT = '/home/app/Pharmacy/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
