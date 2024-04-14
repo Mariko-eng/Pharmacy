@@ -48,7 +48,7 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     GENDER_CHOICES = [("Male", "Male"), ("Female", "Female")]
     
-    account_type = models.CharField(max_length=255, choices=AccessGroups.choices)
+    account_type = models.CharField(max_length=225, choices=AccessGroups.choices)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length = 225)
     is_superuser = models.BooleanField(default = False)
@@ -112,7 +112,7 @@ class RoleGroup(models.Model):
     groups = models.ManyToManyField(Group)
     
 class EmailLog(models.Model):
-    subject = models.CharField(max_length=255)
+    subject = models.CharField(max_length=225)
     recipient = models.EmailField()
     status = models.CharField(max_length=20)
     timestamp = models.DateTimeField(auto_now_add=True)

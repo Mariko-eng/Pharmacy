@@ -22,7 +22,7 @@ class CompanyApplication(Base):
     email = models.EmailField(unique=True)
     location = models.CharField(max_length = 225, null=True, blank=True)
     logo = models.ImageField(upload_to="company/logo", null=True)
-    status = models.CharField(max_length=255, choices=STATUS_TYPES, default="PENDING")
+    status = models.CharField(max_length=225, choices=STATUS_TYPES, default="PENDING")
     activation_code = models.CharField(max_length = 225, null=True, blank=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
@@ -63,8 +63,8 @@ class Store(Base):
     STATUS_TYPES = [('OPEN', 'OPEN'),('CLOSED', 'CLOSED'),]
 
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
-    store_type = models.CharField(max_length=255,choices=STORE_TYPES)
-    status_type = models.CharField(max_length=255,choices=STATUS_TYPES)
+    store_type = models.CharField(max_length=225,choices=STORE_TYPES)
+    status_type = models.CharField(max_length=225,choices=STATUS_TYPES)
     name = models.CharField(max_length = 225)
     phone = models.CharField(max_length = 225)
     email = models.EmailField(blank=True, null=True)
@@ -104,7 +104,7 @@ class PosCenter(Base):
 
 class SupplierEntity(Base):
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=225)
     phone = models.CharField(max_length=225)
     email = models.EmailField(null=True, blank=True)
     location = models.CharField(max_length=225, null=True, blank=True)
@@ -120,8 +120,8 @@ class SupplierEntity(Base):
     
 class Client(Base):
     store = models.ForeignKey(Store,on_delete=models.CASCADE, null=True)
-    name = models.CharField(max_length=255)
-    phone = models.CharField(max_length=255,blank=True, null=True)
+    name = models.CharField(max_length=225)
+    phone = models.CharField(max_length=225,blank=True, null=True)
     email = models.EmailField(blank=True, null=True)
     address = models.TextField(blank=True, null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)

@@ -10,7 +10,7 @@ from utils.permissions.inventory import *
 class Category(Base):
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=225)
 
     def __str__(self):
         return self.name 
@@ -22,7 +22,7 @@ class Category(Base):
 class Variant(Base):
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=225)
 
     def __str__(self):
         return self.name 
@@ -34,7 +34,7 @@ class Variant(Base):
 class Units(Base): # Units Of Measure
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=225)
 
     def __str__(self):
         return self.name
@@ -48,8 +48,8 @@ class StockItem(Base):
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
     # Data    
-    unique_no = models.CharField(max_length=255,unique=True)
-    name = models.CharField(max_length=255)
+    unique_no = models.CharField(max_length=225,unique=True)
+    name = models.CharField(max_length=225)
     description = models.TextField(blank=True, null=True)
     category = models.ForeignKey(Category,on_delete=models.SET_NULL, null=True)
     variant = models.ForeignKey(Variant,on_delete=models.SET_NULL, null=True)
@@ -63,7 +63,7 @@ class StockItem(Base):
     is_consummable = models.BooleanField(default=False)
     #Utility fields
     uniqueId = models.CharField(null=True, blank=True, max_length=100)
-    slug = models.SlugField(max_length=500, unique=True, blank=True, null=True)
+    slug = models.SlugField(max_length=225, unique=True, blank=True, null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="stock_items_createdby")
 
@@ -98,8 +98,8 @@ class ReceivedStock(Base):
     supplier_type = models.CharField(max_length=10,choices=SUPPLIER_TYPES,default="SUPPLIER")
     supplier_entity = models.ForeignKey(SupplierEntity,on_delete=models.SET_NULL,null=True)
     supplier_store = models.ForeignKey(Store,on_delete=models.SET_NULL,null=True, related_name="received_stock")
-    delivered_by_name = models.CharField(max_length=255)
-    delivered_by_phone = models.CharField(max_length=255)
+    delivered_by_name = models.CharField(max_length=225)
+    delivered_by_phone = models.CharField(max_length=225)
     received_date = models.DateField(null=True)
     delivery_notes = models.TextField(null=True,blank=True)
     status = models.CharField(max_length=10,choices=STATUS_TYPES, default="PENDING")
@@ -157,7 +157,7 @@ class ReceivedStockItem(Base):
     # Data
     received_stock = models.ForeignKey(ReceivedStock,on_delete=models.CASCADE)
     stock_item = models.ForeignKey(StockItem,on_delete=models.CASCADE)
-    batch_no = models.CharField(max_length=255)
+    batch_no = models.CharField(max_length=225)
     quantity = models.DecimalField(max_digits=12, decimal_places=3)
     unit_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     total_cost = models.DecimalField(max_digits=12, decimal_places=3, default=0)

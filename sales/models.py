@@ -52,7 +52,7 @@ class Sale(Base):
 
     #Utility fields
     uniqueId = models.CharField(null=True, blank=True, max_length=100)
-    slug = models.SlugField(max_length=500, unique=True, blank=True, null=True)
+    slug = models.SlugField(max_length=225, unique=True, blank=True, null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="sales_createdby")
 
