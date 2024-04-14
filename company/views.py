@@ -53,7 +53,7 @@ def company_application_add_view(request):
         if form_data.is_valid():
             application = form_data.save()
             code = generate_random_number()
-            print("code is : " + str(code))
+            print("code is : " + code)
             application.activation_code = code
             application.save()
 
