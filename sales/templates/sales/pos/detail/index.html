@@ -3,14 +3,15 @@
 
 {% block pagetitle%}
 <div class="pagetitle">
-    <h1>Store : {{ store.name }}!</h1>
-    
-    <nav>
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="#">Home</a></li>
-            <li class="breadcrumb-item active"><a>Sales</a></li>
-        </ol>
-    </nav>
+  <h1>Store : {{ store.name }}!</h1>
+  <h1>POS : {{ pos.name }}!</h1>
+  
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">Home</a></li>
+      <li class="breadcrumb-item active"><a>Sales</a></li>
+    </ol>
+  </nav>
 </div><!-- End Page Title --> 
 {% endblock %} 
 
@@ -59,7 +60,7 @@
                 </div>
                 <div class="row">
                     <div class="col-lg-4 col-md-5 label">Pay Status</div>
-                    <div class="col-lg-8 col-md-7 text-primary">{{sale.status}}</div>
+                    <div class="col-lg-8 col-md-7 text-primary">{{sale.payment_status}}</div>
                 </div>
                 <div class="row">
                     <div class="col-lg-4 col-md-5 label">No of Items</div>

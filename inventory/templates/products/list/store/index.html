@@ -45,7 +45,7 @@
                     <th scope="col">Photo</th>
                     <th scope="col">Name</th>
                     <th scope="col">Price</th>
-                    <th scope="col">AV. QTY</th>
+                    {% comment %} <th scope="col">AV. QTY</th> {% endcomment %}
                     <th scope="col">AC. QTY</th>
                     <th scope="col">Created At</th>
                     <th scope="col">Actions</th>
@@ -64,9 +64,10 @@
                     </td>
                     <td>{{result}}</td>
                     <td>{{result.unit_price|floatformat:1}}</td>
-                    <td>{{result.available_qty|floatformat:1}}</td>
+                    {% comment %} <td>{{result.available_qty|floatformat:1}}</td> {% endcomment %}
                     <td>{{result.actual_qty|floatformat:1}}</td>
-                    <td>{{result.created_at|date:"Y-m-d H:i:A"}}</td>
+                    <td>{{result.created_at|date:"SHORT_DATETIME_FORMAT"}}</td>
+                    {% comment %} <td>{{result.created_at|date:"Y-m-d H:i:A"}}</td> {% endcomment %}
                     <td>
                       <select data-item-id="{{ result.id }}"  class="action-select">
                         <option value="" selected disabled>Actions</option>
@@ -74,7 +75,7 @@
                         <option value="edit">Edit</option>
                         <option value="delete">Delete</option>
                       </select>
-                    </td>
+                    </td> 
                     {% comment %} <td>
                       <div class="d-flex">
                         <a href="{% url 'inventory:store-products-detail' store_id=store.id stock_item_id=result.id %}" 

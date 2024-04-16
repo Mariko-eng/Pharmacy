@@ -37,12 +37,13 @@
                 <thead>
                   <tr>
                     <th scope="col">Sale No</th>
-                    <th scope="col">Date</th>
+                    <th scope="col">Status</th>
                     <th scope="col">POS</th>
                     <th scope="col">No of items</th>
                     <th scope="col">Total Cost</th>
-                    <th scope="col">Payment Option</th>
-                    <th scope="col">Status</th>
+                    <th scope="col">Pay Option</th>
+                    <th scope="col">Pay Status</th>
+                    <th scope="col">Date</th>
                     <th scope="col">Action</th>
                   </tr>
                 </thead>
@@ -50,13 +51,22 @@
                   {% for result in sales %}
                   <tr>
                     <td>{{result.sale_unique_id}}</td>
-                    <td>{{result.created_at}}</td>
-                    <td>{{result.pos_center}}</td>
+                    <td><span class="badge {% if result.status == "Cancelled" %}bg-danger{% else %}bg-primary{% endif %}">{{ result.status }}</span></td>
+                    <td>{{result.pos_center.name}}</td>
                     <td>{{result.items_count}}</td>
-                    <td>{{result.total_cost}}</td>
+                    <td>{{result.total_cost|floatformat:1}}</td>
                     <td>{{result.payment_option}}</td>
-                    <td>{{result.status}}</td>
-                    <td><a href="#">Edit</a></td>
+                    <td>{{result.payment_status}}</td>
+                    <td>{{result.created_at|date:"SHORT_DATETIME_FORMAT"}}</td>
+                    <td>
+                      <select data-item-id="{{ result.id }}"  class="action-select">
+                        <option value="" selected disabled>Actions</option>
+                        <option value="view">View</option>
+                        {% if result.created_by == request.user %}
+                        <option value="cancel">Cancel</option> 
+                        {% endif %}
+                      </select>
+                    </td>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -68,6 +78,38 @@
     </div><!-- End Default Tabs -->
   </div>
 </div>
+
+<script type='text/javascript'>
+  
+  $(document).ready(function (){
+    
+    $('.action-select').on('change', function () {
+      var selectBtn = $(this);
+      var selectedAction = selectBtn.val();
+      var itemId = selectBtn.data('item-id');
+      
+      selectBtn.prop('disabled', true);
+      selectBtn.val('');
+      
+      if (selectedAction === "view") {
+        selectBtn.prop('disabled', false);
+        window.location.href = "{% url 'sales:pos-sales-detail' pos_id=0 sale_id=0 %}".replace('0', {{pos.id}}).replace('0', itemId);
+      }
+      
+      if (selectedAction === "cancel") {
+        const isConfirmed = window.confirm("Are You sure that you want to continue?") 
+        
+        if (isConfirmed === false){
+          // Reset the  select button And Able  it
+          selectBtn.prop('disabled', false);
+          return
+        }
+        window.location.href = "{% url 'sales:pos-sales-cancel' pos_id=0 sale_id=0 %}".replace('0', {{pos.id}}).replace('0', itemId);
+      }
+      
+    });
+  })   
+</script>
 
 {% endblock %}
 

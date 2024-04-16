@@ -140,7 +140,7 @@
                                                 <td>{{item.store.name}}</td>
                                                 <td>{{item.name}}</td>
                                                 <td>{{item.group.name}}</td>
-                                                <td><a href="{% url 'user:users-store-roles-permissions-list' store_id=item.store.id group_id=item.group.id %}">
+                                                <td><a href="{% url 'user:users-store-role-permissions-list' store_id=item.store.id group_id=item.group.id %}">
                                                     <i class="bi bi-pencil"></i>View Permissions</a>
                                                 </td>
                                             </tr>

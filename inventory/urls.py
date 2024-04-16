@@ -68,11 +68,11 @@ urlpatterns = [
     path('home/store/<int:store_id>/inventory/received_stock/<int:received_stock_id>/delete',
         views.store_received_stock_delete, name="store-received-stock-delete"),
 
-    #Company Recieved Stock     
+
+    #Company Stock Requests     
     path('home/company/<int:company_id>/inventory/stock-requests/list/',
         views.company_stock_requests_list, name="company-stock-requests-list"),
-
-    #Store Recieved Stock     
+    #Store Stock Requests  
     path('home/store/<int:store_id>/inventory/stock-requests/list/',
         views.store_stock_requests_list, name="store-stock-requests-list"),
     path('home/store/<int:store_id>/inventory/stock-requests/new/',
@@ -81,5 +81,10 @@ urlpatterns = [
         views.store_stock_requests_detail, name="store-stock-requests-detail"),
     path('home/store/<int:store_id>/inventory/stock-requests/edit/<int:stock_request_id>/',
         views.store_stock_requests_edit, name="store-stock-requests-edit"),
-
+    path('home/store/<int:store_id>/inventory/stock-requests/approve/<int:stock_request_id>/',
+        views.store_stock_requests_approve, name="store-stock-requests-approve"),
+    path('home/store/<int:store_id>/inventory/stock-requests/cancel/<int:stock_request_id>/',
+        views.store_stock_requests_cancel, name="store-stock-requests-cancel"),
+    path('home/store/<int:store_id>/inventory/stock-requests/delete/<int:stock_request_id>/',
+        views.store_stock_requests_delete, name="store-stock-requests-delete"),
 ]

@@ -109,6 +109,7 @@ def company_dashboard(request, company_id = None):
     data1 = SaleItem.get_sales_and_revenue(company=company)
     data2 = SaleItem.get_sales_data(company=company)
 
+
     context = { 
         "company" : company, 
         "summary": data1,
@@ -131,6 +132,9 @@ def store_dashboard(request, store_id = None):
     # Get sales and revenue
     data1 = SaleItem.get_sales_and_revenue(store=store)
     data2 = SaleItem.get_sales_data(store=store)
+
+    # print(data1)
+    # print(data2)
 
 
     context = { 
@@ -155,6 +159,7 @@ def pos_dashboard(request, pos_id = None):
         # Get sales and revenue
     data1 = SaleItem.get_sales_and_revenue(pos_center=pos)
     data2 = SaleItem.get_sales_data(pos_center=pos)
+
 
     context = { 
         "company" : pos.store.company,

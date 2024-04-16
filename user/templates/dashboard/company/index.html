@@ -97,7 +97,7 @@
         </div><!-- End Revenue Card -->
         
         <!-- Customers Card -->
-        <div class="col-xxl-4 col-xl-12">
+        {% comment %} <div class="col-xxl-4 col-xl-12">
           
           <div class="card info-card customers-card">
             <div class="card-body">
@@ -116,7 +116,7 @@
             </div>
           </div>
           
-        </div><!-- End Customers Card -->
+        </div><!-- End Customers Card --> {% endcomment %}
         
         <!-- Reports -->
         <div class="col-12">
@@ -209,21 +209,23 @@
               <table class="table table-borderless datatable">
                 <thead>
                   <tr>
-                    <th scope="col">#</th>
+                    <th scope="col">Store</th>
                     <th scope="col">Product</th>
+                    <th scope="col">Price</th>
                     <th scope="col">QTY</th>
-                    <th scope="col">Price</th>
-                    <th scope="col">Price</th>
+                    <th scope="col">Cost</th>
+                    <th scope="col">Date</th>
                   </tr>
                 </thead>
                 <tbody>
                   {% for item in reports.recent_sales %}
                     <tr>
-                      <th scope="row"><a href="#">{{ item.created_at}}</a></th>
-                      <td>{{ item.stock_item.product.name }}</td>
-                      <td>{{ item.quantity }}</td>
+                      <td>{{ item.store.name }}</td>
+                      <td>{{ item.stock_item.name }}</td>
                       <td><a href="#" class="text-primary">SHS {{ item.unit_cost }}</a></td>
+                      <td>{{ item.quantity }}</td>
                       <td><a href="#" class="text-primary">SHS {{ item.total_cost }}</a></td>
+                      <th scope="row"><a href="#">{{ item.created_at}}</a></th>
                   </tr>
                   {% endfor %}
                 </tbody>
@@ -257,21 +259,25 @@
               <table class="table table-borderless">
                 <thead>
                   <tr>
+                    <th scope="col">Store</th>
                     <th scope="col">Preview</th>
                     <th scope="col">Product</th>
                     <th scope="col">Price</th>
                     <th scope="col">Sold</th>
                     <th scope="col">Revenue</th>
+                    <th scope="col">Date</th>
                   </tr>
                 </thead>
                 <tbody>             
                   {% for item in reports.this_year_top_sales %}
                     <tr>
-                    <th scope="row"><a href="#"><img src="{{ item.stock_item.item_photo.url  }}" alt=""></a></th>
-                      <td class="text-primary fw-bold">{{ item.stock_item }}</td>
+                      <td>{{ item.store.name }}</td>
+                      <td class="text-primary fw-bold">{{ item.stock_item.name }}</td>
+                    <td scope="row"><a href="#"><img src="{{ item.stock_item.item_photo.url  }}" alt=""></a></td>
                       <td>{{ item.unit_cost }}</td>
                       <td class="fw-bold">{{ item.quantity }}</td>
                       <td>SHS {{ item.total_cost }}</td>
+                      <th scope="row"><a href="#">{{ item.created_at}}</a></th>
                   </tr>
                   {% endfor %}
                 </tbody>

@@ -19,7 +19,16 @@
 
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Received Stock</h5>
+    <div class="d-flex justify-content-between my-3">
+      <h5 class="card-title">Received Stock</h5>
+      <div>
+        <a href="{% url 'inventory:store-received-stock-new' store_id=store.id %}" 
+            class="btn btn-outline-primary" 
+            style="width: 150px; display: inline-block; text-align: center; text-decoration: none;">
+            <i class="bi bi-plus"></i><span>Add</span>
+          </a>
+      </div>
+    </div>
     
     <!-- Default Tabs -->
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -29,14 +38,14 @@
     </ul>
     <div class="tab-content pt-2" id="myTabContent">
       <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-        <div class="d-flex flex-column">
+        {% comment %} <div class="d-flex flex-column">
           <div class="d-flex flex-row justify-content-end">
             <a href="{% url 'inventory:store-received-stock-new' store_id=store.id %}" 
             class="btn btn-outline-primary" 
             style="width: 150px; display: inline-block; text-align: center; text-decoration: none;">
             <i class="bi bi-plus"></i><span>Add</span>
           </a>
-        </div>
+        </div> {% endcomment %}
         <div>
           <div class="table-responsive small">
             <table id="bootstrapdatatable" class="datatable table table-striped table-sm">

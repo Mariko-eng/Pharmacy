@@ -40,6 +40,7 @@
                     <object id="pdf-object" type="application/pdf" style="width:100%; height:400px;">
                         <iframe id="pdf-container" width="100%" height="100%" frameborder="0"></iframe>
                     </object>
+                    <button id="addNew" class="d-none btn btn-warning"> Add New </button>
                 </div>
             </div>
             <div class= "col-8">
@@ -286,14 +287,14 @@
     </div>
 </div>
 
-<div class="toast" style="position: absolute; top: 50px; right: 20px;">
+{% comment %} <div class="toast" style="position: absolute; top: 250px; right: 20px;">
     <div id = "toast-header" class="toast-header">
         <strong class="mr-auto">Notification</strong>
     </div>
     <div id = "toast-body" class="toast-body">
         Sale Added successfully!
     </div>
-</div>
+</div> {% endcomment %}
 
 
 <script type='text/javascript'>
@@ -308,6 +309,8 @@
 
             $('#pdf-object').attr('data', '');
             $('#pdf-container').attr('src', '');
+
+            $('#addNew').removeClass('d-block').addClass('d-none');
         });
     })
     
@@ -576,6 +579,17 @@
                 });
                 formValuesArray.push(formValues);
             });
+
+            if(formValuesArray.length == 0){
+                $("#toast-header").addClass("text-danger")
+                $("#toast-body").text("Select items!");
+                $("#toast-body").addClass("text-danger")
+                $('.toast').toast('show');
+                setTimeout(function(){
+                    $('.toast').toast('hide');
+                }, 3000);
+                return;
+            }
             
             // console.log(formValuesArray)
             
@@ -650,15 +664,29 @@
 
                         $('#pdf-object').attr('data', data.invoice_url);
                         $('#pdf-container').attr('src', data.invoice_url);
+
+                        $('#addNew').removeClass('d-none').addClass('d-block')
                         
                     }else{
                         console.log("Error")
+                        $("#toast-header").addClass("text-danger")
+                        $("#toast-body").text("Something went wrong!");
+                        $("#toast-body").addClass("text-danger")
+                        $('.toast').toast('show');
+                        setTimeout(function(){
+                            $('.toast').toast('hide');
+                        }, 3000);
+                        return;
                     }
                 },
             })
             
             
         });
+
+        $('#addNew').click(function() {
+            window.location.reload()
+        })
     });
 </script> 
 

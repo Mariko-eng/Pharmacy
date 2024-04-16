@@ -48,11 +48,35 @@
             <i class="bi bi-circle"></i><span>Units/Metrics</span>
           </a>
         </li>
+
+        <li>
+          <a class="nav-link {% if current_url == 'store-product-suppliers-list' %}link-success{% endif %}" href="{% url 'inventory:store-product-suppliers-list' store_id=store.id %}">
+            <i class="bi bi-circle"></i><span>Suppliers</span>
+          </a>
+        </li>
         
       </ul>
     </li>
+
+    <li>
+      <a class="nav-link {% if current_url == 'store-received-stock-list' %}link-success{% endif %}" href="{% url 'inventory:store-received-stock-list' store_id=store.id %}">
+        <i class="bi bi-circle"></i><span>Received Stock</span>
+      </a>
+    </li>
+
+    <li>
+      <a class="nav-link {% if current_url == 'store-stock-requests-list' %}link-success{% endif %}" href="{% url 'inventory:store-stock-requests-list' store_id=store.id %}">
+        <i class="bi bi-circle"></i><span>Stock Requests</span>
+      </a>
+    </li>
+
+    <li>
+      <a class="nav-link {% if current_url == 'purchase-orders-list' %}link-success{% endif %}" href="{% url 'purchase_orders:purchase-orders-list' store_id=store.id %}">
+        <i class="bi bi-circle"></i><span>Purchase Orders</span>
+      </a>
+    </li>
     
-    <li class="nav-item">
+    {% comment %} <li class="nav-item">
       <a class="nav-link collapsed {% if current_url|in_list:'store-received-stock-list,store-stock-requests-list,purchase-orders-list' %}show{% endif %}" data-bs-target="#company-incoming-stock-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-menu-button-wide"></i><span>Stock</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
@@ -73,7 +97,7 @@
           </a>
         </li>
       </ul>
-    </li>
+    </li> {% endcomment %}
     
     
     <!-- sales Nav -->
@@ -82,14 +106,14 @@
       <a class="nav-link collapsed" data-bs-target="#sales-nav" data-bs-toggle="collapse" href="#">
         <i class="bi bi-menu-button-wide"></i><span>Sales</span><i class="bi bi-chevron-down ms-auto"></i>
       </a>
-      <ul id="sales-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
+      <ul id="sales-nav" class="nav-content collapse  {% if current_url|in_list:'store-sales-list,store-pos-list' %}show{% endif %}" data-bs-parent="#sidebar-nav">
         <li>
-          <a class="nav-link" href="{% url 'sales:store-sales-list' store_id=store.id %}">
+          <a class="nav-link {% if current_url == 'store-sales-list' %}link-success{% endif %}" href="{% url 'sales:store-sales-list' store_id=store.id %}">
             <i class="bi bi-circle"></i><span>List Sales</span>
           </a>
         </li>
         <li>
-          <a href="{% url 'company:store-pos-list' store_id=store.id %}">
+          <a class="nav-link {% if current_url == 'store-pos-list' %}link-success{% endif %}" href="{% url 'company:store-pos-list' store_id=store.id %}">
             <i class="bi bi-circle"></i><span>Point of Sales</span>
           </a>
         </li>
@@ -98,20 +122,7 @@
     <!-- End sales Nav -->
     
     <!-- Uitilty  Nav -->
-    <li class="nav-heading">Uitilty</li>
-    <li class="nav-item">
-      <a class="nav-link" class="nav-link" href="{% url 'inventory:store-product-suppliers-list' store_id=store.id %}">
-        <i class="bi bi-grid"></i>
-        <span>Suppliers</span>
-      </a>
-    </li>
-    
-    <li class="nav-item">
-      <a class="nav-link" class="nav-link" href="{% url 'inventory:store-product-suppliers-list' store_id=store.id %}">
-        <i class="bi bi-grid"></i>
-        <span>Customers</span>
-      </a>
-    </li>
+    {% comment %} <li class="nav-heading">Uitilty</li> {% endcomment %}
     <!-- End Uitilty Nav -->
     
     <!-- Access Control -->

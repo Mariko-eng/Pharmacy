@@ -236,7 +236,7 @@ class SaleItem(Base):
         return total
     
     @classmethod
-    def get_recent_sales(cls, store=None, company=None, pos_center=None):
+    def get_recent_sales(cls, company=None, store=None, pos_center=None):
         queryset = cls.sale_item_objects.order_by('-created_at')
 
         if pos_center is not None:
@@ -248,7 +248,7 @@ class SaleItem(Base):
             return queryset
 
         if company is not None:
-            queryset = queryset.for_company(store)[:5]
+            queryset = queryset.for_company(company)[:5]
             return queryset
         
         return queryset[:5]
@@ -275,7 +275,7 @@ class SaleItem(Base):
             return queryset
 
         if company is not None:
-            queryset = queryset.for_company(store)[:5]
+            queryset = queryset.for_company(company)[:5]
             return queryset
         
         return queryset[:5]
@@ -315,7 +315,7 @@ class SaleItem(Base):
 
 
     @classmethod
-    def get_sales_data(cls, store=None, company=None, pos_center=None):
+    def get_sales_data(cls, company=None, store=None, pos_center=None):
         recent_sales = cls.get_recent_sales(store= store, company=company, pos_center=pos_center)
 
         today_top_sales = cls.get_top_sales(datetime.now(), datetime.now(), store= store, company=company, pos_center=pos_center)

@@ -19,7 +19,16 @@
 
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Manage POS</h5>
+    <div class="d-flex justify-content-between my-3">
+      <h5 class="card-title">POS</h5>
+      <div>
+        {% if perms.company.add_pos_center %}
+        <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createPosModal"><i class="bi bi-plus"></i><span>Add</span></button>
+        {% endif %}
+      </div>
+    </div>
+
+    {% comment %} <h5 class="card-title">Manage POS</h5> {% endcomment %}
     
     <!-- Default Tabs -->
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -30,37 +39,44 @@
     <div class="tab-content pt-2" id="myTabContent">
       <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
         <div class="d-flex flex-column">
-          <div class="d-flex flex-row justify-content-end">
+          {% comment %} <div class="d-flex flex-row justify-content-end">
             {% if perms.company.add_pos_center %}
             <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createPosModal"><i class="bi bi-plus"></i><span>Add</span></button>
             {% endif %}
+          </div> {% endcomment %}
+        <div>
+          <div class="table-responsive small">
+            <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+              <thead>
+                <tr>
+                  <th scope="col">Name</th>
+                  <th scope="col">Store</th>
+                  <th scope="col">Company</th>
+                  <th scope="col">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for result in pos_centers %}
+                <tr>
+                  <td>{{result.name}}</td>
+                  <td>{{result.store.name}}</td>
+                  <td>{{result.store.company.name}}</td>
+                  <td>
+                    <select data-store-id="{{ result.id }}"  class="action-select">
+                        <option value="" selected disabled>Actions</option>
+                        <option value="view">View</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
-          <div>
-        <div class="table-responsive small">
-        <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
-          <thead>
-            <tr>
-              <th scope="col">Name</th>
-              <th scope="col">Store</th>
-              <th scope="col">Company</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for result in pos_centers %}
-             <tr>
-              <td>{{result.name}}</td>
-              <td>{{result.store.name}}</td>
-              <td>{{result.store.company.name}}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-          </div>
+        </div>
         </div>
       </div>
     </div><!-- End Default Tabs -->
-  </div>
 </div>
 
 <div class="modal fade" id="createPosModal" tabindex="-1">

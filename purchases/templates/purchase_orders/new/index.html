@@ -28,20 +28,20 @@
             
             <div class="row mb-3">
                 <label for="supplier_type" class="col-sm-3 col-form-label">Supplier/Store</label>
-                <div class="col-sm-9">
+                <div class="col-sm-9 d-flex">
                     {% for radio in form.supplier_type %}
-                    <div class="row">
+                    <div class="row m-2">
                         <div class="col-sm-12">
                             {{ radio }}
                         </div>
                     </div> 
                     {% endfor %}
-                    {% if form.errors.supplier_type %}
-                    <div id = "" class="text-danger">
-                        {{ form.errors.supplier_type.0 }}
-                    </div>
-                    {% endif %}
                 </div>
+                {% if form.errors.supplier_type %}
+                <div id = "" class="text-danger">
+                    {{ form.errors.supplier_type.0 }}
+                </div>
+                {% endif %}
             </div>
             
             <div class="row mb-3">
@@ -120,7 +120,13 @@
             </div>
             
             <hr/ class="mt-4">
-            <h5 class="card-title">Add Purchase Order Items</h5>
+            <div class="d-flex justify-content-between align-items-center">
+                <h5 class="card-title">Add Purchase Order Items</h5>
+                <span class="m-1">
+                    <a class = "add-form text-primary" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Add Item</span></a>
+                </span>
+            </div>
+            {% comment %} <h5 class="card-title">Add Purchase Order Items</h5> {% endcomment %}
             
             {{ formset.management_form }}
             {% for formset_item in formset.forms %}
@@ -171,12 +177,12 @@
                     
                 </div>
                 
-                <div class="d-flex flex-row justify-content-end d-block add-formset-item mt-2">
+                {% comment %} <div class="d-flex flex-row justify-content-end d-block add-formset-item mt-2">
                     <a class = "add-form text-primary" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-plus"></i><span>Add Item</span></a>
-                </div>
+                </div> {% endcomment %}
                 
                 <div class="d-flex flex-row justify-content-end d-none remove-formset-item mt-2">
-                    <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-trash"></i><span>Remove Item</span></a>
+                    <a class = "remove-form text-danger" style = "width: 150px; height:30px; display: inline-block; text-align: center; text-decoration: none;"><i class="bi bi-dash"></i><span>Remove Item</span></a>
                 </div>
                 
                 <hr class="text-primary" />

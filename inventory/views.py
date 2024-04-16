@@ -622,10 +622,7 @@ def store_received_stock_delete(request, store_id, received_stock_id):
         received_stock.hard_delete()
     
     return redirect('inventory:store-received-stock-list', store_id=store_id)
-    
-  
- 
-
+      
 
 @login_required(login_url='/login')
 def company_stock_requests_list(request, company_id):
@@ -773,5 +770,41 @@ def store_stock_requests_edit(request, store_id, stock_request_id):
     return render(request, 'stock_requests/edit/index.html', context=context)
 
 
+@login_required(login_url='/login')
+def store_stock_requests_approve(request, store_id, stock_request_id):
+    store = get_object_or_404(Store, pk=store_id)
 
+    stock_request = get_object_or_404(StockRequest, pk=stock_request_id, store=store)
+
+    if stock_request.status == "PENDING":
+        print("APPROVED")
+        stock_request.status = "APPROVED"
+        stock_request.save()
+    
+    return redirect('inventory:store-stock-requests-list', store_id=store_id)
+    
+
+@login_required(login_url='/login')
+def store_stock_requests_cancel(request, store_id, stock_request_id):
+    store = get_object_or_404(Store, pk=store_id)
+
+    stock_request = get_object_or_404(StockRequest, pk=stock_request_id, store=store)
+
+    if stock_request.status == "PENDING":
+        stock_request.status = "CANCELLED"
+        stock_request.save()
+    
+    return redirect('inventory:store-stock-requests-list', store_id=store_id)
+    
+   
+@login_required(login_url='/login')
+def store_stock_requests_delete(request, store_id, stock_request_id):
+    store = get_object_or_404(Store, pk=store_id)
+
+    stock_request = get_object_or_404(StockRequest, pk=stock_request_id, store=store)
+
+    if stock_request.status != "APPROVED":
+        stock_request.hard_delete()
+    
+    return redirect('inventory:store-stock-requests-list', store_id=store_id)
 

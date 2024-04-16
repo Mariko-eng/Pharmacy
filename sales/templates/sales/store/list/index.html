@@ -19,7 +19,17 @@
 
 <div class="card">
   <div class="card-body">
-    <h5 class="card-title">Sales</h5>
+    <div class="d-flex justify-content-between my-3">
+      <h5 class="card-title">Sales</h5>
+      <div>
+        <a href="{% url 'sales:store-sales-new' store_id=store.id %}" 
+        class="btn btn-outline-primary" 
+        style="width: 180px; display: inline-block; text-align: center; text-decoration: none;">
+          <i class="bi bi-plus"></i>
+          <span>Add</span>
+      </a>
+      </div>
+    </div>
     
     <!-- Default Tabs -->
     <ul class="nav nav-tabs" id="myTab" role="tablist">
@@ -32,14 +42,14 @@
       <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
         <div class="d-flex flex-column">
 
-          <div class="d-flex flex-row justify-content-end">
+          {% comment %} <div class="d-flex flex-row justify-content-end">
             <a href="{% url 'sales:store-sales-new' store_id=store.id %}" 
               class="btn btn-outline-primary" 
               style="width: 180px; display: inline-block; text-align: center; text-decoration: none;">
                 <i class="bi bi-plus"></i>
                 <span>Add</span>
             </a>
-          </div>
+          </div> {% endcomment %}
 
         <div>
           <div class="table-responsive small">
@@ -47,12 +57,13 @@
               <thead>
                 <tr>
                   <th scope="col">Sale No</th>
-                  <th scope="col">Date</th>
+                  <th scope="col">Status</th>
                   <th scope="col">POS</th>
                   <th scope="col">No of items</th>
                   <th scope="col">Total Cost</th>
-                  <th scope="col">Payment Option</th>
-                  <th scope="col">Status</th>
+                  <th scope="col">Pay Option</th>
+                  <th scope="col">Pay Status</th>
+                  <th scope="col">Date</th>
                   <th scope="col">Action</th>
                 </tr>
               </thead>
@@ -60,18 +71,28 @@
                 {% for result in sales %}
                 <tr>
                   <td>{{result.sale_unique_id}}</td>
-                  <td>{{result.created_at}}</td>
-                  <td>{{result.pos_center}}</td>
+                  <td><span class="badge {% if result.status == "Cancelled" %}bg-danger{% else %}bg-primary{% endif %}">{{ result.status }}</span></td>
+                  <td>{{result.pos_center.name}}</td>
                   <td>{{result.items_count}}</td>
-                  <td>{{result.total_cost}}</td>
+                  <td>{{result.total_cost|floatformat:1}}</td>
                   <td>{{result.payment_option}}</td>
-                  <td>{{result.status}}</td>
+                  <td>{{result.payment_status}}</td>
+                  <td>{{result.created_at|date:"SHORT_DATETIME_FORMAT"}}</td>
                   <td>
+                    <select data-item-id="{{ result.id }}"  class="action-select">
+                      <option value="" selected disabled>Actions</option>
+                      <option value="view">View</option>
+                      <option value="cancel">Cancel</option>
+                      <option value="delete">Delete</option>
+                    </select>
+                  </td>
+
+                  {% comment %} <td>
                     <div class="d-flex">
                       <a href="{% url 'sales:store-sales-detail' store_id=store.id sale_id=result.id %}" class="mx-1 text-primary">View</a>
                       <a href="#" class="mx-1 text-danger">Edit</a>
                     </div>
-                  </td>
+                  </td> {% endcomment %}
                 </tr>
                 {% endfor %}
               </tbody>
@@ -83,6 +104,50 @@
     </div>
   </div>
 </div>
+
+
+<script type='text/javascript'>
+  
+  $(document).ready(function (){
+    
+    $('.action-select').on('change', function () {
+      var selectBtn = $(this);
+      var selectedAction = selectBtn.val();
+      var itemId = selectBtn.data('item-id');
+      
+      selectBtn.prop('disabled', true);
+      selectBtn.val('');
+      
+      if (selectedAction === "view") {
+        selectBtn.prop('disabled', false);
+        window.location.href = "{% url 'sales:store-sales-detail' store_id=0 sale_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+      }
+      
+      if (selectedAction === "cancel") {
+        const isConfirmed = window.confirm("Are You sure that you want to continue?") 
+        
+        if (isConfirmed === false){
+          // Reset the  select button And Able  it
+          selectBtn.prop('disabled', false);
+          return
+        }
+        window.location.href = "{% url 'sales:store-sales-cancel' store_id=0 sale_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+      }
+
+      if (selectedAction === "delete") {
+        const isConfirmed = window.confirm("Are You sure that you want to continue?") 
+        
+        if (isConfirmed === false){
+          // Reset the  select button And Able  it
+          selectBtn.prop('disabled', false);
+          return
+        }
+        window.location.href = "{% url 'sales:store-sales-delete' store_id=0 sale_id=0 %}".replace('0', {{store.id}}).replace('0', itemId);
+      }
+      
+    });
+  })   
+</script>
 
 {% endblock %}
 

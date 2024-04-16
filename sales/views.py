@@ -1,4 +1,6 @@
+from django.core.serializers import serialize
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.forms import formset_factory
 from django.forms.models import modelformset_factory
 from django.shortcuts import get_object_or_404
@@ -54,6 +56,33 @@ def store_sales_detail(request, store_id, sale_id):
         }
 
     return render(request, 'sales/store/detail/index.html', context=context) 
+
+
+@login_required(login_url='/login')
+def store_sales_cancel(request, store_id, sale_id):
+    sale = Sale.objects.get(pk = sale_id)
+
+    if sale.status != "Cancelled":
+        sale.status = 'Cancelled'
+        sale.save()
+
+        for sale_item in sale.saleitem_set.all():            
+            stock_item = sale_item.stock_item
+            stock_item.actual_qty = stock_item.actual_qty +  sale_item.quantity
+            stock_item.available_qty = stock_item.available_qty +  sale_item.quantity
+            stock_item.save()
+    
+    return redirect(reverse('sales:store-sales-list', kwargs={'store_id': store_id}))
+
+
+@login_required(login_url='/login')
+def store_sales_delete(request, store_id, sale_id):
+    sale = Sale.objects.get(pk = sale_id)
+
+    if sale.status == "Cancelled":
+        sale.hard_delete()
+    
+    return redirect(reverse('sales:store-sales-list', kwargs={'store_id': store_id}))
 
 
 # @login_required(login_url='/login')
@@ -231,9 +260,28 @@ def pos_sales_list(request, pos_id):
     company = store.company
 
     sales = Sale.objects.filter(pos_center = pos)
+    # print(sales[0].created_by)
+
     context = { "company": company, "store": store, "pos": pos, "sales": sales }
 
     return render(request, 'sales/pos/list/index.html', context=context) 
+
+
+@login_required(login_url='/login')
+def pos_sales_detail(request, pos_id, sale_id):
+    pos = get_object_or_404(PosCenter, pk=pos_id)
+    store = pos.store
+    company = store.company
+
+    sale = Sale.objects.get(pk = sale_id)
+    context = {
+            "company": company,
+            "store": store,
+            "pos": pos,
+            "sale": sale
+        }
+
+    return render(request, 'sales/pos/detail/index.html', context=context) 
 
 
 @login_required(login_url='/login')
@@ -326,6 +374,7 @@ def pos_sales_new(request, pos_id):
                 sale_data = {
                     "success": True,
                     "sale_id": sale.id,
+                    "products" : serialize('json', products),
                     "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
                 }
 
@@ -337,3 +386,20 @@ def pos_sales_new(request, pos_id):
     context['formset'] = formset  
     context['empty_form'] = test_formset.forms[0]  
     return render(request, 'sales/pos/new/index.html', context=context) 
+
+
+@login_required(login_url='/login')
+def pos_sales_cancel(request, pos_id, sale_id):
+    sale = Sale.objects.get(pk = sale_id)
+
+    if sale.status != "Cancelled":
+        sale.status = 'Cancelled'
+        sale.save()
+
+        for sale_item in sale.saleitem_set.all():            
+            stock_item = sale_item.stock_item
+            stock_item.actual_qty = stock_item.actual_qty +  sale_item.quantity
+            stock_item.available_qty = stock_item.available_qty +  sale_item.quantity
+            stock_item.save()
+    
+    return redirect(reverse('sales:pos-sales-list', kwargs={'pos_id': pos_id}))

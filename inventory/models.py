@@ -177,6 +177,7 @@ class ReceivedStockItem(Base):
 class StockRequest(Base):
     STATUS_CHOICES = [
         ('PENDING', 'Pending'),
+        ('CANCELLED', 'Cancelled'),
         ('APPROVED', 'Approved'),
         ('DECLINED', 'Declined'),
     ]
@@ -241,7 +242,7 @@ class StockRequestItem(Base):
     stock_request = models.ForeignKey(StockRequest, on_delete=models.CASCADE)
     stock_item = models.ForeignKey(StockItem,on_delete=models.CASCADE)
     quantity = models.DecimalField(max_digits=12, decimal_places=3, default=0)
-    available_quantity = models.DecimalField(max_digits=12, decimal_places=3, default=0)
+    # available_quantity = models.DecimalField(max_digits=12, decimal_places=3, default=0)
     reason = models.CharField(max_length=225, choices=REASON_CHOICES, default='Low Stock')
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name="stock_request_items_createdby")

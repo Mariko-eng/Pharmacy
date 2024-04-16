@@ -14,8 +14,13 @@ urlpatterns = [
     path('home/store/<int:store_id>/sales/detail/<int:sale_id>/', views.store_sales_detail, name="store-sales-detail"),
     path('home/store/<int:store_id>/sales/invoice/<int:sale_id>/', views.store_sales_invoice, name="store-sales-invoice"),
     path('home/store/<int:store_id>/sales/edit/<int:sale_id>/', views.store_sales_edit, name="store-sales-edit"),
+    path('home/store/<int:store_id>/sales/cancel/<int:sale_id>/', views.store_sales_cancel, name="store-sales-cancel"),
+    path('home/store/<int:store_id>/sales/delete/<int:sale_id>/', views.store_sales_delete, name="store-sales-delete"),
+
 
     # Pos Sales     
     path('home/pos/<int:pos_id>/sales/list/', views.pos_sales_list, name="pos-sales-list"),
     path('home/pos/<int:pos_id>/sales/new/', views.pos_sales_new, name="pos-sales-new"),
+    path('home/pos/<int:pos_id>/sales/detail/<int:sale_id>/', views.pos_sales_detail, name="pos-sales-detail"),
+    path('home/pos/<int:pos_id>/sales/cancel/<int:sale_id>/', views.pos_sales_cancel, name="pos-sales-cancel"),
 ]
