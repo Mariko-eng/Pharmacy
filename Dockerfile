@@ -6,6 +6,11 @@ ENV PYTHONDONTWRITEBYTECODE=1
 
 ENV PYTHONUNBUFFERED=1
 
+RUN apt-get update && apt-get install -y --no-install-recommends wkhtmltopdf
+
+RUN echo "Africa/Nairobi" > /etc/timezone
+RUN dpkg-reconfigure -f noninteractive tzdata
+
 WORKDIR /app
 
 COPY requirements.txt /app/
