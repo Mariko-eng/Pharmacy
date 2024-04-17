@@ -1,11 +1,7 @@
-# Fetching the latest nginx image
-FROM nginx:1.23-alpine
+FROM nginx:latest
 
-# Removing default nginx.conf
-RUN rm /etc/nginx/conf.d/default.conf
+RUN apt-get update && apt-get install -y procps
 
-# Copying our nginx.conf
-COPY nginx.conf /etc/nginx/conf.d
+RUN mkdir -p /app/static
 
-# Expose port 80 (or any other port as needed)
-EXPOSE 80
+RUN mkdir -p /app/media

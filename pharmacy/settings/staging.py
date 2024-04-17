@@ -5,23 +5,31 @@ from pathlib import Path
 os.environ.setdefault("PYTHONDONTWRITEBYTECODE", "1")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
+
+# print("BASE_DIR")
+# print(BASE_DIR)
+# print(os.path.join(BASE_DIR, 'templates'))
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-v3ape*^+#so+y0#8c^tg7z@^qy3_!_yja7shl9e)bb-lketz^-'
+# SECRET_KEY = 'django-insecure-v3ape*^+#so+y0#8c^tg7z@^qy3_!_yja7shl9e)bb-lketz^-'
+SECRET_KEY = os.environ.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = False
+DEBUG = int(os.environ.get('DEBUG', default=0))
 
-ALLOWED_HOSTS = [
-    "localhost",
-    "127.0.0.1",
-    "62.72.24.189",
-]
+# ALLOWED_HOSTS = [
+#     "localhost",
+#     "127.0.0.1",
+#     "62.72.24.189",
+# ]
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS').split(" ")
+
 
 # Application definition
 
@@ -56,8 +64,8 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'pharmacy.urls'
 
-# TEMPLATES = os.path.join(BASE_DIR, 'templates')
-TEMPLATES =  '/app/templates/' # Docker Container
+# TEMPLATES = '/home/app/Pharmacy/templates'
+TEMPLATES = os.path.join(BASE_DIR, 'templates')
 
 
 TEMPLATES = [
@@ -83,23 +91,23 @@ WSGI_APPLICATION = 'pharmacy.wsgi.application'
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'pharmacydb_staging',
-        'USER': 'root',
-        'HOST': '62.72.24.189',
-        'PASSWORD': 'Mariko@123',
-        'PORT': '3306',
-    },
-
     # 'default': {
     #     'ENGINE': 'django.db.backends.mysql',
-    #     'NAME': os.environ.get('DATABASE_NAME'),
-    #     'USER': os.environ.get('DATABASE_USER'),
-    #     'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
-    #     'HOST': os.environ.get('MYSQL_HOST'),
-    #     'PORT': '3306',  # Default MySQL port
+    #     'NAME': 'pharmacydb_staging',
+    #     'USER': 'root',
+    #     'HOST': 'localhost',
+    #     'PASSWORD': 'Mariko@123',
+    #     'PORT': '3306',
     # },
+
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': os.environ.get('DATABASE_NAME'),
+        'USER': os.environ.get('DATABASE_USER'),
+        'PASSWORD': os.environ.get('DATABASE_PASSWORD'),
+        'HOST': os.environ.get('MYSQL_HOST'),
+        'PORT': '3306',  # Default MySQL port
+    },
 }
 
 
@@ -140,12 +148,17 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATIC_ROOT = '/app/static/' # PATH IN THE CONTAINER, root directory
 # DIRECTORIES WHERE YOU PUT YOUR STATIC FILES
-STATICFILES_DIRS =  [ '/app/assets/' ,]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR,'assets'),
+]
+# STATICFILES_DIRS = ['/home/app/Pharmacy/assets']
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/') 
+# STATIC_ROOT = '/home/app/Pharmacy/static/'
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/app/media/' # PATH IN THE CONTAINER, root directory
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
+# MEDIA_ROOT = '/home/app/Pharmacy/media/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
@@ -181,7 +194,6 @@ CELERY_TIMEZONE = 'Africa/Nairobi'
 
 # CELERY_RESULT_BACKEND = 'django-db'
 CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
-
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 

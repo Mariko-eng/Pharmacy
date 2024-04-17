@@ -19,7 +19,4 @@ EXPOSE 8000
 # ENTRYPOINT ["python3"]
 
 ##-Staging Env
-CMD ["/bin/bash", "-c", "/app/docker-entrypoint2.sh"]
-
-##-Production Env
-# CMD ["/bin/bash", "-c", "/app/docker-entrypoint.sh"]
+CMD ["/bin/bash", "-c", "/app/docker-entrypoint.sh"]
