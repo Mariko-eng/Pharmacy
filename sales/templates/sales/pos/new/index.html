@@ -662,10 +662,21 @@
                         $('#cartTotalCost').text('SHS ' + 0);
                         $('#cartTotal').removeClass('row').addClass('d-none') // Dont Display
 
+                        // Manual 
+                        if(data.invoice_file){
+                            var domain = "http://62.72.24.189:81";  // Example domain with port
+                            var absoluteUrl = domain + data.invoice_file;
+        
+                            $('#pdf-object').attr('data', absoluteUrl);
+                            $('#pdf-container').attr('src', absoluteUrl);
+                            
+                            $('#addNew').removeClass('d-none').addClass('d-block') 
+                            return;
+                        }
+
                         $('#pdf-object').attr('data', data.invoice_url);
                         $('#pdf-container').attr('src', data.invoice_url);
-
-                        $('#addNew').removeClass('d-none').addClass('d-block')
+                        $('#addNew').removeClass('d-none').addClass('d-block') 
                         
                     }else{
                         console.log("Error")
