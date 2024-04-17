@@ -3,59 +3,33 @@ services:
   web:
     build: .
     platform: "linux/amd64"
-    image: yigamarkgabriel333288/pharmacy_prod:v1.0.0.0  #  Production
+    image: yigamarkgabriel333288/pharmacy_prod:latest #  Production
     container_name: "pharmacy_sys_prod"
     volumes:
       - .:/app
       - static_volume:/app/static
       - media_volume:/app/media
+    expose:
+      - 8000
+    # ports:
+    #   - 8000:8000
+    env_file:
+      - ./.env/prod.env
+
+  nginx:
+    build:
+      context: ./nginx/
+    image: yigamarkgabriel333288/pharmacy_sys_nginx:latest
+    container_name: "pharmacy_sys_nginx"
     ports:
-      - 8000:8000
-    environment:
-      - SECRET_KEY=qwerty1234
-      - DATABASE_NAME=pharmacydb
-      - DATABASE_USER=root
-      - MYSQL_HOST=62.72.24.189
-      - DATABASE_PASSWORD=Mariko@123
+      - 80:80
+    depends_on:
+      - web
+    volumes:
+      - ./nginx/conf.d/:/etc/nginx/conf.d/
+      - static_volume:/app/static
+      - media_volume:/app/media
 
 volumes:
   static_volume:
   media_volume:
-
-
-# version: '3.4'
-# services:
-#   # db:
-#   #   image: mysql:5.7
-#   #   restart: always
-#   #   environment:
-#   #     MYSQL_ROOT_PASSWORD: icon5b3t
-#   #     DATABASE_NAME: pharmacydb
-#   #     DATABASE_USER: root
-#   #     DATABASE_PASSWORD: icon@2023
-#   #   volumes:
-#   #     - db_data:/var/lib/mysql
-#   web:
-#     build: .
-#     platform: "linux/amd64"
-#     image: yigamarkgabriel333288/pharmacy:v1.0.0.1
-#     container_name: "pharmacy_sys"
-#     volumes:
-#       - .:/app
-#       - static_volume:/app/static
-#       - media_volume:/app/media
-#     ports:
-#       - 8000:8000
-#     environment:
-#       - SECRET_KEY=qwerty1234
-#       - DATABASE_NAME=pharmacydb
-#       - DATABASE_USER=root
-#       - DATABASE_HOST=127.0.0.1
-#       - DATABASE_PASSWORD=icon@2023
-
-# volumes:
-#   # db_data:
-#   static_volume:
-#   media_volume:
-
-
