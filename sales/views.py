@@ -111,6 +111,7 @@ def store_sales_invoice(request, store_id, sale_id):
     # Prepare the sale data to be returned as JSON
     sale_data = {
         "sale_id": sale.pk,
+        "invoice_file": sale.invoice_file.url,
         "invoice_url" : file_link
         # "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
     }
@@ -386,6 +387,7 @@ def pos_sales_new(request, pos_id):
                     "success": True,
                     "sale_id": sale.id,
                     "products" : serialize('json', products),
+                    "invoice_file": sale.invoice_file.url,
                     "invoice_url" : file_link
                     # "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
                 }
