@@ -1,5 +1,5 @@
 import os
-from django.db import models
+from django.db import models 
 from django.db.models import Sum
 from django.core.files import File
 from uuid import uuid4
@@ -102,36 +102,40 @@ class Sale(Base):
 
 
     def generate_invoice(self, context = {}):
-        if self.uniqueId:
-            filename = f"INV-{self.uniqueId}-data.pdf"
-        else:
-            self.uniqueId = f"INV-{self.id}"
-            self.save()
-            filename = f"INV-{self.uniqueId}-data.pdf"
+        try:
+            if self.uniqueId:
+                filename = f"INV-{self.uniqueId}-data.pdf"
+            else:
+                self.uniqueId = f"INV-{self.id}"
+                self.save()
+                filename = f"INV-{self.uniqueId}-data.pdf"
 
-        sale_items = self.saleitem_set.all()
+            sale_items = self.saleitem_set.all()
 
-        context['sale'] = self
-        context['sale_items'] = sale_items
-        context['items_count'] = self.items_count
-        context['total_cost'] = self.total_cost
+            context['sale'] = self
+            context['sale_items'] = sale_items
+            context['items_count'] = self.items_count
+            context['total_cost'] = self.total_cost
 
-        
-        pdf_file_path = generatePDf(context = context)
+            
+            pdf_file_path = generatePDf(context = context)
 
-        with open(pdf_file_path, 'rb') as pdf_file:
-            django_file = File(file = pdf_file, name= filename)
+            with open(pdf_file_path, 'rb') as pdf_file:
+                django_file = File(file = pdf_file, name= filename)
 
-            # Delete the old file associated with the model field, if any
-            if self.invoice_file:
-                self.invoice_file.delete(save=False)
+                # Delete the old file associated with the model field, if any
+                if self.invoice_file:
+                    self.invoice_file.delete(save=False)
 
-            # Assign the new file to the model field
-            self.invoice_file = django_file
-            self.save()
+                # Assign the new file to the model field
+                self.invoice_file = django_file
+                self.save()
 
-            # Remove the temporary PDF file
-            os.remove(pdf_file_path)
+                # Remove the temporary PDF file
+                os.remove(pdf_file_path)
+                return self
+        except Exception as e:
+            print(f"An error occurred while generating the invoice: {e}")
             return self
 
 class SaleItem(Base):

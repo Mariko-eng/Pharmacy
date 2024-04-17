@@ -13,6 +13,7 @@ from company.models import Company, Store, PosCenter, Client
 from inventory.models import StockItem
 from .models import Sale
 from .models import SaleItem
+from pharmacy.utils import build_file_path
 
 
 @login_required(login_url='/login')
@@ -99,13 +100,19 @@ def store_sales_invoice(request, store_id, sale_id):
         "sale": sale}  
 
     print("Before Generating....")
-    sale = sale.generate_invoice( context = context)
+    sale = sale.generate_invoice(context = context)
+
+    if sale.invoice_file is None:
+        file_link = build_file_path(request)
+    else:
+        file_link = build_file_path(request, file_url = sale.invoice_file.url)
     print("After Generating....")
     
     # Prepare the sale data to be returned as JSON
     sale_data = {
-        "sale_id": sale.id,
-        "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
+        "sale_id": sale.pk,
+        "invoice_url" : file_link
+        # "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
     }
 
     return JsonResponse(sale_data)
@@ -365,9 +372,13 @@ def pos_sales_new(request, pos_id):
                     "store": store,
                     "title": "Sale Invoice",
                     "sale": sale}   
-
+            
                 print("Before Generating Invoice....")
-                sale = sale.generate_invoice( context = invoice_context)
+                sale = sale.generate_invoice(context = invoice_context)
+                if sale.invoice_file is None:
+                    file_link = build_file_path(request) 
+                else:
+                    file_link = build_file_path(request, file_url = sale.invoice_file.url)                
                 print("After Generating Invoice....")
     
                 # Prepare the sale data to be returned as JSON
@@ -375,7 +386,8 @@ def pos_sales_new(request, pos_id):
                     "success": True,
                     "sale_id": sale.id,
                     "products" : serialize('json', products),
-                    "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
+                    "invoice_url" : file_link
+                    # "invoice_url" : request.build_absolute_uri(sale.invoice_file.url) if sale.invoice_file else None,
                 }
 
                 return JsonResponse(sale_data)
