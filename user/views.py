@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
-from utils.groups.access_groups import AccessGroups
+from utils.groups.access_groups import AccountTypes
 from utils.groups.default_roles import DefaultRoles
 from utils.permissions.user import superuser_permissions
 from utils.permissions.user import app_admin_permissions
@@ -76,16 +76,16 @@ def logoutView(request):
 @login_required(login_url='/login')
 def home_view(request):
 
-    if request.user.account_type == AccessGroups.APP_ADMIN:
+    if request.user.account_type == AccountTypes.APP_ADMIN:
         return redirect('user:super-dashboard')
     
-    if request.user.account_type == AccessGroups.COMPANY_ADMIN:
+    if request.user.account_type == AccountTypes.COMPANY_ADMIN:
         return redirect(reverse('user:company-dashboard'))
     
-    if request.user.account_type == AccessGroups.STORE_ADMIN:
+    if request.user.account_type == AccountTypes.STORE_ADMIN:
         return redirect(reverse('user:store-dashboard'))
         
-    if request.user.account_type == AccessGroups.POS_ATTENDANT:
+    if request.user.account_type == AccountTypes.POS_ATTENDANT:
         return redirect(reverse('user:pos-dashboard'))
         
     raise Http404('Page Not Found!')
@@ -494,9 +494,6 @@ def users_list_view(request):
             group = Group.objects.filter(name = default_group[0]).first()
             app_groups.append(group)
 
-        # group, created = Group.objects.get_or_create(name = default_group[0])
-        # app_groups.append(group)
-
     company_groups = CompanyLevelGroup.objects.all()
     store_groups = StoreLevelGroup.objects.all()
     form = AppUserForm()
@@ -507,14 +504,16 @@ def users_list_view(request):
         "company_groups" : company_groups,
         "store_groups" : store_groups,
         "form" : form }
-        
+         
     if request.method == 'POST':
         form_data = AppUserForm(request.POST or None)
         if form_data.is_valid():
             user = form_data.save(commit=False)
             user.set_password(str(user.email))
             user.created_by = request.user
+            user.account_type = AccountTypes.APP_ADMIN
             user.save()
+            
             return JsonResponse({'success': True, 'email': form_data.cleaned_data['email']})
         else:
             return JsonResponse({'success': False, 'errors': form_data.errors})
@@ -546,10 +545,10 @@ def users_company_list_view(request, company_id):
 def users_company_new_view(request, company_id):
     access_group = request.GET.get('access_group', None)
 
-    if  access_group == AccessGroups.COMPANY_ADMIN:
+    if  access_group == AccountTypes.COMPANY_ADMIN:
         return redirect(reverse('user:users-company-admin-new', kwargs={'company_id': company_id}))
 
-    if  access_group == AccessGroups.STORE_ADMIN:
+    if  access_group == AccountTypes.STORE_ADMIN:
         return redirect(reverse('user:users-company-store-admin-new', kwargs={'company_id': company_id}))
 
     return redirect(reverse('user:users-company-list'))
@@ -578,7 +577,7 @@ def users_company_admin_user_new(request, company_id):
                 phone = phone,
                 email = email,
             )
-            user.account_type = AccessGroups.COMPANY_ADMIN
+            user.account_type = AccountTypes.COMPANY_ADMIN
             user.set_password(str(email))
             user.save()
 
@@ -610,7 +609,7 @@ def users_store_list_view(request, store_id):
     access_group = request.GET.get('access_group', None)
 
     if access_group is not None:
-        if access_group == AccessGroups.COMPANY_ADMIN:
+        if access_group == AccountTypes.COMPANY_ADMIN:
             users = User.objects.filter(userprofile__company=store.company)
             users  = users.filter(account_type = access_group)
         else:
@@ -661,7 +660,7 @@ def users_company_store_admin_user_new(request, company_id):
                 phone = phone,
                 email = email,
             )
-            user.account_type = AccessGroups.STORE_ADMIN
+            user.account_type = AccountTypes.STORE_ADMIN
             user.set_password(str(email))
             user.save()
 
@@ -721,7 +720,7 @@ def users_store_admin_user_new(request, store_id):
                 phone = phone,
                 email = email,
             )
-            user.account_type = AccessGroups.STORE_ADMIN
+            user.account_type = AccountTypes.STORE_ADMIN
             user.set_password(str(email))
             user.save()
 
@@ -748,10 +747,10 @@ def users_store_admin_user_new(request, store_id):
 def users_store_new_view(request, store_id):
     access_group = request.GET.get('access_group', None)
 
-    if  access_group == AccessGroups.STORE_ADMIN:
+    if  access_group == AccountTypes.STORE_ADMIN:
         return redirect(reverse('user:users-store-admin-new', kwargs={'store_id': store_id}))
 
-    if  access_group == AccessGroups.POS_ATTENDANT:
+    if  access_group == AccountTypes.POS_ATTENDANT:
         return redirect(reverse('user:users-store-pos-attendant-new', kwargs={'store_id': store_id}))
 
     return redirect(reverse('user:store-index'))
@@ -795,7 +794,7 @@ def users_store_pos_attendant_user_new(request, store_id):
                 phone = phone,
                 email = email,
             )
-            user.account_type = AccessGroups.POS_ATTENDANT
+            user.account_type = AccountTypes.POS_ATTENDANT
             user.set_password(str(email))
             user.save()
 

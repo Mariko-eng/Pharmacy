@@ -3,9 +3,7 @@
 
 
 {% block pagetitle%}
-<div class="pagetitle">
-    <h1>Hello, {{ request.session.company_name|default:"Guest" }}!</h1>
-    
+<div class="pagetitle">    
     <nav>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="#">Home</a></li>
@@ -20,77 +18,37 @@
 
 {% block content%}  
 
+
+
 <div class="card">
     <div class="card-body">
-        <h5 class="card-title">Manage Stores</h5>
-        
-        <!-- Default Tabs -->
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="home-tab" 
-                data-bs-toggle="tab" data-bs-target="#home" 
-                type="button" role="tab" aria-controls="home" 
-                aria-selected="true">List Stores</button>
-            </li>
-        </ul>
-        
-        <div class="tab-content pt-2" id="myTabContent">
-            <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-                <div class="d-flex flex-column">
-                    <div class="d-flex flex-row justify-content-end">
-                        {% if perms.company.list_store %} 
-                        <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createBranchModal"><i class="bi bi-plus"></i><span>Add</span></button>
-                        {%  endif %}
-                    </div>
-                    
-                    <div>
-                        <div class="table-responsive small">
-                            <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">Date</th>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Type</th>
-                                        <th scope="col">Status</th>
-                                        <th scope="col">Email</th>
-                                        <th scope="col">Phone</th>
-                                        <th scope="col">District</th>
-                                        <th scope="col">Village</th>
-                                        <th scope="col">Action</th>
-                                        {% comment %} <th scope="col">Actions</th> {% endcomment %}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for result in stores %}
-                                    <tr> 
-                                        <td>{{result.created_at}}</td>
-                                        <td>{{result.name}}</td>
-                                        <td>{{result.store_type}}</td>
-                                        
-                                        <td><span class="{% if result.status_type == "OPEN"%} bg-primary {% else %} bg-warning {%endif%} badge">{{result.status_type}}</span></td>
-                                        <td>{{result.email}}</td>
-                                        <td>{{result.phone}}</td>
-                                        <td>{{result.location_district}}</td>
-                                        <td>{{result.location_village}}</td>
-                                        <td>
-                                            <select data-store-id="{{ result.id }}"  class="action-select">
-                                                <option value="" selected disabled>Actions</option>
-                                                <option value="view">View Store</option>
-                                                <option value="edit">Edit Store</option>
-                                                <option value="delete">Delete Store</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-                
+        <div class="d-flex justify-content-between my-3">
+            <h5 class="card-title">Manage Stores</h5>
+            <div>
+                {% if perms.company.list_store %} 
+                <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createBranchModal"><i class="bi bi-plus"></i><span>Add</span></button>
+                {%  endif %}
             </div>
+          </div>
+
+          <hr />
+        
+          <div class="row">
+            {% if stores %}
+            {% for store in stores %}
+            <div class="col-xs-12 col-sm-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
+                <a href="{% url 'company:company-store-detail' store_id=store.id %}">
+                    <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
+                        <i class="bi bi-windows text-white" style="font-size: 2em;"></i>
+                    </div>
+                    <p>{{store.name}}</p>
+                </a>
+            </div> 
+            {% endfor %}
+            {% endif %}
         </div>
-    </div><!-- End Default Tabs -->
+    </div>
+    <!-- End Default Tabs -->
 </div>
 </div>
 
@@ -317,36 +275,7 @@
         })
     })
     
-    $(document).ready(function (){
-        
-        $('.action-select').on('change', function () {
-            var selectBtn = $(this);
-            var selectedAction = selectBtn.val();
-            
-            var companyId = "{{company.id}}";
-            var storeId = selectBtn.data('store-id');
-                        
-            // Disable the select Button
-            selectBtn.prop('disabled', true);
-            selectBtn.val('');
-            
-            
-            if (selectedAction === "view") {
-                window.location.href = "{% url 'user:store-dashboard' store_id=0 %}".replace('0', storeId);
-            }
-            
-            if (selectedAction === "delete") {
-                const isConfirmed = window.confirm("Are You sure that you want to continue?")  
 
-                if (isConfirmed === false){
-                    // Reset the  select button And Able  it
-                    selectBtn.prop('disabled', false);
-                    return
-                }
-                window.location.href = "{% url 'company:store-delete' company_id=0 store_id=0 %}".replace('0', {{company.id}}).replace('0', storeId);
-            }
-        });
-    })
     
 </script>
 {% endblock %}

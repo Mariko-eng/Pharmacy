@@ -1,0 +1,193 @@
+{% extends 'base/super/index.html' %}
+{% load static %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">
+  <div class="d-flex justify-content-between">
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'user:home' %}">Home</a></li>
+            <li class="breadcrumb-item active"><a>{{ company.name }}</li>
+        </ol>
+    </nav>
+    <div>
+        <a href="{% url 'user:company-dashboard' company_id=company.id %}" 
+            class="btn btn-outline-primary" 
+            style="width: 200px; display: inline-block; text-align: center; text-decoration: none;">
+            <span class="mx-2">Go To Company</span><i class="bi bi-arrow-up-right-square"></i>
+          </a>
+    </div>
+  </div>
+</div>
+<!-- End Page Title --> 
+
+{% endblock %} 
+
+
+{% block content%}   
+
+<div class="card">
+    <div class="card-body">
+      <h5 class="card-title">Company Account <span class="badge {% if company.is_active %}bg-success{% else %}bg-warning{% endif %}">{% if company.is_active %}Active{% else %}INACTIVE{% endif %}</span></h5>
+
+      <!-- Vertical Pills Tabs -->
+      <div class="d-flex align-items-start">
+        <div class="nav flex-column nav-pills me-4" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+          <button class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" data-bs-target="#v-pills-home" type="button" role="tab" aria-controls="v-pills-home" aria-selected="true">General</button>
+          <button class="nav-link" id="v-pills-profile-tab" data-bs-toggle="pill" data-bs-target="#v-pills-profile" type="button" role="tab" aria-controls="v-pills-profile" aria-selected="false">Administrators</button>
+          <button class="nav-link" id="v-pills-messages-tab" data-bs-toggle="pill" data-bs-target="#v-pills-messages" type="button" role="tab" aria-controls="v-pills-messages" aria-selected="false">Settings</button>
+        </div>
+        <div class="tab-content" id="v-pills-tabContent">
+          <div class="tab-pane fade show active" id="v-pills-home" role="tabpanel" aria-labelledby="v-pills-home-tab">
+            <div class="row">
+                <h3> COMPANY INFORMATION</h3>
+                <div class"p-2 d-flex" >
+                    <div style="height:100px; width:100px">
+                        {% if company %}
+                        {% if company.logo %}
+                        <img src="{{ company.logo.url }}" alt="" class="rounded-circle" style="height:100px; width:100px">
+                        {% else %}
+                        <img src="{% static 'img/logo.png' %}" alt="" style="height:100px; width:100px">
+                        {% endif %}
+                        {% else %}
+                        <img src="{% static 'img/logo.png' %}" alt="" style="height:100px; width:100px"> 
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-4 p-1">
+                        <h4 class="fw-bold fs-4"> Company name </h4>
+                        <h4 class="fw-light f-6"> {{company.name}} </h4>
+                        <hr/>
+                    </div>
+                    <div class="col-4 p-1">
+                        <h4 class="fw-bold fs-4"> Email Address </h4>
+                        <h4 class="fw-light f-6"> {{company.email}} </h4>
+                        <hr/>
+                    </div>
+                    <div class="col-4 p-1">
+                        <h4 class="fw-bold fs-4"> Phone Number </h4>
+                        <h4 class="fw-light f-6"> {{company.email}} </h4>
+                        <hr/>
+                    </div>
+                    <div class="col-4 p-1">
+                        <h4 class="fw-bold fs-4">Location </h4>
+                        <h4 class="fw-light f-6"> {{company.location}} </h4>
+                        <hr/>
+                    </div>
+                </div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="v-pills-profile" role="tabpanel" aria-labelledby="v-pills-profile-tab">
+            <div class="row">
+                <h3> COMPANY ADMINS </h3>
+                <div class="row">
+                    <table class="table">
+                        <thead>
+                          <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Phone</th>
+                            <th scope="col">Start Date</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                            {% for user in admins %}
+                            <tr>
+                                <td>{{user.role}}</td>
+                                <td>{{user.name}}</td>
+                                <td>{{user.email}}</td>
+                                <td>{{user.phone}}</td>
+                                <td>{{user.created_at}}</td>
+                            <tr>
+                            {% endfor%}
+                        </tbody>
+                      </table>
+                </div>
+            </div>
+          </div>
+          <div class="tab-pane fade" id="v-pills-messages" role="tabpanel" aria-labelledby="v-pills-messages-tab">
+            {% if company.is_active %}
+            <div class="row">
+                <h3> Actions </h3>
+                <div class="m-2">
+                <p class="text-decoration-underline text-uppercase">Deactivate Company account?</p>
+                <p class="fs-6">Deactivating <span class="text-primary">{{company.name}}'s</span> account will block usage of company information and access from users</p>
+                <a id="deactivate-link" href="{% url 'company:company-deactivate' company_id=company.id %}" 
+                class="btn btn-outline-warning" 
+                style="width: 200px; display: inline-block; text-align: center; text-decoration: none;">
+                <span class="mx-2">Deactivate Now</span><i class="bi bi-arrow-up-right-square"></i>
+              </a>
+            </div>
+            {% else %}
+            <div class="row">
+                <h3> Actions </h3>
+                <div class="m-2">
+                <p class="text-decoration-underline text-uppercase">Activate Company account?</p>
+                <a id="activate-link" href="{% url 'company:company-activate' company_id=company.id %}" 
+                class="btn btn-outline-primary" 
+                style="width: 200px; display: inline-block; text-align: center; text-decoration: none;">
+                <span class="mx-2">Activate Now</span><i class="bi bi-arrow-up-right-square"></i>
+              </a>
+            </div>
+            {% endif %}
+            <hr/>
+            <div class="m-2">
+                <p class="text-decoration-underline text-uppercase">Delete Company account?</p>
+                <p class="fs-6">Permanently remove sail <span class="text-primary">{{company.name}}'s</span> account and all it's data from Base Guard system. This action is not reversible - please continue with caution</p>
+                <a id="delete-link" href="{% url 'company:company-delete' company_id=company.id %}" 
+                class="btn btn-outline-danger" 
+                style="width: 200px; display: inline-block; text-align: center; text-decoration: none;">
+                <span class="mx-2">Delete Now</span><i class="bi bi-arrow-up-right-square"></i>
+              </a>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- End Vertical Pills Tabs -->
+
+    </div>
+  </div>
+
+<script type='text/javascript'>
+
+    $(document).ready(function(){
+        var deactivateLink = document.getElementById("deactivate-link");
+
+        deactivateLink.addEventListener("click", function(event) {
+            // Prevent the default link behavior
+            event.preventDefault();
+
+                    // Ask for confirmation
+            var confirmation = confirm("Are you sure you want to deactivate?");
+
+            // If user confirms, follow the link
+            if (confirmation) {
+                window.location.href = this.href;
+            }
+
+        })
+
+        var deleteLink = document.getElementById("delete-link");
+
+        deleteLink.addEventListener("click", function(event) {
+            // Prevent the default link behavior
+            event.preventDefault();
+
+                    // Ask for confirmation
+            var confirmation = confirm("Are you sure you want to delete?");
+
+            // If user confirms, follow the link
+            if (confirmation) {
+                window.location.href = this.href;
+            }
+
+        })
+    })
+
+</script>
+{% endblock %}
+

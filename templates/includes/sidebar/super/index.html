@@ -119,88 +119,10 @@
 </aside>
 <!-- End Sidebar-->
 
-<div class="modal fade" id="deactivateModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-center">{{ company.name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are You Sure  You Want To Deactivate this company?
-            </div>
-            <input type="hidden" id="companyId" name="companyId" value="{{company.id}}">
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button id="deactivateCompany" type="button" class="btn btn-warning">Continue</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-center">{{ company.name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Deleting this company, all its data will be lost?
-            </div>
-            <input type="hidden" id="companyId" name="companyId" value="{{company.id}}">
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button id="deleteCompany" type="button" class="btn btn-danger">Continue</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script type='text/javascript'>
     
     $(document).ready(function(){
-        $('#deactivateCompany').click(function(){
-            const id = $('#companyId').val();
-            // Make an AJAX request to delete the company
-            $.ajax({
-                url: '{% url "user:company-deactivate" 0 %}'.replace('0', id),
-                method: 'POST',
-                success: function (data) {
-                    // If the deletion is successful, handle the response
-                    console.log(data.message);
-                    $('#deactivateModal').modal('hide');
-                    window.location.href = '{% url "user:company-list" %}';
-                    // Optionally display a success message or update the UI
-                },
-                error: function (error) {
-                    console.error('Error deleting company:', error);
-                    $('#deactivateModal').modal('hide');
-                    alert("Something Went Wrong!")
-                }
-            });
-        })
 
-        $('#deleteCompany').click(function(){
-            const id = $('#companyId').val();
-            // Make an AJAX request to delete the company
-            $.ajax({
-                url: '{% url "user:company-delete" 0 %}'.replace('0', id),
-                method: 'POST',
-                success: function (data) {
-                    // If the deletion is successful, handle the response
-                    console.log(data.message);
-                    $('#deleteModal').modal('hide');
-                    window.location.href = '{% url "user:company-list" %}';
-                    // Optionally display a success message or update the UI
-                },
-                error: function (error) {
-                    console.error('Error deleting company:', error);
-                    $('#deleteModal').modal('hide');
-                    alert("Something Went Wrong!")
-                }
-            });
-        })
     })
     
 </script>

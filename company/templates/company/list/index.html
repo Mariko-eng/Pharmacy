@@ -27,13 +27,19 @@
         {% if companies %}
         {% for company in companies %}
         <div class="col-xs-12 col-sm-6 col-md-4 d-flex flex-column align-items-center justify-content-center">
-            <a href="{% url 'user:company-dashboard' company_id=company.id %}">
+            {% comment %} <a href="{% url 'user:company-dashboard' company_id=company.id %}">
+                <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
+                    <i class="bi bi-house text-white" style="font-size: 2em;"></i>
+                </div>
+                <p>{{company.name}}</p>
+            </a> {% endcomment %}
+            <a href="{% url 'company:company-detail' company_id=company.id %}">
                 <div class="card mb-1 bg-primary d-flex align-items-center justify-content-center" style="width:150px; height:150px;">
                     <i class="bi bi-house text-white" style="font-size: 2em;"></i>
                 </div>
                 <p>{{company.name}}</p>
             </a>
-        </div>
+        </div> 
         {% endfor %}
         {% endif %}
     </div>

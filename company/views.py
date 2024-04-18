@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import JsonResponse,HttpResponseServerError
 # from django.contrib.auth.models import Group
-from utils.groups.access_groups import AccessGroups
+from utils.groups.access_groups import AccountTypes
 from utils.groups.default_roles import DefaultRoles
 from .forms import CompanyApplicationRegisterForm
 from .forms import CompanyAccountActivationForm
@@ -174,7 +174,7 @@ def company_account_activate_view(request):
                     last_name = last_name,
                     phone = phone)
 
-                user.account_type = AccessGroups.COMPANY_ADMIN
+                user.account_type = AccountTypes.COMPANY_ADMIN
                 user.set_password(str(password2))
                 user.save()
 
@@ -217,12 +217,27 @@ def company_list_view(request):
 
 @login_required(login_url='/login')
 @permission_required("company.view_company", raise_exception=True)
-def company_detail_view(request, company_id):
+def company_detail_view(request, company_id): # Only Viewed by superuser
     company = Company.objects.get(pk = company_id)
 
-    context = { "company" : company }
+    admins = User.objects.filter(account_type = AccountTypes.COMPANY_ADMIN, userprofile__company=company)
+
+    context = { "company" : company, "admins" : admins}
     
-    return render(request, 'company/detail/index.html', context = context)
+    return render(request, 'company/detail/company_detail/index.html', context = context)
+
+
+@login_required(login_url='/login')
+@permission_required("company.view_company", raise_exception=True)
+def company_profile_view(request, company_id): 
+    company = Company.objects.get(pk = company_id)
+
+    admins = User.objects.filter(account_type = AccountTypes.COMPANY_ADMIN, userprofile__company=company)
+
+    context = { "company" : company, "admins" : admins}
+    
+    return render(request, 'company/detail/company_profile/index.html', context = context)
+
 
 
 @login_required(login_url='/login')
@@ -236,25 +251,34 @@ def company_edit_view(request, company_id):
 
 
 @login_required(login_url='/login')
-@csrf_exempt  # Use this decorator if you don't need CSRF protection for this view
+@permission_required("company.activate_company", raise_exception=True)
+def company_activate_view(request, company_id):
+    company = get_object_or_404(Company, id=company_id)
+
+    company.is_active = True
+    company.is_deleted = False
+    company.save()
+    return redirect(reverse('company:company-detail', kwargs={'company_id': company.pk}))
+
+
+@login_required(login_url='/login')
 @permission_required("company.deactivate_company", raise_exception=True)
 def company_deactivate_view(request, company_id):
-    if request.method == 'POST':
-        try:
-            company = get_object_or_404(Company, id=company_id)
-            company.delete()
-            return JsonResponse({'message': 'Company deactivated successfully'})
-        except Exception as e:
-            return HttpResponseServerError({'message': f'Failed to delete company. Error: {str(e)}'})
+    company = get_object_or_404(Company, id=company_id)
+
+    company.is_active = False
+    company.save()
+    company.delete()
+
+    return redirect(reverse('company:company-detail', kwargs={'company_id': company.pk}))
 
 
 @permission_required("company.delete_company", raise_exception=True)
-def company_delete_view(request, pk):
-    data = Company.objects.all(pk = pk)
+def company_delete_view(request, company_id):
+    company = get_object_or_404(Company, id=company_id)
+    company.hard_delete()
 
-    context = { "data" : data }
-    
-    return render(request, 'company/new/index.html', context = context)
+    return redirect('company:company-list')
 
 
 ###################### - Company Store - ####################
@@ -300,6 +324,8 @@ def company_store_list_view(request, company_id):
 def store_detail_view(request, store_id):
     store = Store.objects.get(pk = store_id) 
 
+    admins = User.objects.filter(account_type = AccountTypes.STORE_ADMIN, userprofile__store=store)
+
     if request.is_ajax():
         if request.method == 'POST':
             form = StoreForm(request.POST, instance=store)
@@ -314,22 +340,68 @@ def store_detail_view(request, store_id):
     else:
         form = StoreForm(instance=store)
 
-    context = {  "company" : store.company, "store" : store, "form": form }
+    context = {  "company" : store.company, "admins" : admins ,"store" : store, "form": form }
     
-    return render(request, 'store/detail/index.html', context = context)
+    return render(request, 'store/detail/store_detail/index.html', context = context)
+
+
+@login_required(login_url='/login')
+@permission_required("company.view_store", raise_exception=True)
+def store_profile_view(request, store_id):
+    store = Store.objects.get(pk = store_id) 
+
+    admins = User.objects.filter(account_type = AccountTypes.STORE_ADMIN, userprofile__store=store)
+
+    if request.is_ajax():
+        if request.method == 'POST':
+            form = StoreForm(request.POST, instance=store)
+            if form.is_valid():
+                store = form.save(commit=False)
+                store.created_by = request.user
+                store.company = store.company
+                store.save()
+                return JsonResponse({'success': True, 'store_id': store.id})
+            else:
+                return JsonResponse({'success': False, 'errors': form.errors})
+    else:
+        form = StoreForm(instance=store)
+
+    context = {  "company" : store.company, "admins" : admins ,"store" : store, "form": form }
+    
+    return render(request, 'store/detail/store_profile/index.html', context = context)
+
+
+@login_required(login_url='/login')
+@permission_required("company.activate_store", raise_exception=True)
+def store_activate_view(request, store_id):
+    store = get_object_or_404(Store, id=store_id)
+
+    store.is_active = True
+    store.is_deleted = False
+    store.save()
+    return redirect(reverse('company:company-store-detail', kwargs={"store_id" :store_id}))
+
+
+@login_required(login_url='/login')
+@permission_required("company.activate_store", raise_exception=True)
+def store_deactivate_view(request, store_id):
+    store = get_object_or_404(Store, id=store_id)
+
+    store.is_active = False
+    store.save()
+    store.delete()
+
+    return redirect(reverse('company:company-store-detail', kwargs={"store_id" :store_id}))
 
 
 @login_required(login_url='/login')
 @permission_required("company.delete_store", raise_exception=True)
-def store_delete_view(request, company_id, store_id):
-    company = Company.objects.get(pk=company_id) 
-    store = Store.objects.get(pk = store_id) 
-
+def store_delete_view(request, store_id):
+    store = get_object_or_404(Store, id=store_id)
+    
     store.hard_delete()
-    if request.is_ajax():
-        return JsonResponse({'success': True})
-    else:
-        return redirect(reverse('company:company-store-list', kwargs={'company_id': company.id}))
+
+    return redirect(reverse('company:company-store-list', kwargs={'company_id': store.company.pk}))
 
 
 ###################### - Company PosCenter - ####################

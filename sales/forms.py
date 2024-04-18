@@ -2,7 +2,7 @@ from django import forms
 from .models import Sale
 from .models import SaleItem 
 from company.models import  PosCenter
-from user.models import AccessGroups
+from user.models import AccountTypes
 from django.forms import BaseFormSet
 
 
@@ -39,7 +39,7 @@ class SaleForm(forms.ModelForm):
         super(SaleForm, self).__init__(*args, **kwargs)
 
         if user:
-            if user.account_type == AccessGroups.POS_ATTENDANT:
+            if user.account_type == AccountTypes.POS_ATTENDANT:
                 self.fields['pos_center'].queryset = user.userprofile.pos_center
                 self.fields['pos_center'].initial = user.userprofile.pos_center
             else:

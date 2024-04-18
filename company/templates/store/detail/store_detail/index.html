@@ -1,19 +1,28 @@
-{% extends 'base/store/index.html' %}
+{% extends 'base/company/index.html' %}
 {% load widget_tweaks %}
+
 
 {% block pagetitle%}
 <div class="pagetitle">
-  <h1>Store : {{ store.name }}!</h1>
-  
-  <nav>
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="#">Home</a></li>
-      <li class="breadcrumb-item active"><a>Store</a></li>
-      <li class="breadcrumb-item active"><a>Profile</a></li>
-    </ol>
-  </nav>
-</div><!-- End Page Title --> 
-{% endblock %} 
+  <div class="d-flex justify-content-between">
+    <nav>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'user:home' %}">Home</a></li>
+            <li class="breadcrumb-item active"><a>Stores</a></li>
+            <li class="breadcrumb-item active"><a>{{store.name}}</a></li>
+        </ol>
+    </nav>
+    <div>
+        <a href="{% url 'user:store-dashboard' store_id=store.id %}" 
+            class="btn btn-outline-primary" 
+            style="width: 200px; display: inline-block; text-align: center; text-decoration: none;">
+            <span class="mx-2">Go To Store</span><i class="bi bi-arrow-up-right-square"></i>
+          </a>
+    </div>
+  </div>
+</div>
+<!-- End Page Title --> 
+{% endblock %}  
 
 
 {% block content%}  
@@ -28,12 +37,15 @@
         
         <h2>{{ store.name }}</h2>
         <h3>{{ location_district }} - {{location_village}}</h3>
-        <div class="social-links mt-2">
+        <div><span class="badge {% if store.is_active %}bg-primary{% else %}bg-warning{% endif %}">{% if store.is_active %}Active{% else %}INACTIVE{% endif %}</span></div>
+        <div><span class="badge {% if store.status_type == 'OPEN' %}bg-success{% else %}bg-danger{% endif %}">{{store.status_type}}</span></div>
+
+        {% comment %} <div class="social-links mt-2">
           <a href="#" class="twitter"><i class="bi bi-twitter"></i></a>
           <a href="#" class="facebook"><i class="bi bi-facebook"></i></a>
           <a href="#" class="instagram"><i class="bi bi-instagram"></i></a>
           <a href="#" class="linkedin"><i class="bi bi-linkedin"></i></a>
-        </div>
+        </div> {% endcomment %}
       </div>
     </div>
     
@@ -88,6 +100,33 @@
               <div class="col-lg-3 col-md-4 label">Address</div>
               <div class="col-lg-9 col-md-8">{{store.location_district}} - {{store.location_village}}</div>
             </div>
+
+            <hr />
+            <div class="row">
+              <h3 class="fs-6"> COMPANY ADMINS </h3>
+              <div class="row">
+                  <table class="table">
+                      <thead>
+                        <tr>
+                          <th scope="col">#</th>
+                          <th scope="col">Name</th>
+                          <th scope="col">Email</th>
+                          <th scope="col">Phone</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                          {% for user in admins %}
+                          <tr>
+                              <td>{{user.role}}</td>
+                              <td>{{user.name}}</td>
+                              <td>{{user.email}}</td>
+                              <td>{{user.phone}}</td>
+                          <tr>
+                          {% endfor%}
+                      </tbody>
+                    </table>
+              </div>
+            </div>
             
           </div>
           
@@ -121,7 +160,7 @@
               <div class="row mb-3">
                 <label for="status" class="col-md-4 col-lg-3 col-form-label">Status</label>
                 <div class="col-md-8 col-lg-9">
-                  {% render_field form.status|add_class:"form-select"|attr:"id:status" %}
+                  {% render_field form.status_type|add_class:"form-select"|attr:"id:status_type" %}
                   <div id = "statusError" class="invalid-feedback">
                     Please Select Status
                   </div>
@@ -176,8 +215,31 @@
           </div>
           
           <div class="tab-pane fade pt-3" id="profile-settings">
-            
             <!-- Settings Form -->
+            {% if store.is_active %}
+            <div class="row">
+                <div class="m-2">
+                <p class="text-decoration-underline text-uppercase">Deactivate Store?</p>
+                <p class="fs-6">Deactivating <span class="text-primary">{{store.name}}'s</span> account will block usage of store information and access from users</p>
+                <a id="deactivate-link" href="{% url 'company:company-store-deactivate' store_id=store.id %}" 
+                class="btn btn-outline-warning" 
+                style="width: 200px; display: inline-block; text-align: center; text-decoration: none;">
+                <span class="mx-2">Deactivate Now</span><i class="bi bi-arrow-up-right-square"></i>
+              </a>
+            </div>
+            {% else %}
+            <div class="row">
+                <div class="m-2">
+                <p class="text-decoration-underline text-uppercase">Activate Store?</p>
+                <a id="activate-link" href="{% url 'company:company-store-activate' store_id=store.id %}" 
+                class="btn btn-outline-primary" 
+                style="width: 200px; display: inline-block; text-align: center; text-decoration: none;">
+                <span class="mx-2">Activate Now</span><i class="bi bi-arrow-up-right-square"></i>
+              </a>
+            </div>
+            {% endif %}
+            <hr/>
+
             <form id="deleteStoreForm" method="POST">
               <!-- ... your form content ... -->
               <div class="d-flex justify-content-between">
@@ -185,7 +247,12 @@
                   Delete this store?
                 </div>
                 <div class="text-center">
-                  <button type="button" id="deleteStoreButton" class="btn btn-danger">Delete Store</button>
+                  <a id="delete-link" href="{% url 'company:company-store-delete' store_id=store.id %}" 
+                class="btn btn-outline-danger" 
+                style="width: 200px; display: inline-block; text-align: center; text-decoration: none;">
+                <span class="mx-2">Delete Store</span><i class="bi bi-arrow-up-right-square"></i>
+              </a>
+                  {% comment %} <button type="button" id="deleteStoreButton" class="btn btn-danger">Delete Store</button> {% endcomment %}
                 </div>
               </div>
             </form>
@@ -221,7 +288,7 @@
         headers: {
           'X-CSRFToken': csrfToken,
         },
-        url: '{% url "company:store-detail" 0 0 %}'.replace('0', {{company.id}}).replace('0', {{store.id}}), 
+        url: '{% url "company:company-store-detail" 0 %}'.replace('0', {{store.id}}), 
         data: data,
         success: function (data) {
           // console.log(data)
@@ -313,7 +380,7 @@
             if (isConfirmed) {
                 // User confirmed, send AJAX request to delete the store
                 $.ajax({
-                    url: '{% url "company:store-delete" 0 %}'.replace('0', {{store.id}}), 
+                    url: '{% url "company:company-store-delete" 0 %}'.replace('0', {{store.id}}), 
                     type: "GET",  // Change this to the appropriate HTTP method
                     success: function (data) {
                         // The store is deleted successfully
@@ -330,6 +397,41 @@
             }
         });
   })
+
+  $(document).ready(function(){
+    var deactivateLink = document.getElementById("deactivate-link");
+
+    deactivateLink.addEventListener("click", function(event) {
+        // Prevent the default link behavior
+        event.preventDefault();
+
+                // Ask for confirmation
+        var confirmation = confirm("Are you sure you want to deactivate?");
+
+        // If user confirms, follow the link
+        if (confirmation) {
+            window.location.href = this.href;
+        }
+
+    })
+
+    var deleteLink = document.getElementById("delete-link");
+
+    deleteLink.addEventListener("click", function(event) {
+        // Prevent the default link behavior
+        event.preventDefault();
+
+                // Ask for confirmation
+        var confirmation = confirm("Are you sure you want to delete?");
+
+        // If user confirms, follow the link
+        if (confirmation) {
+            window.location.href = this.href;
+        }
+
+    })
+})
+
 </script>
 
 {% endblock %}

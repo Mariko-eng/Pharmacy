@@ -16,16 +16,22 @@ urlpatterns = [
     
     path('home/company/list/', views.company_list_view, name="company-list"),
     path('home/company/<int:company_id>/', views.company_detail_view, name="company-detail"),
+    path('home/company/<int:company_id>/profile', views.company_profile_view, name="company-profile"),
     path('home/company/<int:company_id>/edit/', views.company_edit_view, name="company-edit"),
+    path('home/company/<int:company_id>/activate', views.company_activate_view, name='company-activate'),
     path('home/company/<int:company_id>/deactivate', views.company_deactivate_view, name='company-deactivate'),
     path('home/company/<int:company_id>/delete/', views.company_delete_view, name="company-delete"),
 
     ## Company Store List
     path('home/company/<int:company_id>/store/list/', views.company_store_list_view, name="company-store-list"),
+    path('home/company/store/<int:store_id>/', views.store_detail_view, name="company-store-detail"),
+    path('home/company/store/<int:store_id>/activate/', views.store_activate_view, name="company-store-activate"),
+    path('home/company/store/<int:store_id>/deactivate/', views.store_deactivate_view, name="company-store-deactivate"),
+    path('home/company/store/<int:store_id>/delete/', views.store_delete_view, name="company-store-delete"),
+
 
     ## Store Proifle
-    path('home/company/<int:company_id>/store/<int:store_id>/profile/', views.store_detail_view, name="store-detail"),
-    path('home/company/<int:company_id>/store/<int:store_id>/delete/', views.store_delete_view, name="store-delete"),
+    path('home/store/<int:store_id>/profile/', views.store_profile_view, name="store-profile"),
 
     path('home/company/<int:company_id>/pos-center/list/', views.pos_list_view, name="company-pos-list"),
     path('home/company/store/<int:store_id>/pos-center/list/', views.pos_list_view, name="store-pos-list"),

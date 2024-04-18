@@ -41,6 +41,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">#</th>
+                                        <th scope="col">Account Type</th>
                                         <th scope="col">Role</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Email</th>
@@ -52,6 +53,7 @@
                                     {% for user in users %}
                                     <tr>
                                         <td>{{user.created_at}}</td>
+                                        <td>{{user.account_type}}</td>
                                         <td>{{user.role}}</td>
                                         {% comment %} <td>{% for group in user.groups.all %}<p>{{group.name}}</p>{% endfor %}</td> {% endcomment %}
                                         <td>{{user.name}}</td>
@@ -196,7 +198,7 @@
                         <h5 class="modal-title text-center">User Registration Form</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
-                    {% comment %} <div class="modal-body row g-3 needs-validation">
+                    <div class="modal-body row g-3 needs-validation">
                         <form id = "form" method="post" novalidate >
                             {% csrf_token %}
                             <div class="row mb-3">
@@ -248,7 +250,7 @@
                                 </div>
                             </div>
                         </form>
-                    </div>  {% endcomment %}
+                    </div>
                     
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -285,58 +287,10 @@
             
             $(document).ready(function() {
                 
-                /**
-                
-                $("#selectUserTypeForm").submit(function(e){
-                    e.preventDefault();
-                    
-                    const selectedUserType = document.querySelector('input[name="user_type"]:checked');
-                    
-                    if (selectedUserType) {
-                        $('#user_type_error').removeClass('d-block');
-                        $('#user_type_error').addClass('d-none');
-                        const value = selectedUserType.value;
-                        // console.log(value);
-                        $('#selectUserTypeModal').modal('hide');
-                        if(value === "superUser"){
-                            $('#createSuperUserModal').modal('show');
-                        }else{
-                            $('#createAdminUserModal').modal('show');
-                        }
-                    } else {
-                        $('#user_type_error').removeClass('d-none');
-                        $('#user_type_error').addClass('d-block');
-                    }
-                    
-                })
-                
-                var roleSelect = $('#role');
-                var companySelect = $('#company');
-                
-                // Function to toggle the disabled state of the company select based on the role
-                function toggleCompanyField() {
-                    var isCompanyOwner = roleSelect.val() === 'Company Owner';
-                    companySelect.prop('disabled', !isCompanyOwner);
-                    
-                    // If not a manager, reset the company select
-                    if (!isCompanyOwner) {
-                        companySelect.val('').trigger('change');
-                    }
-                }
-                
-                // Initial setup
-                toggleCompanyField();
-                
-                // Attach an event handler to the role select to update the company select
-                roleSelect.on('change', function () {
-                    toggleCompanyField();
-                });
-                
-                **/
-                
                 $("#formSubmitBtn").click(function () {
                     const data = $('#form').serialize() // Contains Form Data And CSRF Token As Well
-                    // console.log(data)
+                    console.log(data)
+
                     
                     $.ajax({
                         type: 'POST',

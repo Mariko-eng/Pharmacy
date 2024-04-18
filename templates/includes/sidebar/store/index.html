@@ -5,16 +5,39 @@
   {% with current_url=request.resolver_match.url_name %}
 
   <ul class="sidebar-nav" id="sidebar-nav">
-    
-    <li class="nav-heading">Home</li>
-    
+
     <li class="nav-item">
-      <a class="nav-link" href="{% url 'user:store-dashboard' store_id=store.id %}">
-        <i class="bi bi-grid"></i>
-        <span>Dashboard</span>
+      <a class="nav-link" href="{% url 'user:home' %}">
+          <i class="bi bi-house"></i>
+          <span>Home</span>
+        </a>
+      </li>
+      <!-- End Home Nav -->
+
+      <li class="nav-item">
+          <a class="nav-link" href="{% url 'user:store-dashboard' store_id=store.id  %}">
+              <i class="bi bi-grid"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+      <!-- End Dashboard Nav -->
+
+    <!-- Sales Nav -->
+    <li class="nav-heading">Sales</li>
+    <li class="nav-item">
+      <a class="nav-link" href="{% url 'sales:store-sales-list' store_id=store.id %}">
+          <i class="bi bi-receipt"></i>
+          <span>Manage Sales</span>
       </a>
-    </li>
-    <!-- End Dashboard Nav -->
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" href="{% url 'company:store-pos-list' store_id=store.id %}">
+        <i class="bi bi-cone-striped"></i>
+        <span>Point Of Sales</span>
+    </a>
+  </li>
+    <!-- End sales Nav -->
+  
     
     <!-- Inventory Nav -->
     <li class="nav-heading">Inventory</li>
@@ -60,70 +83,23 @@
 
     <li>
       <a class="nav-link {% if current_url == 'store-received-stock-list' %}link-success{% endif %}" href="{% url 'inventory:store-received-stock-list' store_id=store.id %}">
-        <i class="bi bi-circle"></i><span>Received Stock</span>
+        <i class="bi bi-file-earmark-arrow-down"></i><span>Received Stock</span>
       </a>
     </li>
 
     <li>
       <a class="nav-link {% if current_url == 'store-stock-requests-list' %}link-success{% endif %}" href="{% url 'inventory:store-stock-requests-list' store_id=store.id %}">
-        <i class="bi bi-circle"></i><span>Stock Requests</span>
+        <i class="bi bi-pass"></i><span>Stock Requests</span>
       </a>
     </li>
 
     <li>
       <a class="nav-link {% if current_url == 'purchase-orders-list' %}link-success{% endif %}" href="{% url 'purchase_orders:purchase-orders-list' store_id=store.id %}">
-        <i class="bi bi-circle"></i><span>Purchase Orders</span>
+        <i class="bi bi-indent"></i><span>Purchase Orders</span>
       </a>
     </li>
-    
-    {% comment %} <li class="nav-item">
-      <a class="nav-link collapsed {% if current_url|in_list:'store-received-stock-list,store-stock-requests-list,purchase-orders-list' %}show{% endif %}" data-bs-target="#company-incoming-stock-nav" data-bs-toggle="collapse" href="#">
-        <i class="bi bi-menu-button-wide"></i><span>Stock</span><i class="bi bi-chevron-down ms-auto"></i>
-      </a>
-      <ul id="company-incoming-stock-nav" class="nav-content collapse {% if current_url|in_list:'store-received-stock-list,store-stock-requests-list,purchase-orders-list' %}show{% endif %}" data-bs-parent="#sidebar-nav">
-        <li>
-          <a class="nav-link {% if current_url == 'store-received-stock-list' %}link-success{% endif %}" href="{% url 'inventory:store-received-stock-list' store_id=store.id %}">
-            <i class="bi bi-circle"></i><span>Manage Received Stock</span>
-          </a>
-        </li>
-        <li>
-          <a class="nav-link {% if current_url == 'store-stock-requests-list' %}link-success{% endif %}" href="{% url 'inventory:store-stock-requests-list' store_id=store.id %}">
-            <i class="bi bi-circle"></i><span>Manage Stock Requests</span>
-          </a>
-        </li>
-        <li>
-          <a class="nav-link {% if current_url == 'purchase-orders-list' %}link-success{% endif %}" href="{% url 'purchase_orders:purchase-orders-list' store_id=store.id %}">
-            <i class="bi bi-circle"></i><span>Manage Purchase Orders</span>
-          </a>
-        </li>
-      </ul>
-    </li> {% endcomment %}
-    
-    
-    <!-- sales Nav -->
-    <li class="nav-heading">Sales</li>
-    <li class="nav-item">
-      <a class="nav-link collapsed" data-bs-target="#sales-nav" data-bs-toggle="collapse" href="#">
-        <i class="bi bi-menu-button-wide"></i><span>Sales</span><i class="bi bi-chevron-down ms-auto"></i>
-      </a>
-      <ul id="sales-nav" class="nav-content collapse  {% if current_url|in_list:'store-sales-list,store-pos-list' %}show{% endif %}" data-bs-parent="#sidebar-nav">
-        <li>
-          <a class="nav-link {% if current_url == 'store-sales-list' %}link-success{% endif %}" href="{% url 'sales:store-sales-list' store_id=store.id %}">
-            <i class="bi bi-circle"></i><span>List Sales</span>
-          </a>
-        </li>
-        <li>
-          <a class="nav-link {% if current_url == 'store-pos-list' %}link-success{% endif %}" href="{% url 'company:store-pos-list' store_id=store.id %}">
-            <i class="bi bi-circle"></i><span>Point of Sales</span>
-          </a>
-        </li>
-      </ul>
-    </li>
-    <!-- End sales Nav -->
-    
-    <!-- Uitilty  Nav -->
-    {% comment %} <li class="nav-heading">Uitilty</li> {% endcomment %}
-    <!-- End Uitilty Nav -->
+  <!-- End Inventory Nav -->
+
     
     <!-- Access Control -->
     <li class="nav-heading">Access Control</li>
@@ -162,16 +138,15 @@
       </a> 
     </li> 
     <!-- End Access Control Nav -->
-    
-    <!-- Profile Nav -->
-    {% comment %} <li class="nav-heading">My Account</li>
-    <li class="nav-item">
-      <a class="nav-link" href="{% url 'company:store-detail' company_id=store.company.id store_id=store.id %}">
-        <i class="bi bi-grid"></i>
-        <span>Profile</span>
+        
+  <li class="nav-heading">... More ...</li>
+  <li class="nav-item">
+      <a class="nav-link" href="{% url 'company:company-profile' company_id=company.id %}">
+          <i class="bi bi-gear"></i>
+          <span>Account</span>
       </a>
-    </li> {% endcomment %}
-    <!-- End Profile Nav -->
+  </li>
+  <!-- End Actions Nav -->
     
   </ul>
   {% endwith %}

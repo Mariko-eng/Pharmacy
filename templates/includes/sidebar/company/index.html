@@ -3,41 +3,33 @@
     
     <ul class="sidebar-nav" id="sidebar-nav">
         
-        <li class="nav-heading">Home</li>
-
        <li class="nav-item">
         <a class="nav-link" href="{% url 'user:home' %}">
-            <i class="bi bi-grid"></i>
-            <span>Dashboard</span>
+            <i class="bi bi-house"></i>
+            <span>Home</span>
           </a>
         </li>
-        <!-- End Dashboard Nav -->
-        
-        <li class="nav-heading">Company Info</li>
-        
+        <!-- End Home Nav -->
+
         <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#company-stores-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-menu-button-wide"></i><span>Stores</span><i class="bi bi-chevron-down ms-auto"></i>
+            <a class="nav-link" href="{% url 'user:company-dashboard' company_id=company.id  %}">
+                <i class="bi bi-grid"></i>
+                <span>Dashboard</span>
             </a>
-            <ul id="company-stores-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-                {% if request.user.is_staff or request.user.is_superuser %}
-                <li>
-                    <a href="{% url 'company:company-store-list' company_id=company.id %}">
-                        <i class="bi bi-circle"></i><span>List Stores</span>
-                    </a>
-                </li>
-                {% else %}
-                    <li>
-                    <a href="{% url 'company:company-store-list' company_id=request.user.company.id %}">
-                        <i class="bi bi-circle"></i><span>List Stores</span>
-                    </a>
-                </li>
-                {%endif%}
-            </ul>
         </li>
-        <!-- End Company Nav -->
-        
+        <!-- End Dashboard Nav -->
+
+        <!-- Stores Nav -->
+        <li class="nav-heading">Stores</li>
         <li class="nav-item">
+            <a class="nav-link" href="{% url 'company:company-store-list' company_id=company.id %}">
+                <i class="bi bi-windows"></i>
+                <span>Manage Stores</span>
+            </a>
+        </li>
+        <!-- End Stores Nav -->
+        
+        {% comment %} <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#company-reports-nav" data-bs-toggle="collapse" href="#">
                 <i class="bi bi-menu-button-wide"></i><span>Reports</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
@@ -58,14 +50,15 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> {% endcomment %}
+
         <!-- End Reports Nav -->
 
         <li class="nav-heading">Access Control</li>
 
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#company-users-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-menu-button-wide"></i><span>Users</span><i class="bi bi-chevron-down ms-auto"></i>
+                <i class="bi bi-people-fill"></i><span>Users</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
             <ul id="company-users-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 <li>
@@ -93,7 +86,7 @@
         
         <li class="nav-item">
             <a class="nav-link collapsed" data-bs-target="#company-roles-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-menu-button-wide"></i><span>Roles</span><i class="bi bi-chevron-down ms-auto"></i>
+                <i class="bi bi-signpost"></i><span>Roles</span><i class="bi bi-chevron-down ms-auto"></i>
             </a>
             <ul id="company-roles-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
                 {% if request.user.is_staff or request.user.is_superuser %}
@@ -113,122 +106,23 @@
         </li> 
         <!-- End Users Nav -->
 
-        <!-- End Profile Nav -->
         
         <li class="nav-heading">... More ...</li>
-        
         <li class="nav-item">
-            <a class="nav-link collapsed" data-bs-target="#company-actions-nav" data-bs-toggle="collapse" href="#">
-                <i class="bi bi-menu-button-wide"></i><span>Actions</span><i class="bi bi-chevron-down ms-auto"></i>
+            <a class="nav-link" href="{% url 'company:company-profile' company_id=company.id %}">
+                <i class="bi bi-gear"></i>
+                <span>Account</span>
             </a>
-            <ul id="company-actions-nav" class="nav-content collapse " data-bs-parent="#sidebar-nav">
-                <li>
-                    <a href="{% url 'company:company-detail' company_id=company.id %}">
-                        <i class="bi bi-circle"></i><span>View Profile</span>
-                    </a>
-                </li>
-                {% comment %} {% if request.user.is_superuser or request.user.is_staff %}
-              <li>
-                    <a class="text-warning" data-bs-toggle="modal" data-bs-target="#deactivateModal" href="#">
-                        <i class="bi bi-trash"></i><span>Deactivate Company</span>
-                    </a>
-                </li>
-                <li>
-                    <a class="text-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" href="#">
-                        <i class="bi bi-trash"></i><span>Delete Company!!!</span>
-                    </a>
-                </li>
-                {% endif %} {% endcomment %}
-            </ul>
         </li>
-        <!-- End Actions Nav -->
+
+        <!-- End Profile Nav -->
+
     </ul>
     
 </aside>
 <!-- End Sidebar-->
 
-<div class="modal fade" id="deactivateModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-center">{{ company.name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Are You Sure  You Want To Deactivate this company?
-            </div>
-            <input type="hidden" id="companyId" name="companyId" value="{{company.id}}">
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button id="deactivateCompany" type="button" class="btn btn-warning">Continue</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title text-center">{{ company.name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                Deleting this company, all its data will be lost?
-            </div>
-            <input type="hidden" id="companyId" name="companyId" value="{{company.id}}">
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <button id="deleteCompany" type="button" class="btn btn-danger">Continue</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script type='text/javascript'>
-    
-    $(document).ready(function(){
-        $('#deactivateCompany').click(function(){
-            const id = $('#companyId').val();
-            // Make an AJAX request to delete the company
-            $.ajax({
-                url: '{% url "company:company-deactivate" 0 %}'.replace('0', id),
-                method: 'POST',
-                success: function (data) {
-                    // If the deletion is successful, handle the response
-                    console.log(data.message);
-                    $('#deactivateModal').modal('hide');
-                    window.location.href = '{% url "company:company-list" %}';
-                    // Optionally display a success message or update the UI
-                },
-                error: function (error) {
-                    console.error('Error deleting company:', error);
-                    $('#deactivateModal').modal('hide');
-                    alert("Something Went Wrong!")
-                }
-            });
-        })
 
-        $('#deleteCompany').click(function(){
-            const id = $('#companyId').val();
-            // Make an AJAX request to delete the company
-            $.ajax({
-                url: '{% url "company:company-delete" 0 %}'.replace('0', id),
-                method: 'POST',
-                success: function (data) {
-                    // If the deletion is successful, handle the response
-                    console.log(data.message);
-                    $('#deleteModal').modal('hide');
-                    window.location.href = '{% url "company:company-list" %}';
-                    // Optionally display a success message or update the UI
-                },
-                error: function (error) {
-                    console.error('Error deleting company:', error);
-                    $('#deleteModal').modal('hide');
-                    alert("Something Went Wrong!")
-                }
-            });
-        })
-    })
     
 </script>

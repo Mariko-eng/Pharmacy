@@ -6,7 +6,7 @@ from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from simple_history.models import HistoricalRecords
-from utils.groups.access_groups import AccessGroups
+from utils.groups.access_groups import AccountTypes
 from company.models import Company
 from company.models import Store
 from company.models import PosCenter
@@ -41,14 +41,14 @@ class UserManager(BaseUserManager):
     extra_fields.setdefault('is_active', True)  # Set is_active to False by default
     extra_fields.setdefault('is_staff', True)
     extra_fields.setdefault('is_superuser', True)
-    extra_fields.setdefault('account_type', AccessGroups.APP_ADMIN)
+    extra_fields.setdefault('account_type', AccountTypes.APP_ADMIN)
     user = self._create_user(email, password, **extra_fields)
     return user
 
 class User(AbstractUser):
     GENDER_CHOICES = [("Male", "Male"), ("Female", "Female")]
     
-    account_type = models.CharField(max_length=225, choices=AccessGroups.choices)
+    account_type = models.CharField(max_length=225, choices=AccountTypes.choices)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length = 225)
     is_superuser = models.BooleanField(default = False)
@@ -82,13 +82,16 @@ class User(AbstractUser):
     
     @property
     def company(self):
-        return self.userprofile.company
+        if self.userprofile is not None:
+            return self.userprofile.company
+        else:
+            return "Nan"
 
     def role(self):
         if self.is_superuser:
-            return "Superuser"
+            return "App Superuser"
         elif self.is_staff:
-            return "Staff"
+            return "App Staff"
         elif self.groups.exists():
             # If the user belongs to any groups, concatenate their names
             return ', '.join(group.name for group in self.groups.all())
@@ -108,7 +111,7 @@ class  UserProfile(Base):
         permissions = user_profile_permissions
 
 class RoleGroup(models.Model):
-    name = models.CharField(max_length=225, choices=AccessGroups.choices)
+    name = models.CharField(max_length=225, choices=AccountTypes.choices)
     groups = models.ManyToManyField(Group)
     
 class EmailLog(models.Model):
@@ -120,4 +123,3 @@ class EmailLog(models.Model):
     def __str__(self):
         return f"{self.subject} to {self.recipient} ({self.status})"
 
-user_profile_permissions
