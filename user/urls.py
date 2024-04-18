@@ -23,6 +23,10 @@ urlpatterns = [
     path('home/users/list/',views.users_list_view,name="users-list"),  
     path('home/users-roles/list/',views.users_list_view,name="users-roles-list"),  
     path('home/users-roles/<int:group_id>/permissions/',views.super_role_permissions_edit_view, name="users-roles-permissions-list"),
+    path('home/users/<int:user_id>/activate/', views.user_activate_view, name="user-activate"),
+    path('home/users/<int:user_id>/deactivate/', views.user_deactivate_view, name="user-deactivate"),
+    path('home/users/<int:user_id>/delete/', views.user_delete_view, name="user-delete"),
+
     # Company - Users & Roles
     path('home/company/<int:company_id>/users/list/', views.users_company_list_view, name="users-company-list"),
     path('home/company/<int:company_id>/users/add/', views.users_company_new_view,name="users-company-new"),

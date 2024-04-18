@@ -25,7 +25,7 @@ class AuthenticationBackend(ModelBackend):
             
         # print(user.password)
                     
-        if user.is_superuser:
+        if user.is_superuser or user.is_staff:
             if user.check_password(password):
                 return user
         else:

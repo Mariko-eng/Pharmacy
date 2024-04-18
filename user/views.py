@@ -509,16 +509,51 @@ def users_list_view(request):
         form_data = AppUserForm(request.POST or None)
         if form_data.is_valid():
             user = form_data.save(commit=False)
+            user.username = user.email
             user.set_password(str(user.email))
             user.created_by = request.user
             user.account_type = AccountTypes.APP_ADMIN
             user.save()
+
+            group, _ = Group.objects.get_or_create(name = AccountTypes.APP_ADMIN)
+
+            user.groups.add(group)
             
             return JsonResponse({'success': True, 'email': form_data.cleaned_data['email']})
         else:
             return JsonResponse({'success': False, 'errors': form_data.errors})
 
     return render(request, "user/super/list/index.html", context = context)
+
+@login_required(login_url='/login')
+@permission_required("user.manage_all_users", raise_exception=True)
+def user_activate_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    user.is_active = True
+    user.save()
+
+    return redirect(reverse('user:users-list'))
+
+
+@login_required(login_url='/login')
+@permission_required("user.manage_all_users", raise_exception=True)
+def user_deactivate_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    user.is_active = False
+    user.save()
+
+    return redirect(reverse('user:users-list'))
+
+@login_required(login_url='/login')
+@permission_required("user.manage_all_users", raise_exception=True)
+def user_delete_view(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    user.delete()
+
+    return redirect(reverse('user:users-list'))
 
 # Company Users
 @login_required(login_url='/login')

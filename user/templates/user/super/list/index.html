@@ -17,7 +17,7 @@
 
 <div class="container-fluid">
     
-    <div class="card">
+     <div class="card">
         <div class="card-body">
             <h5 class="card-title">Users & Roles</h5>
             
@@ -40,26 +40,52 @@
                             <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
                                 <thead>
                                     <tr>
-                                        <th scope="col">#</th>
                                         <th scope="col">Account Type</th>
-                                        <th scope="col">Role</th>
+                                        <th scope="col">Status</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Email</th>
                                         <th scope="col">Contact</th>
                                         <th scope="col">Company</th>
+                                        <th scope="col">Date</th>
+                                        <th scope="col">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for user in users %}
                                     <tr>
-                                        <td>{{user.created_at}}</td>
                                         <td>{{user.account_type}}</td>
-                                        <td>{{user.role}}</td>
-                                        {% comment %} <td>{% for group in user.groups.all %}<p>{{group.name}}</p>{% endfor %}</td> {% endcomment %}
+                                        <td>{% if user.is_active%} 
+                                            <span class="badge bg-success">Active</span> {%else%}
+                                            <span class="badge bg-danger">InActive</span> {% endif%}</td>
                                         <td>{{user.name}}</td>
                                         <td>{{user.email}}</td>
                                         <td>{{user.phone}}</td>
                                         <td>{{user.company.name}}</td>
+                                        <td>{{user.created_at|date:"SHORT_DATETIME_FORMAT"}}</td>
+                                        <td>
+                                            {% if user.is_superuser %} <div></div> {% elif request.user.id == user.id %} <div></div> {% else %}
+                                            <div class="d-flex">
+                                                {% if user.is_active %}
+                                                    <a href="{% url 'user:user-deactivate' user_id=user.id %}" 
+                                                    class="deactivate-link btn btn-outline-warning" 
+                                                    style="width: 120px; display: inline-block; text-align: center; text-decoration: none;">
+                                                    <span class="">Deactivate</span>
+                                                  </a>
+                                                {% else %}
+                                                    <a href="{% url 'user:user-activate' user_id=user.id %}" 
+                                                    class="activate-link btn btn-outline-primary" 
+                                                    style="width: 120px; display: inline-block; text-align: center; text-decoration: none;">
+                                                    <span class="">Activate</span>
+                                                  </a>
+                                                {% endif %}
+                                                <a href="{% url 'user:user-delete' user_id=user.id %}" 
+                                                    class="delete-link btn btn-outline-danger mx-1" 
+                                                    style="width: 100px; display: inline-block; text-align: center; text-decoration: none;">
+                                                    <span class="">Delete</span><i class="bi bi-trash"></i>
+                                                </a>
+                                            </div>
+                                            {% endif %}
+                                        </td>
                                     </tr>
                                     {% endfor %}
                                 </tbody>
@@ -383,6 +409,32 @@
                     })
                 })
                 
+            })
+
+            $(document).ready(function(){
+                var deactivateLinks = document.getElementsByClassName("deactivate-link");
+        
+                for (var i = 0; i < deactivateLinks.length; i++) {
+                    deactivateLinks[i].addEventListener("click", function(event) {
+                        event.preventDefault();
+                        var confirmation = confirm("Are you sure you want to deactivate?");
+                        if (confirmation) {
+                            window.location.href = this.href;
+                        }
+                    });
+                }
+        
+                var deleteLinks = document.getElementsByClassName("delete-link");
+
+                for (var i = 0; i < deleteLinks.length; i++) {
+                    deleteLinks[i].addEventListener("click", function(event) {
+                        event.preventDefault();
+                        var confirmation = confirm("Are you sure you want to delete?");
+                        if (confirmation) {
+                            window.location.href = this.href;
+                        }
+                    });
+                }
             })
         </script>
         
