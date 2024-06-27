@@ -4,6 +4,7 @@ from django.contrib.auth.models import Group
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from .models import User, UserProfile
+from .constants.roles import DefaultRoles
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
@@ -11,6 +12,10 @@ def create_user_profile(sender, instance, created, **kwargs):
         # Check if a UserProfile already exists for the user
         if not UserProfile.objects.filter(user=instance).exists():
             UserProfile.objects.create(user=instance)
+        
+        group, _ = Group.objects.get_or_create(name = DefaultRoles.ROOT_ADMIN)
+        instance.groups.add(group)
+        
 
  
 # Signal receiver function to generate a unique 6-digit number

@@ -1,7 +1,4 @@
-from typing import Any, Mapping
 from django import forms
-from django.forms.renderers import BaseRenderer
-from django.forms.utils import ErrorList
 from .models import CompanyApplication
 from .models import Company
 from .models import Store
@@ -12,6 +9,17 @@ class CompanyApplicationRegisterForm(forms.ModelForm):
     class Meta:
         model = CompanyApplication
         fields = ['name', 'phone', 'email', 'location', 'logo',]
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+
+        if "-" in name or '_' in name:
+            raise forms.ValidationError("Company Name should not contain underscore(_) or hyphen(-)")
+        
+        if Company.objects.filter(name__iexact=name).exists():
+            raise forms.ValidationError("Company Name already exists!")
+        
+        return name
 
     def clean_email(self):
         email = self.cleaned_data.get('email')

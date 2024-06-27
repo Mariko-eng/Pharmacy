@@ -5,22 +5,18 @@ from pharmacy.utils import generate_random_number
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
-from django.http import JsonResponse,HttpResponseServerError
-# from django.contrib.auth.models import Group
-from utils.groups.access_groups import AccountTypes
-from utils.groups.default_roles import DefaultRoles
+from django.http import JsonResponse
+from user.constants.roles import AccountTypes
+from user.constants.roles import DefaultRoles
 from .forms import CompanyApplicationRegisterForm
 from .forms import CompanyAccountActivationForm
-# from .forms import CompanyAdminRegisterForm
 from .forms import StoreForm
 from .forms import PosCenterForm
 from user.models import User, UserProfile
 from .models import CompanyApplication
 from .models import Company, Store, PosCenter
+from user.utils.init_company_groups import create_company_group
 from .tasks import send_company_approval_email
-from utils.defaults.init_company_groups import init_company_groups
-from utils.defaults.init_company_groups import create_company_group
-from utils.defaults.init_store_groups import init_store_groups
 
 ################### - Company Application - ################# 
 
@@ -156,7 +152,7 @@ def company_account_activate_view(request):
                             logo = companyApplication.logo,
                             activation_code = activation_code)
                 
-                init_company_groups(company_id=company.pk)
+                # init_company_groups(company_id=company.pk)
                 
                 companyApplication.status = "CREATED"
                 companyApplication.save()
@@ -303,7 +299,7 @@ def company_store_list_view(request, company_id):
                 store.company = company
                 store.save()
 
-                init_store_groups(store_id=store.pk)
+                # init_store_groups(store_id=store.pk)
             
             return JsonResponse({'success': True})
         else:

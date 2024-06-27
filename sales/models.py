@@ -7,12 +7,12 @@ from datetime import datetime
 from datetime import timedelta
 from django.utils import timezone
 from django.template.defaultfilters import slugify
+from .tasks import generatePDf
 from company.mixins import Base
 from company.models import Company, Store
 from company.models import PosCenter, Client
 from inventory.models import StockItem
-from utils.permissions.sales import *
-from .tasks import generatePDf
+from user.constants.permissions.sales import *
 
 class Sale(Base):
     PAYMENT_oPTIONS = [

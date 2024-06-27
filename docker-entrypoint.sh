@@ -13,7 +13,6 @@ python3 manage.py migrate --settings=pharmacy.settings.staging
 
 # Setup currencies using management command
 python3 manage.py setup_app_defaults
-python3 manage.py setup_app_groups
 
 # Start server
 echo "Starting server"

@@ -1,12 +1,11 @@
-from company.models import Store
-from company.models import StoreLevelGroup
-from django.contrib.auth.models import Group
-from django.contrib.auth.models import Permission
-from utils.groups.default_roles import DefaultRoles
-from utils.permissions.user import app_admin_permissions
-from utils.permissions.user import company_admin_permissions
-from utils.permissions.user import store_manager_permissions
-from utils.permissions.user import pos_attendant_permissions
+from django.contrib.auth.models import Group, Permission
+from company.models import Store, StoreLevelGroup
+from user.constants.roles import DefaultRoles
+from user.constants.permissions.user import superuser_permissions
+from user.constants.permissions.user import app_admin_permissions
+from user.constants.permissions.user import company_admin_permissions
+from user.constants.permissions.user import store_admin_permissions
+from user.constants.permissions.user import pos_attendant_permissions
 
 
 def init_store_groups(store_id=None):
@@ -18,10 +17,9 @@ def init_store_groups(store_id=None):
         company_name = store.company.name.replace(" ", "-")
 
         default_store_level_roles = [
-            DefaultRoles.APP_ADMIN,
             DefaultRoles.ACCOUNT_HOLDER, 
             DefaultRoles.COMPANY_ADMIN, 
-            DefaultRoles.STORE_MANAGER, 
+            DefaultRoles.STORE_ADMIN, 
         ]
 
         exluded_model_names = ['rolegroup', 'companyapplication', 'company', 'store']
@@ -30,7 +28,8 @@ def init_store_groups(store_id=None):
         )
 
         all_permissions_set = set(Permission.objects.all()) # Use a set insteead of a list
-        app_and_company_admin_permissions = app_admin_permissions + company_admin_permissions
+        
+        excluded_higher_level_permissions = superuser_permissions + app_admin_permissions + company_admin_permissions
         # Get the permissions associated with the ContentType objects
         excluded_model_permissions_set = set(permissions_for_model)
  
@@ -45,7 +44,7 @@ def init_store_groups(store_id=None):
 
             # Create a set of non_store_permissions
             non_store_permissions_set = set()
-            for codename, description in app_and_company_admin_permissions:
+            for codename, description in excluded_higher_level_permissions:
                 permission = Permission.objects.get(codename=codename, name=description)
                 non_store_permissions_set.add(permission) # Add items to the set
 
@@ -53,22 +52,21 @@ def init_store_groups(store_id=None):
             for perm in all_permissions_set - (non_store_permissions_set | excluded_model_permissions_set): # Subtract the sets
                 group.permissions.add(perm)
             
-            # Add specific store manager permissions
-            for codename, description in store_manager_permissions:
+            # Add specific store admin permissions
+            for codename, description in store_admin_permissions:
                 permission1 = Permission.objects.get(codename=codename, name=description)
                 group.permissions.add(permission1)
 
 
-        # Pos Attendant/Cashier Permissions
+        # Pos Attendant Permissions
         # Role Name
-        role_name = DefaultRoles.CASHIER.replace(" ", "-")
+        role_name = DefaultRoles.POS_ATTENDANT.replace(" ", "-")
         group_name = f"{company_name}_{store_name}_{role_name}"              
-        cashier_group, created = Group.objects.get_or_create(name=group_name)
-        StoreLevelGroup.objects.get_or_create(store=store, group=cashier_group, name=role_name.replace("-", " "))
+        group, created = Group.objects.get_or_create(name=group_name)
+        StoreLevelGroup.objects.get_or_create(store=store, group=group, name=role_name.replace("-", " "))
         for codename, description in pos_attendant_permissions:
-            cashier_permission = Permission.objects.get(codename=codename, name=description)
-            cashier_group.permissions.add(cashier_permission)
-
+            permission = Permission.objects.get(codename=codename, name=description)
+            group.permissions.add(permission)
 
 
 def create_store_group(store_id=None, role_name=None):

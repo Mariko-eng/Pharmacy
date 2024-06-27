@@ -41,6 +41,7 @@
                                 <thead>
                                     <tr>
                                         <th scope="col">Account Type</th>
+                                        <th scope="col">Role</th>
                                         <th scope="col">Status</th>
                                         <th scope="col">Name</th>
                                         <th scope="col">Email</th>
@@ -54,6 +55,7 @@
                                     {% for user in users %}
                                     <tr>
                                         <td>{{user.account_type}}</td>
+                                        <td>{{user.role}}</td>
                                         <td>{% if user.is_active%} 
                                             <span class="badge bg-success">Active</span> {%else%}
                                             <span class="badge bg-danger">InActive</span> {% endif%}</td>
@@ -94,7 +96,10 @@
                     </div>
                 </div>
                 <div class="tab-pane fade" id="roles" role="tabpanel" aria-labelledby="roles-tab">
-                    <div class="d-flex flex-column">
+
+                    {% include 'role/super/list/index.html' with app_groups=app_groups company_groups=company_groups store_groups=store_groups  %}
+
+                    {% comment %} <div class="d-flex flex-column">
                         <div class="d-flex flex-row justify-content-end">
                             <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createcategoryModal"><i class="bi bi-plus"></i><span>Add</span></button>
                         </div>
@@ -178,7 +183,7 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    </div> {% endcomment %}
                 </div><!-- End Default Tabs -->
             </div>
         </div>

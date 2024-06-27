@@ -32,11 +32,11 @@ company_admin_user_model_permissions = [
     ("deactivate_company_admin","Deactivate company admin"),
     ("delete_company_admin","Delete company admin"),
 
-    ("add_store_manager","Add store manager"),
-    ("edit_store_manager","Edit store manager"),
-    ("activate_store_manager","Activate store manager"), 
-    ("deactivate_store_manager","Deactivate store manager"),
-    ("delete_store_manager","Delete store manager"),
+    ("add_store_admin","Add store admin"),
+    ("edit_store_admin","Edit store admin"),
+    ("activate_store_admin","Activate store admin"), 
+    ("deactivate_store_admin","Deactivate store admin"),
+    ("delete_store_admin","Delete store admin"),
 ]
 
 user_permissions = [
@@ -134,11 +134,11 @@ company_admin_permissions = [
     ("deactivate_company_admin","Deactivate company admin"),
     ("delete_company_admin","Delete company admin"),
 
-    ("add_store_manager","Add store manager"),
-    ("edit_store_manager","Edit store manager"),
-    ("activate_store_manager","Activate store manager"), 
-    ("deactivate_store_manager","Deactivate store manager"),
-    ("delete_store_manager","Delete store manager"),
+    ("add_store_admin","Add store admin"),
+    ("edit_store_admin","Edit store admin"),
+    ("activate_store_admin","Activate store adminv"), 
+    ("deactivate_store_admin","Deactivate store admin"),
+    ("delete_store_admin","Delete store admin"),
 
     ("add_store","Add store"),
     ("list_store","List store"),
@@ -152,7 +152,7 @@ company_admin_permissions = [
     ("manage_store_roles", "Manage store roles"),
 ]
 
-store_manager_permissions = [
+store_admin_permissions = [
     ("manage_store_users", "Manage store users"),
     ("manage_store_roles", "Manage store roles"),
 ]

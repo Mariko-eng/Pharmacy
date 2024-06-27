@@ -5,7 +5,7 @@ from company.models import Company, SupplierEntity
 from company.models import Store
 from company.mixins import Base
 from inventory.models import StockItem
-from utils.permissions.purchases import *
+from user.constants.permissions.purchases import *
 
 class PurchaseOrder(Base):
     SUPPLIER_TYPES = [('SUPPLIER', 'SUPPLIER'),('STORE', 'STORE'),]

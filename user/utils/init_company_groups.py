@@ -1,12 +1,8 @@
-from company.models import Company
-from company.models import CompanyLevelGroup
-from django.contrib.auth.models import Group
-from django.contrib.auth.models import Permission
-from utils.groups.default_roles import DefaultRoles
-from utils.permissions.user import app_admin_permissions
-from utils.permissions.user import superuser_permissions
-
-from django.db.models import Count
+from django.contrib.auth.models import Group, Permission
+from company.models import Company, CompanyLevelGroup
+from user.constants.roles import DefaultRoles
+from user.constants.permissions.user import superuser_permissions
+from user.constants.permissions.user import app_admin_permissions
 
 
 def init_company_groups(company_id=None):
@@ -15,12 +11,11 @@ def init_company_groups(company_id=None):
         company_name = company.name.replace(" ", "-")
 
         default_company_level_roles = [
-            DefaultRoles.APP_ADMIN,
             DefaultRoles.ACCOUNT_HOLDER, 
             DefaultRoles.COMPANY_ADMIN
         ]
 
-        all_excluded_permissions = app_admin_permissions + superuser_permissions
+        all_excluded_permissions = superuser_permissions + app_admin_permissions
     
         all_permissions_set = set(Permission.objects.all()) # Use a set insteead of a list
         all_excluded_permissions = [Permission.objects.get(

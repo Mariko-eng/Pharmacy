@@ -1,0 +1,88 @@
+
+<!--  Roles Component of Super  Dashboard  -->
+
+<div class="d-flex flex-column">
+    <div class="d-flex flex-row justify-content-end">
+        <button class="btn btn-primary" style="width: 100px;" data-bs-toggle="modal" data-bs-target="#createcategoryModal"><i class="bi bi-plus"></i><span>Add</span></button>
+    </div>
+    <div>
+        <h6 class="card-title">App Roles</h6>
+        <div class="table-responsive small">
+            <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th scope="col">Name</th>
+                        <th scope="col">Action 1</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in app_groups %}
+                    <tr>
+                        <td>{{item.name}}</td>
+                        <td><a href="{% url 'user:users-roles-permissions-list' group_id=item.id %}">
+                            <i class="bi bi-pencil"></i>View Permissions</a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% comment %} <div>
+            <h6 class="card-title">Company Roles</h6>
+            <div class="table-responsive small">
+                <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Group</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in company_groups %}
+                        <tr>
+                            <td>{{item.company}}</td>
+                            <td>{{item.name}}</td>
+                            <td>{{item.group.name}}</td>
+                            <td><a href="{% url 'user:users-company-role-permissions-list' company_id=item.company.id group_id=item.group.id %}">
+                                <i class="bi bi-pencil"></i>View Permissions</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div>
+            <h6 class="card-title">Store Roles</h6>
+            <div class="table-responsive small">
+                <table id="bootstrapdatatable" class="datatable table table-striped table-sm">
+                    <thead>
+                        <tr>
+                            <th scope="col">Company</th>
+                            <th scope="col">Store</th>
+                            <th scope="col">Role</th>
+                            <th scope="col">Group</th>
+                            <th scope="col">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in store_groups %}
+                        <tr>
+                            <td>{{item.store.company.name}}</td>
+                            <td>{{item.store.name}}</td>
+                            <td>{{item.name}}</td>
+                            <td>{{item.group.name}}</td>
+                            <td><a href="{% url 'user:users-store-role-permissions-list' store_id=item.store.id group_id=item.group.id %}">
+                                <i class="bi bi-pencil"></i>View Permissions</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div> {% endcomment %}
+    </div>
+</div>

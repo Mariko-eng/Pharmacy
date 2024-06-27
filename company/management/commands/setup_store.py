@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from company.models import Store
-from utils.defaults.init_store_groups import init_store_groups
+from user.utils.init_store_groups import init_store_groups
 
 class Command(BaseCommand):
     help = 'Sets default store groups and permissions'

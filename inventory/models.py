@@ -5,7 +5,8 @@ from company.models import Store
 from company.models import SupplierEntity
 from company.mixins import Base
 from django.template.defaultfilters import slugify
-from utils.permissions.inventory import *
+from user.constants.permissions.inventory import *
+
 
 class Category(Base):
     company = models.ForeignKey(Company,on_delete=models.CASCADE)

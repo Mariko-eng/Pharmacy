@@ -1,13 +1,21 @@
 from django import forms
-from utils.groups.default_roles import DefaultRoles
-from utils.groups.access_groups import AccountTypes
+from .constants.roles import AccountTypes
+from .constants.roles import DefaultRoles
 from .models import User
-from .models import Company
 from .models import Store
 from .models import PosCenter
 
 class RoleForm(forms.Form):
     name = forms.CharField(max_length=20)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        name = cleaned_data.get('name')
+
+        if "-" in name or '_' in name:
+            raise forms.ValidationError("Name should not contain underscore(_) or hyphen(-)")
+
+        return cleaned_data
 
 class AppUserForm(forms.ModelForm):
     first_name = forms.CharField(max_length=30)
@@ -130,14 +138,14 @@ class StoreAdminUserForm(forms.ModelForm):
 
         # Get the default choices from the DefaultRoles enum
         role_choices = [(role.value, role.label) for role in DefaultRoles]
+        # Exclude ROOT_ADMIN from the choices
+        role_choices = [choice for choice in role_choices if choice[0] != DefaultRoles.ROOT_ADMIN]
         # Exclude APP_ADMIN from the choices
         role_choices = [choice for choice in role_choices if choice[0] != DefaultRoles.APP_ADMIN]
         # Exclude ACCOUNT_HOLDER from the choices
         role_choices = [choice for choice in role_choices if choice[0] != DefaultRoles.ACCOUNT_HOLDER]
         # Exclude COMPANY_ADMIN from the choices
         role_choices = [choice for choice in role_choices if choice[0] != DefaultRoles.COMPANY_ADMIN]
-        # Exclude CASHIER from the choices
-        role_choices = [choice for choice in role_choices if choice[0] != DefaultRoles.CASHIER]
         # Set the updated choices for the 'role' field
         self.fields['roles'].choices = role_choices
 

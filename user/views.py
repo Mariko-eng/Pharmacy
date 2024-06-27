@@ -3,19 +3,20 @@ from django.urls import reverse
 from django.http import Http404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, permission_required
+from utils.decorators.permission import custom_permission_required
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
-from utils.groups.access_groups import AccountTypes
-from utils.groups.default_roles import DefaultRoles
-from utils.permissions.user import superuser_permissions
-from utils.permissions.user import app_admin_permissions
-from utils.permissions.user import company_admin_permissions
-from utils.defaults.init_company_groups import create_company_group
-from utils.defaults.init_store_groups import create_store_group
+from .constants.roles import AccountTypes
+from .constants.roles import DefaultRoles
+from .constants.permissions.user import superuser_permissions
+from .constants.permissions.user import app_admin_permissions
+from .constants.permissions.user import company_admin_permissions
+from .utils.init_company_groups import create_company_group
+from .utils.init_store_groups import create_store_group
 from .forms import RoleForm
 from .forms import AppUserForm
 from .forms import CompanyRoleFrom
@@ -76,7 +77,7 @@ def logoutView(request):
 @login_required(login_url='/login')
 def home_view(request):
 
-    if request.user.account_type == AccountTypes.APP_ADMIN:
+    if request.user.is_superuser or request.user.account_type == AccountTypes.APP_ADMIN:
         return redirect('user:super-dashboard')
     
     if request.user.account_type == AccountTypes.COMPANY_ADMIN:
@@ -90,8 +91,10 @@ def home_view(request):
         
     raise Http404('Page Not Found!')
 
+
 ########################### Dashboard ##################
 @login_required(login_url='/login')
+@custom_permission_required("user.manage_all_roles", raise_exception=True)
 def super_dashboard(request):
     context={}
     return render(request, "dashboard/super/index.html", context=context)
@@ -494,15 +497,15 @@ def users_list_view(request):
             group = Group.objects.filter(name = default_group[0]).first()
             app_groups.append(group)
 
-    company_groups = CompanyLevelGroup.objects.all()
-    store_groups = StoreLevelGroup.objects.all()
+    # company_groups = CompanyLevelGroup.objects.all()
+    # store_groups = StoreLevelGroup.objects.all()
     form = AppUserForm()
 
     context = {
         "users" : users,
         "app_groups" : app_groups,
-        "company_groups" : company_groups,
-        "store_groups" : store_groups,
+        # "company_groups" : company_groups,
+        # "store_groups" : store_groups,
         "form" : form }
          
     if request.method == 'POST':
@@ -515,7 +518,10 @@ def users_list_view(request):
             user.account_type = AccountTypes.APP_ADMIN
             user.save()
 
-            group, _ = Group.objects.get_or_create(name = AccountTypes.APP_ADMIN)
+            if user.is_superuser:
+                group, _ = Group.objects.get_or_create(name = DefaultRoles.ROOT_ADMIN)
+            else:
+                group, _ = Group.objects.get_or_create(name = DefaultRoles.APP_ADMIN)
 
             user.groups.add(group)
             
@@ -833,7 +839,7 @@ def users_store_pos_attendant_user_new(request, store_id):
             user.set_password(str(email))
             user.save()
 
-            group = create_store_group(store_id=store.pk, role_name = DefaultRoles.CASHIER)
+            group = create_store_group(store_id=store.pk, role_name = DefaultRoles.POS_ATTENDANT)
             if group:
                 user.groups.add(group)
 

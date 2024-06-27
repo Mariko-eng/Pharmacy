@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from company.models import Company
-from utils.defaults.init_company_groups import init_company_groups
+# from utils.defaults.init_company_groups import init_company_groups
+from user.utils.init_company_groups import init_company_groups
 
 class Command(BaseCommand):
     help = 'Sets default company groups and permissions'

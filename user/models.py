@@ -1,16 +1,16 @@
 from django.db import models
-from django.contrib.auth.models import Group,Permission
+from django.contrib.auth.models import Group
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.hashers import make_password
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from simple_history.models import HistoricalRecords
-from utils.groups.access_groups import AccountTypes
 from company.models import Company
 from company.models import Store
 from company.models import PosCenter
-from utils.permissions.user import *
+from .constants.permissions.user import *
+from .constants.roles import AccountTypes
 from .mixins import Base
 
 class UserManager(BaseUserManager):
@@ -88,15 +88,23 @@ class User(AbstractUser):
             return "Nan"
 
     def role(self):
-        if self.is_superuser:
-            return "App Superuser"
-        elif self.is_staff:
-            return "App Staff"
-        elif self.groups.exists():
+        if self.groups.exists():
             # If the user belongs to any groups, concatenate their names
-            return ', '.join(group.name for group in self.groups.all())
+            group_names = [group.name for group in self.groups.all()]
+            formatted_roles = []
+            for name in group_names:
+                if '_' in name:
+                    new_name = name.split('_')[1]
+                    if '-' in new_name:
+                        new_name = new_name.replace('-', ' ')
+                    formatted_roles.append(new_name)
+                else:
+                    if '-' in name:
+                        name = name.replace('-', ' ')
+                    formatted_roles.append(name)
+            return ', '.join(formatted_roles)
         else:
-            return "Regular User"
+            return ""
 
 class  UserProfile(Base):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
@@ -110,9 +118,6 @@ class  UserProfile(Base):
         default_permissions = []
         permissions = user_profile_permissions
 
-class RoleGroup(models.Model):
-    name = models.CharField(max_length=225, choices=AccountTypes.choices)
-    groups = models.ManyToManyField(Group)
     
 class EmailLog(models.Model):
     subject = models.CharField(max_length=225)
