@@ -145,6 +145,17 @@
           selectBtn.prop('disabled', false);
           return
         }
+
+        // Show the toast
+        $("#toast-header").addClass("text-warning")
+        $("#toast-body").text("Please Wait while loading!");
+        $("#toast-body").addClass("text-warning")
+        $('.toast').toast('show');
+        
+        // Hide the toast after 5 seconds
+        setTimeout(function(){
+            $('.toast').toast('hide');
+        }, 3000);
         
         
         if (selectedAction === "edit") {
@@ -170,6 +181,17 @@
           console.log("Republish clicked for App ID: " + appId);
           editStatusAction(appId, "PENDING")
         }
+
+        // Show the toast
+        $("#toast-header").addClass("text-success")
+        $("#toast-body").text("Finished Successfully!");
+        $("#toast-body").addClass("text-success")
+        $('.toast').toast('show');
+        
+        // Hide the toast after 5 seconds
+        setTimeout(function(){
+            $('.toast').toast('hide');
+        }, 3000);
         
         // Reset the  select button And Able  it
         // selectBtn.prop('disabled', false);

@@ -15,6 +15,9 @@ from .models import Sale
 from .models import SaleItem
 from pharmacy.utils import build_file_path
 
+def test_sales_new(request):
+    return render(request, 'sales/test.html') 
+
 
 @login_required(login_url='/login')
 def company_sales_list(request, company_id):

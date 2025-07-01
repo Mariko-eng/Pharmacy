@@ -84,11 +84,11 @@
                     <hr/>
                     
                     <div class="row mb-3">
-                        <label for="account_type" class="col-sm-3 col-form-label">Select Account Type*</label>
+                        <label for="user_type" class="col-sm-3 col-form-label">Select Account Type*</label>
                         <div class="col-sm-9">
                             <div class ="d-flex">
                                 <div class="row">
-                                    {% for radio in form.account_type %}
+                                    {% for radio in form.user_type %}
                                     <div class="col-sm-6">
                                         <div class="form-check">
                                             {{ radio }}
@@ -97,9 +97,9 @@
                                     {% endfor %}
                                 </div>
                             </div>
-                            {% if form.errors.account_type %}
+                            {% if form.errors.user_type %}
                             <div id = "" class="text-danger">
-                                {{ form.errors.account_type.0 }}
+                                {{ form.errors.user_type.0 }}
                             </div>
                             {% endif %}
                         </div>
@@ -181,7 +181,7 @@
         
         // console.log($('input[name="role"]:checked').val())
 
-        if($('input[name="account_type"]:checked').val() == undefined){
+        if($('input[name="user_type"]:checked').val() == undefined){
             $('input[name="roles"]').prop('checked', false);
             $('input[name="roles"]').prop('disabled', true);
             $('input[name="branches"]').prop('checked', false);
@@ -197,13 +197,13 @@
         //    $('input[name="access_to_all_branches"]').prop('disabled', true);
         //}
 
-        function handleAccountTypeSelection() {
-            var selectedAccountType = $('input[name="account_type"]:checked').val();
+        function handleUserTypeSelection() {
+            var selectedUserType = $('input[name="user_type"]:checked').val();
 
-            if(selectedAccountType === "Company Admin"){
+            if(selectedUserType === "Company Admin"){
                 $('input[name="roles"]').prop('checked', true);
                 $('input[name="roles"]').prop('disabled', true);
-            }else if (selectedAccountType === "POS Attendant"){
+            }else if (selectedUserType === "POS Attendant"){
                 $('input[name="roles"]').prop('checked', false);
                 $('input[name="roles"]').prop('disabled', false);
                 // Enable the selected role checkbox
@@ -218,7 +218,7 @@
         }
 
         // Attach the function to the change event of the roles checkboxes
-        $('input[name="account_type"]').change(handleAccountTypeSelection);
+        $('input[name="user_type"]').change(handleUserTypeSelection);
         
         
         function handleRolesSelection() {

@@ -1,0 +1,231 @@
+{% extends 'base/auth/index.html' %}
+{% load widget_tweaks %}
+
+{% block pagetitle%}
+<div class="pagetitle">  
+  <nav>
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="#">Home</a></li>
+      <li class="breadcrumb-item active"><a>Sales</a></li>
+    </ol>
+  </nav>
+</div><!-- End Page Title --> 
+{% endblock %} 
+
+
+{% block content%}  
+
+<div class="my-2 py-4 px-4">
+
+    <h4>Create New Invoice</h4>
+
+    <div class="d-flex justify-content-end align-items-center mb-2">
+        <div>
+            Select Type:
+        </div>
+        <div class="mx-2">
+            <Select class="form-select">
+                <option>
+                    Invoice
+                </option>
+                <option>
+                    Receipt
+                </option>
+                <option>
+                    Quote
+                </option>
+            </select>
+        </div>
+        <div class="mx-2">
+            <Select class="form-select">
+                <option>
+                    Open
+                </option>
+                <option>
+                    Paid
+                </option>
+            </select>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-end align-items-center mb-2">
+        <div class="mx-2">
+            <input class="datepicker" width="276" placeholder="Invoice Date"/>
+        </div>
+        <div class="mx-2">
+            <input class="datepicker" width="276" placeholder="Due Date"/>
+        </div>
+
+        <div class="input-group mx-2" style="width:276px;">
+            <span class="input-group-text" id="basic-addon1">#MD</span>
+            <input type="text" class="form-control" placeholder="" aria-describedby="basic-addon1">
+          </div>
+    </div>
+
+    <div class="row  mt-4">
+        <div class="col-6">
+            <div class="card w-full p-2">
+                <div class="d-flex justify-content-between align-items-center mb-2 px-2 py-2 bg-light">
+                    <h4>Customer Information</h4>
+                    <a href="#" class="text-primary">OR Select existing customer</a>
+                </div>
+                <div class="d-flex mb-2">
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="Name" />
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="Email"/>
+                </div>
+                <div class="d-flex mb-2">
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="Phone Number" />
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="District"/>
+                </div>
+                <div class="d-flex mb-2">
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="County" />
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="Village"/>
+                </div>
+              </div>
+        </div>
+        <div class="col-6">
+            <div class="card w-full p-2">
+                <div class="d-flex justify-content-end align-items-center mb-2 px-2 py-2 bg-light">
+                    <h4>Shipping Information</h4>
+                </div>
+                <div class="d-flex mb-2">
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="Postal Address" />
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="District"/>
+                </div>
+                <div class="d-flex mb-2">
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="County" />
+                    <input type="text" class="flex-grow-1 mx-1 form-control" placeholder="Village"/>
+                </div>
+              </div>
+        </div>
+    </div>
+
+    <div class="row p-2">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                  <th class="col-sm-1"><button class="btn btn-primary py-0">+</button></th>
+                  <th class="col-sm-5">Product</th>
+                  <th class="col-sm-2">QTY</th>
+                  <th class="col-sm-2">Price</th>
+                  <th class="col-sm-2">Sub Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                  <th><button class="btn btn-danger py-0">-</button></th>
+                  <td>
+                    <select class="w-full form-select">
+                      <option>....</option>
+                    </select>
+                  </td>
+                  <td>
+                  <input type="number" value="1" class="w-full form-control"/>
+                  </td>
+                  <td>
+                    <input type="number" value="250" class="w-full form-control"/>
+                  </td>
+                  <td>
+                    <input type="number" value="250" class="w-full form-control"/>
+                  </td>
+                </tr>
+                <tr>
+                  <th><button class="btn btn-danger py-0">-</button></th>
+                  <td>
+                    <select class="w-full form-select">
+                      <option>....</option>
+                    </select>
+                  </td>
+                  <td>
+                  <input type="number" value="2" class="w-full form-control"/>
+                  </td>
+                  <td>
+                    <input type="number" value="300" class="w-full form-control"/>
+                  </td>
+                  <td>
+                    <input type="number" value="600" class="w-full form-control"/>
+                  </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+            <textarea 
+            class="w-full form-control" 
+            rows="3" 
+            placeholder="Any Additional Comments"></textarea>
+        </div>
+        <div class="col-6">
+            <div class="w-full d-flex justify-content-end">
+                <div>
+                    <div class="d-flex">
+                        <div class="text-end fw-bold" style="width:150px;">
+                            Discount (%) : 
+                        </div>
+                        <div style="width:150px;" class="mx-2">
+                            <input type="number" value="0" class="form-control text-end" />
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="text-end fw-bold" style="width:150px;">
+                            Subtotal : 
+                        </div>
+                        <div style="width:150px;" class="mx-2 text-end">
+                            6000
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="text-end fw-bold" style="width:150px;">
+                            Shipping : 
+                        </div>
+                        <div style="width:150px;" class="mx-2">
+                            <input type="number" value="0" class="form-control text-end" />
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="text-end fw-bold" style="width:150px;">
+                            TAX/VAT : 
+                        </div>
+                        <div style="width:150px;" class="mx-2 text-end">
+                            18%
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="text-end fw-bold" style="width:150px;">
+                            Remove TAX/VAT : 
+                        </div>
+                        <div style="width:150px;" class="mx-2">
+                            <input type="checkbox" />
+                        </div>
+                    </div>
+                    <div class="d-flex">
+                        <div class="text-end fw-bold" style="width:150px;">
+                            Total  : 
+                        </div>
+                        <div style="width:150px;" class="mx-2 text-end">
+                            6000
+                        </div>
+                    </div>
+
+                    <button class=" my-4 btn btn-success" style="width:250px;">Create Invoice</button>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script> 
+    $(document).ready(function () {
+        $(".datepicker").datepicker({  
+            uiLibrary: 'bootstrap5'
+        }).addClass("mb-0");
+        $(".gj-datepicker").removeClass("mb-3").addClass("mb-0");
+    });
+</script> 
+
+{% endblock %}
+

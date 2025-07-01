@@ -1,5 +1,5 @@
 from django import forms
-from .constants.roles import AccountTypes
+from .constants.roles import UserTypes
 from .constants.roles import DefaultRoles
 from .models import User
 from .models import Store
@@ -33,8 +33,8 @@ class CompanyUserForm(forms.ModelForm):
     last_name = forms.CharField(max_length=30)
     email = forms.CharField(max_length=30)
     phone = forms.CharField(max_length=15)
-    account_type = forms.ChoiceField(
-        choices=[('', '---------')] + AccountTypes.choices,
+    user_type = forms.ChoiceField(
+        choices=[('', '---------')] + UserTypes.choices,
         widget=forms.RadioSelect()
     )
     roles = forms.MultipleChoiceField(
@@ -54,11 +54,11 @@ class CompanyUserForm(forms.ModelForm):
     def __init__(self, *args, company=None, **kwargs):
         super(CompanyUserForm, self).__init__(*args, **kwargs)
         # Get the default choices from the DefaultRoles enum
-        access_group_choices = [(access_group.value, access_group.label) for access_group in AccountTypes]
+        access_group_choices = [(access_group.value, access_group.label) for access_group in UserTypes]
         # Exclude APP_ADMIN from the choices
-        access_group_choices = [choice for choice in access_group_choices if choice[0] != AccountTypes.APP_ADMIN]
+        access_group_choices = [choice for choice in access_group_choices if choice[0] != UserTypes.APP_ADMIN]
         # Set the updated choices for the 'role' field
-        self.fields['account_type'].choices = access_group_choices
+        self.fields['user_type'].choices = access_group_choices
 
         # Get the default choices from the DefaultRoles enum
         role_choices = [(role.value, role.label) for role in DefaultRoles]

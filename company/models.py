@@ -2,13 +2,7 @@ from django.db import models
 from django.contrib.auth.models import Group
 from .mixins import Base
 from user.constants.permissions.company import *
-# from user.constants.permissions.company import company_permissions
-# from user.constants.permissions.company import company_group_level_permissions
-# from user.constants.permissions.company import store_permissions
-# from user.constants.permissions.company import store_group_level_permissions
-# from user.constants.permissions.company import pos_center_permissions
-# from user.constants.permissions.company import supplier_entity_permissions
-# from user.constants.permissions.company import client_permissions
+from utils.shared.slugify import unique_slugify
 
 
 class CompanyApplication(Base):
@@ -40,6 +34,7 @@ class Company(Base):
     email = models.EmailField(unique=True)
     location = models.CharField(max_length=225, null=True, blank=True)
     logo = models.ImageField(upload_to="company/logo", null=True)
+    slug = models.SlugField(blank=True, null=True)
     activation_code = models.CharField(max_length = 225, null=True, blank=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
@@ -50,6 +45,11 @@ class Company(Base):
 
     def __str__(self):
         return self.name
+    
+    def save(self, **kwargs): #  Override the save method
+        slug_str = "%s" % (self.name) 
+        unique_slugify(self, slug_str) 
+        super(Company, self).save(**kwargs)
     
 class CompanyLevelGroup(Base): # Company level groups
     company = models.ForeignKey(Company,on_delete=models.CASCADE)
@@ -69,6 +69,7 @@ class Store(Base):
     name = models.CharField(max_length = 225)
     phone = models.CharField(max_length = 225)
     email = models.EmailField(blank=True, null=True)
+    slug = models.SlugField(blank=True, null=True)
     location_district = models.CharField(max_length = 225, blank=True, null=True)
     location_village = models.CharField(max_length = 225, blank=True, null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
@@ -80,6 +81,12 @@ class Store(Base):
 
     def __str__(self):
         return self.name
+
+    def save(self, **kwargs): #  Override the save method
+        slug_str = "%s %s" % (self.company.name, self.name) 
+        unique_slugify(self, slug_str) 
+        super(Store, self).save(**kwargs)
+
 
 class StoreLevelGroup(Base): # Company level groups
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
@@ -94,6 +101,7 @@ class StoreLevelGroup(Base): # Company level groups
 class PosCenter(Base):
     store = models.ForeignKey(Store,on_delete=models.CASCADE)
     name = models.CharField(max_length = 225)
+    slug = models.SlugField(blank=True, null=True)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
     created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL)
 
@@ -103,6 +111,11 @@ class PosCenter(Base):
 
     def __str__(self):
         return f"{self.name} - {self.store.name}"
+
+    def save(self, **kwargs): #  Override the save method
+        slug_str = "%s %s" % (self.store.name, self.name) 
+        unique_slugify(self, slug_str) 
+        super(Store, self).save(**kwargs)
 
 class SupplierEntity(Base):
     store = models.ForeignKey(Store,on_delete=models.CASCADE)

@@ -47,9 +47,9 @@
                                 
                                 <div class="col-12">
                                     {% if form.errors.company_email %}
-                                    {% render_field form.company_email|add_class:"form-control is-invalid"|attr:"id:company_email" placeholder="Email Address"%}
+                                    {% render_field form.company_email|add_class:"form-control is-invalid"|attr:"id:company_email" placeholder="Company Email Address"%}
                                     {% else %}
-                                    {% render_field form.company_email|add_class:"form-control"|attr:"id:company_email" placeholder="Email Address" %}
+                                    {% render_field form.company_email|add_class:"form-control"|attr:"id:company_email" placeholder="Company Email Address" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.company_email.0  }}
@@ -58,9 +58,9 @@
                                 
                                 <div class="col-12">
                                     {% if form.errors.activation_code %}
-                                    {% render_field form.activation_code|add_class:"form-control is-invalid"|attr:"id:activation_code" placeholder="Activation Code" %}
+                                    {% render_field form.activation_code|add_class:"form-control is-invalid"|attr:"id:activation_code" placeholder="Enter Activation Code" %}
                                     {% else %}
-                                    {% render_field form.activation_code|add_class:"form-control"|attr:"id:activation_code" placeholder="Activation Code" %}
+                                    {% render_field form.activation_code|add_class:"form-control"|attr:"id:activation_code" placeholder="Enter Activation Code" %}
                                     {% endif %}
                                     <div id = "" class="invalid-feedback">
                                         {{  form.errors.activation_code.0  }}

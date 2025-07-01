@@ -54,7 +54,7 @@
                                 <tbody>
                                     {% for user in users %}
                                     <tr>
-                                        <td>{{user.account_type}}</td>
+                                        <td>{{user.user_type}}</td>
                                         <td>{{user.role}}</td>
                                         <td>{% if user.is_active%} 
                                             <span class="badge bg-success">Active</span> {%else%}

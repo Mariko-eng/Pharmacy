@@ -10,7 +10,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.models import Group
 from django.contrib.auth.models import Permission
-from .constants.roles import AccountTypes
+from .constants.roles import UserTypes
 from .constants.roles import DefaultRoles
 from .constants.permissions.user import superuser_permissions
 from .constants.permissions.user import app_admin_permissions
@@ -24,7 +24,9 @@ from .forms import CompanyAdminUserForm
 from .forms import StoreAdminUserForm
 from .forms import POSAttendantUserForm
 from .models import User
-from .models import UserProfile
+from .models import CompanyAdminProfile
+from .models import StoreAdminProfile
+from .models import POSAttendantProfile
 from .models import Company
 from .models import Store
 from .models import PosCenter
@@ -77,16 +79,16 @@ def logoutView(request):
 @login_required(login_url='/login')
 def home_view(request):
 
-    if request.user.is_superuser or request.user.account_type == AccountTypes.APP_ADMIN:
+    if request.user.is_superuser or request.user.user_type == UserTypes.APP_ADMIN:
         return redirect('user:super-dashboard')
     
-    if request.user.account_type == AccountTypes.COMPANY_ADMIN:
+    if request.user.user_type == UserTypes.COMPANY_ADMIN:
         return redirect(reverse('user:company-dashboard'))
     
-    if request.user.account_type == AccountTypes.STORE_ADMIN:
+    if request.user.user_type == UserTypes.STORE_ADMIN:
         return redirect(reverse('user:store-dashboard'))
         
-    if request.user.account_type == AccountTypes.POS_ATTENDANT:
+    if request.user.user_type == UserTypes.POS_ATTENDANT:
         return redirect(reverse('user:pos-dashboard'))
         
     raise Http404('Page Not Found!')
@@ -106,7 +108,7 @@ def company_dashboard(request, company_id = None):
     if company_id is not None :
         company = Company.objects.get(pk = company_id)
     else :
-        company = request.user.userprofile.company
+        company = request.user.company
 
     # Get sales and revenue
     data1 = SaleItem.get_sales_and_revenue(company=company)
@@ -130,7 +132,7 @@ def store_dashboard(request, store_id = None):
     if store_id is not None:
         store = Store.objects.get(pk = store_id)
     else :
-        store = request.user.userprofile.store
+        store = request.user.store
 
     # Get sales and revenue
     data1 = SaleItem.get_sales_and_revenue(store=store)
@@ -157,7 +159,7 @@ def pos_dashboard(request, pos_id = None):
     if pos_id is not None :
         pos = PosCenter.objects.get(pk = pos_id)
     else :
-        pos = request.user.userprofile.pos_center
+        pos = request.user.pos_center
 
         # Get sales and revenue
     data1 = SaleItem.get_sales_and_revenue(pos_center=pos)
@@ -189,7 +191,10 @@ def super_role_permissions_edit_view(request, group_id):
     group_permissions = group.permissions.all()
     # print(group_permissions)
     # Specify the app labels you want to include
-    model_names = ['user','userprofile','companygroup','companygrouppermission']
+
+    model_names = ['user','companygroup','companygrouppermission']
+
+    model_names = ['companyadminprofile','storeadminprofile','posattendantprofile']
 
     model_names += ['companyapplication','company','store','poscenter','supplierentity','client']
 
@@ -286,7 +291,7 @@ def company_role_permissions_list_view(request, company_id, group_id):
         "company": company,
         "company_group": company_group,
         "permissions": permissions,
-        }
+        } 
         
     return render(request, "perms/company/list.html", context= context)
 
@@ -303,7 +308,9 @@ def company_role_permissions_edit_view(request, company_id, group_id):
     group_permissions = group.permissions.all()
     # print(group_permissions)
     # Specify the app labels you want to include
-    model_names = ['user','userprofile','companygroup','companygrouppermission']
+    model_names = ['user','companygroup','companygrouppermission']
+
+    model_names = ['companyadminprofile','storeadminprofile','posattendantprofile']
 
     model_names += ['companyapplication','company','store','poscenter','supplierentity','client']
 
@@ -353,7 +360,7 @@ def company_role_permissions_edit_view(request, company_id, group_id):
 
 # Store Roles
 @login_required(login_url='/login')
-@permission_required("user.manage_store_roles", raise_exception=True)
+@permission_required("user.list_store_user_roles", raise_exception=True)
 def store_roles_list_view(request, store_id):
     store = Store.objects.get(pk = store_id)
     company = store.company
@@ -387,7 +394,7 @@ def store_roles_list_view(request, store_id):
 
 #  Store Role - permissions
 @login_required(login_url='/login')
-@permission_required("user.manage_store_roles", raise_exception=True)
+@permission_required("user.list_store_user_roles", raise_exception=True)
 def store_role_permissions_list_view(request, store_id, group_id):
     store = Store.objects.get(pk = store_id)
     company = store.company
@@ -408,7 +415,7 @@ def store_role_permissions_list_view(request, store_id, group_id):
 
 
 @login_required(login_url='/login')
-@permission_required("user.manage_store_roles", raise_exception=True)
+@permission_required("user.edit_store_user_roles", raise_exception=True)
 def store_role_permissions_edit_view(request, store_id, group_id):
     store = Store.objects.get(pk = store_id)
     company = store.company
@@ -420,7 +427,7 @@ def store_role_permissions_edit_view(request, store_id, group_id):
     group_permissions = group.permissions.all()
     # print(group_permissions)
     # Specify the app labels you want to include
-    model_names = ['store','user','userprofile','storelevelgroup']
+    model_names = ['store','user','storeadminprofile','storelevelgroup']
 
     model_names += ['poscenter','supplierentity','client']
 
@@ -515,7 +522,7 @@ def users_list_view(request):
             user.username = user.email
             user.set_password(str(user.email))
             user.created_by = request.user
-            user.account_type = AccountTypes.APP_ADMIN
+            user.user_type = UserTypes.APP_ADMIN
             user.save()
 
             if user.is_superuser:
@@ -567,12 +574,18 @@ def users_company_list_view(request, company_id):
 
     company = Company.objects.get(pk = company_id)
 
-    users = User.objects.filter(userprofile__company=company)
+    users = []
+
+    users += User.objects.filter(companyadminprofile__company=company)
+
+    users += User.objects.filter(storeadminprofile__store__company=company)
+
+    users += User.objects.filter(posattendantprofile__pos_center__store__company=company)
 
     access_group = request.GET.get('access_group', None)
 
     if access_group is not None:
-        users  = users.filter(account_type = access_group)
+        users  = users.filter(user_type = access_group)
 
     context = {
         "company": company,
@@ -586,10 +599,10 @@ def users_company_list_view(request, company_id):
 def users_company_new_view(request, company_id):
     access_group = request.GET.get('access_group', None)
 
-    if  access_group == AccountTypes.COMPANY_ADMIN:
+    if  access_group == UserTypes.COMPANY_ADMIN:
         return redirect(reverse('user:users-company-admin-new', kwargs={'company_id': company_id}))
 
-    if  access_group == AccountTypes.STORE_ADMIN:
+    if  access_group == UserTypes.STORE_ADMIN:
         return redirect(reverse('user:users-company-store-admin-new', kwargs={'company_id': company_id}))
 
     return redirect(reverse('user:users-company-list'))
@@ -618,7 +631,7 @@ def users_company_admin_user_new(request, company_id):
                 phone = phone,
                 email = email,
             )
-            user.account_type = AccountTypes.COMPANY_ADMIN
+            user.user_type = UserTypes.COMPANY_ADMIN
             user.set_password(str(email))
             user.save()
 
@@ -627,7 +640,8 @@ def users_company_admin_user_new(request, company_id):
             if group:
                 user.groups.add(group)
 
-            UserProfile.objects.get_or_create(user=user, company=company)
+            if user.user_type == UserTypes.COMPANY_ADMIN:
+                CompanyAdminProfile.objects.get_or_create(user=user, company=company)
 
             messages.info(request, "Company admin account created successfully!")
             return redirect(reverse('user:users-company-list', kwargs={'company_id': company_id}))
@@ -645,16 +659,20 @@ def users_store_list_view(request, store_id):
 
     store = Store.objects.get(pk = store_id)
 
-    users = User.objects.filter(userprofile__store=store)
+    users = []
+
+    users += User.objects.filter(storeadminprofile__store=store)
+
+    users += User.objects.filter(posattendantprofile__pos_center__store__=store)
 
     access_group = request.GET.get('access_group', None)
 
     if access_group is not None:
-        if access_group == AccountTypes.COMPANY_ADMIN:
-            users = User.objects.filter(userprofile__company=store.company)
-            users  = users.filter(account_type = access_group)
+        if access_group == UserTypes.COMPANY_ADMIN:
+            users = User.objects.filter(companyadminprofile__company=store.company)
+            users  = users.filter(user_type = access_group)
         else:
-            users  = users.filter(account_type = access_group)
+            users  = users.filter(user_type = access_group)
 
     context = {
         "company": store.company,
@@ -701,7 +719,7 @@ def users_company_store_admin_user_new(request, company_id):
                 phone = phone,
                 email = email,
             )
-            user.account_type = AccountTypes.STORE_ADMIN
+            user.user_type = UserTypes.STORE_ADMIN
             user.set_password(str(email))
             user.save()
 
@@ -710,8 +728,7 @@ def users_company_store_admin_user_new(request, company_id):
                 if role: 
                     user.groups.add(group)
 
-            user_profile, created = UserProfile.objects.get_or_create(user=user, company=company)
-            user_profile.store = store
+            user_profile, created = StoreAdminProfile.objects.get_or_create(user=user, store=store)
             user_profile.save()
 
             messages.info(request, "Store admin account created successfully!")
@@ -761,7 +778,7 @@ def users_store_admin_user_new(request, store_id):
                 phone = phone,
                 email = email,
             )
-            user.account_type = AccountTypes.STORE_ADMIN
+            user.user_type = UserTypes.STORE_ADMIN
             user.set_password(str(email))
             user.save()
 
@@ -770,9 +787,7 @@ def users_store_admin_user_new(request, store_id):
                 if group: 
                     user.groups.add(group)
 
-            user_profile, created = UserProfile.objects.get_or_create(user=user, company=company)
-            user_profile.store = store
-            user_profile.save()
+            StoreAdminProfile.objects.get_or_create(user=user, store=store)
 
             messages.info(request, "Store admin account created successfully!")
             return redirect(reverse('user:users-store-list', kwargs={'store_id': store_id}))
@@ -788,10 +803,10 @@ def users_store_admin_user_new(request, store_id):
 def users_store_new_view(request, store_id):
     access_group = request.GET.get('access_group', None)
 
-    if  access_group == AccountTypes.STORE_ADMIN:
+    if  access_group == UserTypes.STORE_ADMIN:
         return redirect(reverse('user:users-store-admin-new', kwargs={'store_id': store_id}))
 
-    if  access_group == AccountTypes.POS_ATTENDANT:
+    if  access_group == UserTypes.POS_ATTENDANT:
         return redirect(reverse('user:users-store-pos-attendant-new', kwargs={'store_id': store_id}))
 
     return redirect(reverse('user:store-index'))
@@ -835,7 +850,7 @@ def users_store_pos_attendant_user_new(request, store_id):
                 phone = phone,
                 email = email,
             )
-            user.account_type = AccountTypes.POS_ATTENDANT
+            user.user_type = UserTypes.POS_ATTENDANT
             user.set_password(str(email))
             user.save()
 
@@ -843,10 +858,7 @@ def users_store_pos_attendant_user_new(request, store_id):
             if group:
                 user.groups.add(group)
 
-            user_profile, created = UserProfile.objects.get_or_create(user=user, company=company)
-            user_profile.store = store
-            user_profile.pos_center = pos_center
-            user_profile.save()
+            POSAttendantProfile.objects.get_or_create(user=user, pos_center=pos_center)
 
             messages.info(request, "POS attendant account created successfully!")
             return redirect(reverse('user:users-store-list', kwargs={'store_id': store_id}))

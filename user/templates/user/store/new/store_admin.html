@@ -149,13 +149,13 @@
     $(document).ready(function() {
         
         
-        function handleAccountTypeSelection() {
-            var selectedAccountType = $('input[name="account_type"]:checked').val();
+        function handleUserTypeSelection() {
+            var selectedUserType = $('input[name="user_type"]:checked').val();
             
-            if(selectedAccountType === "Company Admin"){
+            if(selectedUserType === "Company Admin"){
                 $('input[name="roles"]').prop('checked', true);
                 $('input[name="roles"]').prop('disabled', true);
-            }else if (selectedAccountType === "POS Attendant"){
+            }else if (selectedUserType === "POS Attendant"){
                 $('input[name="roles"]').prop('checked', false);
                 $('input[name="roles"]').prop('disabled', false);
                 // Enable the selected role checkbox
@@ -170,7 +170,7 @@
         }
         
         // Attach the function to the change event of the roles checkboxes
-        $('input[name="account_type"]').change(handleAccountTypeSelection);
+        $('input[name="user_type"]').change(handleUserTypeSelection);
         
         
         function handleRolesSelection() {

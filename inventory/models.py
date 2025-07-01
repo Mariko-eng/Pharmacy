@@ -15,6 +15,7 @@ class Category(Base):
 
     def __str__(self):
         return self.name 
+    
     class Meta:
         default_permissions = [] # Defaults to ('add', 'change', 'delete', 'view'), setting this to an empty list if your app doesn’t require any of the default permissions.
         permissions = category_permissions

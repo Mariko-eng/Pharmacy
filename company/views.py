@@ -6,13 +6,16 @@ from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.http import JsonResponse
-from user.constants.roles import AccountTypes
+from user.constants.roles import UserTypes
 from user.constants.roles import DefaultRoles
 from .forms import CompanyApplicationRegisterForm
 from .forms import CompanyAccountActivationForm
 from .forms import StoreForm
 from .forms import PosCenterForm
-from user.models import User, UserProfile
+from user.models import User
+from user.models import CompanyAdminProfile
+from user.models import StoreAdminProfile
+from user.models import POSAttendantProfile
 from .models import CompanyApplication
 from .models import Company, Store, PosCenter
 from user.utils.init_company_groups import create_company_group
@@ -170,11 +173,12 @@ def company_account_activate_view(request):
                     last_name = last_name,
                     phone = phone)
 
-                user.account_type = AccountTypes.COMPANY_ADMIN
+                user.user_type = UserTypes.COMPANY_ADMIN
                 user.set_password(str(password2))
                 user.save()
 
-                UserProfile.objects.get_or_create(user=user, company=company)
+                if user.user_type == UserTypes.COMPANY_ADMIN:
+                    CompanyAdminProfile.objects.get_or_create(user=user, company=company)
 
                 group = create_company_group(company_id=company.pk, role_name= DefaultRoles.ACCOUNT_HOLDER)
 
@@ -216,7 +220,7 @@ def company_list_view(request):
 def company_detail_view(request, company_id): # Only Viewed by superuser
     company = Company.objects.get(pk = company_id)
 
-    admins = User.objects.filter(account_type = AccountTypes.COMPANY_ADMIN, userprofile__company=company)
+    admins = User.objects.filter(user_type = UserTypes.COMPANY_ADMIN, companyadminprofile__company=company)
 
     context = { "company" : company, "admins" : admins}
     
@@ -228,7 +232,7 @@ def company_detail_view(request, company_id): # Only Viewed by superuser
 def company_profile_view(request, company_id): 
     company = Company.objects.get(pk = company_id)
 
-    admins = User.objects.filter(account_type = AccountTypes.COMPANY_ADMIN, userprofile__company=company)
+    admins = User.objects.filter(user_type = UserTypes.COMPANY_ADMIN, companyadminprofile__company=company)
 
     context = { "company" : company, "admins" : admins}
     
@@ -320,7 +324,7 @@ def company_store_list_view(request, company_id):
 def store_detail_view(request, store_id):
     store = Store.objects.get(pk = store_id) 
 
-    admins = User.objects.filter(account_type = AccountTypes.STORE_ADMIN, userprofile__store=store)
+    admins = User.objects.filter(user_type = UserTypes.STORE_ADMIN, storeadminprofile__store=store)
 
     if request.is_ajax():
         if request.method == 'POST':
@@ -346,7 +350,7 @@ def store_detail_view(request, store_id):
 def store_profile_view(request, store_id):
     store = Store.objects.get(pk = store_id) 
 
-    admins = User.objects.filter(account_type = AccountTypes.STORE_ADMIN, userprofile__store=store)
+    admins = User.objects.filter(user_type = UserTypes.STORE_ADMIN, storeadminprofile__store=store)
 
     if request.is_ajax():
         if request.method == 'POST':

@@ -4,6 +4,9 @@ from . import views
 app_name = 'sales' 
 
 urlpatterns = [
+
+    path('home/store/sales/test/new/', views.test_sales_new, name="test-sales-new"),
+
     
     # Company Sales     
     path('home/company/<int:company_id>/sales/list/', views.company_sales_list, name="company-sales-list"),

@@ -56,13 +56,13 @@
                             {% for user in users %}
                             <tr>
                                 <td>{{user.created_at}}</td>
-                                <td>{{user.account_type}}</td>
+                                <td>{{user.user_type}}</td>
                                 <td>{% for group in user.groups.all %}<p>{{group.name}}</p>{% endfor %}</td>
                                 <td>{{user.name}}</td>
                                 <td>{{user.email}}</td>
                                 <td>{{user.phone}}</td>
-                                <td>{{user.userprofile.store}}</td>
-                                <td>{{user.userprofile.pos_center}}</td>
+                                <td>{{user.store}}</td>
+                                <td>{{user.pos_center}}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

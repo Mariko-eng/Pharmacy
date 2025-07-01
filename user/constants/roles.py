@@ -1,6 +1,6 @@
 from django.db import models
 from django.utils.translation import gettext as _
-# from .groups import AccountTypes
+# from .groups import UserTypes
 
 class AccessLevels(models.TextChoices): # Access Levels
     APP_LEVEL = 'App Level', _('App Level')
@@ -8,7 +8,7 @@ class AccessLevels(models.TextChoices): # Access Levels
     STORE_LEVEL = 'Store Level', _('Store Level')
 
 
-class AccountTypes(models.TextChoices): # Access Group/ Account Type
+class UserTypes(models.TextChoices): # Access Group/ Account Type
     # ROOT_ADMIN = 'Root Admin', _('Root Admin')
     APP_ADMIN = 'App Admin', _('App Admin')
     # ACCOUNT_HOLDER = 'Account Holder', _('Account Holder')

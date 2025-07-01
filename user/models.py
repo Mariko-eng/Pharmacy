@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth.models import Group
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
 from django.contrib.auth.hashers import make_password
@@ -10,7 +9,7 @@ from company.models import Company
 from company.models import Store
 from company.models import PosCenter
 from .constants.permissions.user import *
-from .constants.roles import AccountTypes
+from .constants.roles import UserTypes
 from .mixins import Base
 
 class UserManager(BaseUserManager):
@@ -41,14 +40,15 @@ class UserManager(BaseUserManager):
     extra_fields.setdefault('is_active', True)  # Set is_active to False by default
     extra_fields.setdefault('is_staff', True)
     extra_fields.setdefault('is_superuser', True)
-    extra_fields.setdefault('account_type', AccountTypes.APP_ADMIN)
+    extra_fields.setdefault('user_type', UserTypes.APP_ADMIN)
     user = self._create_user(email, password, **extra_fields)
     return user
+
 
 class User(AbstractUser):
     GENDER_CHOICES = [("Male", "Male"), ("Female", "Female")]
     
-    account_type = models.CharField(max_length=225, choices=AccountTypes.choices)
+    user_type = models.CharField(max_length=225, choices=UserTypes.choices)
     email = models.EmailField(unique=True)
     phone = models.CharField(max_length = 225)
     is_superuser = models.BooleanField(default = False)
@@ -71,7 +71,7 @@ class User(AbstractUser):
     objects = UserManager()
     class Meta:
         default_permissions = []
-        permissions = all_user_permissions
+        permissions = user_permissions
 
     def get_absolute_url(self):
         return "/user/%i/" % (self.pk)
@@ -80,13 +80,38 @@ class User(AbstractUser):
     def name(self):
         return self.get_full_name()
     
+
     @property
     def company(self):
-        if self.userprofile is not None:
-            return self.userprofile.company
-        else:
-            return "Nan"
+        if self.user_type == UserTypes.COMPANY_ADMIN:
+            return self.companyadminprofile.company
+    
+        if self.user_type == UserTypes.STORE_ADMIN:
+            return self.storeadminprofile.store.company
+        
+        if self.user_type == UserTypes.POS_ATTENDANT:
+            return self.posattendantprofile.pos_center.store.company
+        
+        return None
 
+    @property
+    def store(self):
+        if self.user_type == UserTypes.STORE_ADMIN:
+            return self.storeadminprofile.store
+        
+        if self.user_type == UserTypes.POS_ATTENDANT:
+            return self.posattendantprofile.pos_center.store
+        
+        return None
+    
+
+    @property
+    def pos_center(self):
+        if self.user_type == UserTypes.POS_ATTENDANT:
+            return self.posattendantprofile.pos_center
+        
+        return None
+        
     def role(self):
         if self.groups.exists():
             # If the user belongs to any groups, concatenate their names
@@ -106,19 +131,27 @@ class User(AbstractUser):
         else:
             return ""
 
-class  UserProfile(Base):
+
+class CompanyAdminProfile(Base):
     user = models.OneToOneField(User,on_delete=models.CASCADE)
-    company = models.ForeignKey(Company,null=True,on_delete=models.SET_NULL)
-    store = models.ForeignKey(Store,null=True,on_delete=models.SET_NULL)
-    pos_center = models.ForeignKey(PosCenter,null=True,on_delete=models.SET_NULL)
+    company = models.OneToOneField(Company,null=True,on_delete=models.SET_NULL)
     updated_by = models.CharField(max_length=225,null=True,blank=True)
-    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name ="user_created_by")
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name ="created_by_company_admins")
 
-    class Meta:
-        default_permissions = []
-        permissions = user_profile_permissions
 
-    
+class StoreAdminProfile(Base):
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    store = models.OneToOneField(Store,null=True,on_delete=models.SET_NULL)
+    updated_by = models.CharField(max_length=225,null=True,blank=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name ="created_by_store_admins")
+
+class POSAttendantProfile(Base):
+    user = models.OneToOneField(User,on_delete=models.CASCADE)
+    pos_center = models.OneToOneField(PosCenter,null=True,on_delete=models.SET_NULL)
+    updated_by = models.CharField(max_length=225,null=True,blank=True)
+    created_by = models.ForeignKey("user.User",null=True,on_delete=models.SET_NULL,related_name ="created_by_pos_attendants")
+
+
 class EmailLog(models.Model):
     subject = models.CharField(max_length=225)
     recipient = models.EmailField()
